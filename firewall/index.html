@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<!-- Firewall Rule Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firewall Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:800px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .tabs{display:flex;gap:.3rem;margin-bottom:1.5rem;}
+    .tab{padding:.35rem .9rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.85rem;cursor:pointer;transition:all var(--transition);}
+    .tab.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.875rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--accent2);}
+    .presets{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+    .check-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;}
+    .check-label input{width:16px;height:16px;accent-color:var(--accent);}
+    .ref-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+    .ref-table td{padding:.3rem .5rem;border-bottom:1px solid var(--border);}
+    .ref-table td:first-child{font-family:var(--font-mono);color:var(--accent);}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>Firewall Rule Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-fw" onclick="setMode('firewalld',this)">firewall-cmd</button>
+    <button class="tab" id="tab-ipt" onclick="setMode('iptables',this)">iptables</button>
+    <button class="tab" id="tab-nft" onclick="setMode('nftables',this)">nftables</button>
+  </div>
+
+  <p class="section-title">Règles courantes</p>
+  <div class="presets" id="presets"></div>
+
+  <div class="layout">
+    <!-- Gauche -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- firewalld -->
+      <div id="panel-firewalld">
+        <div class="card" style="margin-bottom:1rem;">
+          <p class="section-title">Zone &amp; Action</p>
+          <div class="two-col">
+            <div>
+              <label>Zone</label>
+              <select class="select" id="fw-zone" onchange="build()">
+                <option>public</option><option>trusted</option><option>internal</option>
+                <option>dmz</option><option>work</option><option>home</option><option>block</option><option>drop</option>
+              </select>
+            </div>
+            <div>
+              <label>Action</label>
+              <select class="select" id="fw-action" onchange="build()">
+                <option value="add-service">Ajouter service</option>
+                <option value="remove-service">Retirer service</option>
+                <option value="add-port">Ajouter port</option>
+                <option value="remove-port">Retirer port</option>
+                <option value="add-source">Ajouter source IP</option>
+                <option value="remove-source">Retirer source IP</option>
+                <option value="add-rich-rule">Règle riche</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem;" id="fw-service-panel">
+          <p class="section-title">Service</p>
+          <select class="select" id="fw-service" onchange="build()">
+            <option>http</option><option>https</option><option>ssh</option><option>ftp</option>
+            <option>smtp</option><option>smtps</option><option>dns</option><option>ntp</option>
+            <option>mysql</option><option>postgresql</option><option>redis</option>
+            <option>mongodb</option><option>kerberos</option><option>ldap</option><option>ldaps</option>
+          </select>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem;display:none" id="fw-port-panel">
+          <p class="section-title">Port / Protocole</p>
+          <div class="two-col">
+            <div><label>Port</label><input class="input" id="fw-port" placeholder="8080" oninput="build()"></div>
+            <div><label>Proto</label><select class="select" id="fw-proto" onchange="build()"><option>tcp</option><option>udp</option></select></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem;display:none" id="fw-source-panel">
+          <p class="section-title">Source IP / CIDR</p>
+          <input class="input" id="fw-source" placeholder="192.168.1.0/24" oninput="build()">
+        </div>
+
+        <div class="card" id="fw-rich-panel" style="display:none;margin-bottom:1rem;">
+          <p class="section-title">Règle riche (rich rule)</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div class="two-col">
+              <div><label>Famille</label><select class="select" id="rr-family" onchange="build()"><option>ipv4</option><option>ipv6</option></select></div>
+              <div><label>Source</label><input class="input" id="rr-source" placeholder="192.168.1.0/24" oninput="build()"></div>
+            </div>
+            <div class="two-col">
+              <div><label>Port</label><input class="input" id="rr-port" placeholder="8080" oninput="build()"></div>
+              <div><label>Proto</label><select class="select" id="rr-proto" onchange="build()"><option>tcp</option><option>udp</option></select></div>
+            </div>
+            <div><label>Action</label><select class="select" id="rr-action" onchange="build()"><option>accept</option><option>drop</option><option>reject</option></select></div>
+            <label class="check-label"><input type="checkbox" id="rr-log" onchange="build()"> Log</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Options</p>
+          <div style="display:flex;flex-direction:column;gap:.4rem;">
+            <label class="check-label"><input type="checkbox" id="fw-permanent" checked onchange="build()"> --permanent</label>
+            <label class="check-label"><input type="checkbox" id="fw-reload" checked onchange="build()"> firewall-cmd --reload après</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- iptables -->
+      <div id="panel-iptables" style="display:none;">
+        <div class="card" style="margin-bottom:1rem;">
+          <p class="section-title">Chaîne &amp; Action</p>
+          <div class="two-col">
+            <div><label>Table</label><select class="select" id="ipt-table" onchange="build()"><option>filter</option><option>nat</option><option>mangle</option></select></div>
+            <div><label>Chaîne</label><select class="select" id="ipt-chain" onchange="build()"><option>INPUT</option><option>OUTPUT</option><option>FORWARD</option><option>PREROUTING</option><option>POSTROUTING</option></select></div>
+          </div>
+          <div class="two-col" style="margin-top:.6rem;">
+            <div><label>Opération</label><select class="select" id="ipt-op" onchange="build()"><option value="-A">-A Ajouter</option><option value="-I">-I Insérer</option><option value="-D">-D Supprimer</option></select></div>
+            <div><label>Target (-j)</label><select class="select" id="ipt-target" onchange="build()"><option>ACCEPT</option><option>DROP</option><option>REJECT</option><option>MASQUERADE</option><option>DNAT</option><option>SNAT</option><option>LOG</option></select></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:1rem;">
+          <p class="section-title">Critères</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div class="two-col">
+              <div><label>Source (-s)</label><input class="input" id="ipt-src" placeholder="192.168.1.0/24" oninput="build()"></div>
+              <div><label>Destination (-d)</label><input class="input" id="ipt-dst" placeholder="0.0.0.0/0" oninput="build()"></div>
+            </div>
+            <div class="two-col">
+              <div><label>Protocole (-p)</label><select class="select" id="ipt-proto" onchange="build()"><option value="">—</option><option>tcp</option><option>udp</option><option>icmp</option><option>all</option></select></div>
+              <div><label>Port dest. (--dport)</label><input class="input" id="ipt-dport" placeholder="80" oninput="build()"></div>
+            </div>
+            <div class="two-col">
+              <div><label>Interface entrée (-i)</label><input class="input" id="ipt-in" placeholder="eth0" oninput="build()"></div>
+              <div><label>Interface sortie (-o)</label><input class="input" id="ipt-out" placeholder="eth1" oninput="build()"></div>
+            </div>
+            <label class="check-label"><input type="checkbox" id="ipt-state" onchange="build()"> --state ESTABLISHED,RELATED</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- nftables -->
+      <div id="panel-nftables" style="display:none;">
+        <div class="card">
+          <p class="section-title">Règle nftables</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div class="two-col">
+              <div><label>Table</label><input class="input" id="nft-table" value="inet filter" oninput="build()"></div>
+              <div><label>Chaîne</label><input class="input" id="nft-chain" value="input" oninput="build()"></div>
+            </div>
+            <div class="two-col">
+              <div><label>Proto</label><select class="select" id="nft-proto" onchange="build()"><option value="">—</option><option>tcp</option><option>udp</option><option>icmp</option></select></div>
+              <div><label>Port</label><input class="input" id="nft-port" placeholder="80" oninput="build()"></div>
+            </div>
+            <div class="two-col">
+              <div><label>IP source</label><input class="input" id="nft-src" placeholder="192.168.1.0/24" oninput="build()"></div>
+              <div><label>Action</label><select class="select" id="nft-action" onchange="build()"><option>accept</option><option>drop</option><option>reject</option></select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Droite : output -->
+    <div>
+      <p class="section-title">Commande(s) générée(s)</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span id="mode-label">firewall-cmd</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyCmd()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let mode='firewalld';
+
+const PRESETS=[
+  {l:'Ouvrir HTTP/HTTPS',  f:()=>loadFwPreset('add-service','http')},
+  {l:'Ouvrir port 8080',   f:()=>loadPortPreset('8080','tcp')},
+  {l:'Autoriser IP interne',f:()=>loadSourcePreset('192.168.1.0/24')},
+  {l:'DROP INPUT par défaut',f:()=>loadIptPreset('INPUT','DROP','')},
+  {l:'ACCEPT ESTABLISHED',  f:()=>loadIptEstablished()},
+];
+
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.getElementById('panel-firewalld').style.display=m==='firewalld'?'':'none';
+  document.getElementById('panel-iptables').style.display=m==='iptables'?'':'none';
+  document.getElementById('panel-nftables').style.display=m==='nftables'?'':'none';
+  document.getElementById('mode-label').textContent=m==='firewalld'?'firewall-cmd':m==='iptables'?'iptables':'nft';
+  build();
+}
+
+document.getElementById('fw-action').onchange=function(){
+  const v=this.value;
+  document.getElementById('fw-service-panel').style.display=(v==='add-service'||v==='remove-service')?'':'none';
+  document.getElementById('fw-port-panel').style.display=(v==='add-port'||v==='remove-port')?'':'none';
+  document.getElementById('fw-source-panel').style.display=(v==='add-source'||v==='remove-source')?'':'none';
+  document.getElementById('fw-rich-panel').style.display=v==='add-rich-rule'?'':'none';
+  build();
+};
+
+function buildFirewalld(){
+  const zone=document.getElementById('fw-zone').value;
+  const action=document.getElementById('fw-action').value;
+  const perm=document.getElementById('fw-permanent').checked;
+  const reload=document.getElementById('fw-reload').checked;
+  const permFlag=perm?'--permanent ':'';
+  let cmd='';
+
+  if(action.includes('service')){
+    const svc=document.getElementById('fw-service').value;
+    cmd=`firewall-cmd ${permFlag}--zone=${zone} --${action}=${svc}`;
+  } else if(action.includes('port')){
+    const port=document.getElementById('fw-port').value||'80';
+    const proto=document.getElementById('fw-proto').value;
+    cmd=`firewall-cmd ${permFlag}--zone=${zone} --${action}=${port}/${proto}`;
+  } else if(action.includes('source')){
+    const src=document.getElementById('fw-source').value||'192.168.1.0/24';
+    cmd=`firewall-cmd ${permFlag}--zone=${zone} --${action}=${src}`;
+  } else if(action==='add-rich-rule'){
+    const fam=document.getElementById('rr-family').value;
+    const src=document.getElementById('rr-source').value;
+    const port=document.getElementById('rr-port').value;
+    const proto=document.getElementById('rr-proto').value;
+    const act=document.getElementById('rr-action').value;
+    const log=document.getElementById('rr-log').checked;
+    let rule=`rule family="${fam}"`;
+    if(src) rule+=` source address="${src}"`;
+    if(port) rule+=` port port="${port}" protocol="${proto}"`;
+    if(log) rule+=` log`;
+    rule+=` ${act}`;
+    cmd=`firewall-cmd ${permFlag}--zone=${zone} --add-rich-rule='${rule}'`;
+  }
+
+  let result=cmd;
+  if(reload) result+=`\nfirewall-cmd --reload`;
+  return result;
+}
+
+function buildIptables(){
+  const table=document.getElementById('ipt-table').value;
+  const chain=document.getElementById('ipt-chain').value;
+  const op=document.getElementById('ipt-op').value;
+  const target=document.getElementById('ipt-target').value;
+  const src=document.getElementById('ipt-src').value;
+  const dst=document.getElementById('ipt-dst').value;
+  const proto=document.getElementById('ipt-proto').value;
+  const dport=document.getElementById('ipt-dport').value;
+  const iface=document.getElementById('ipt-in').value;
+  const oface=document.getElementById('ipt-out').value;
+  const state=document.getElementById('ipt-state').checked;
+
+  const parts=[`iptables -t ${table}`,`${op} ${chain}`];
+  if(src) parts.push(`-s ${src}`);
+  if(dst) parts.push(`-d ${dst}`);
+  if(proto) parts.push(`-p ${proto}`);
+  if(dport&&proto) parts.push(`--dport ${dport}`);
+  if(iface) parts.push(`-i ${iface}`);
+  if(oface) parts.push(`-o ${oface}`);
+  if(state) parts.push(`-m state --state ESTABLISHED,RELATED`);
+  parts.push(`-j ${target}`);
+  return parts.join(' \\\n  ');
+}
+
+function buildNftables(){
+  const table=document.getElementById('nft-table').value||'inet filter';
+  const chain=document.getElementById('nft-chain').value||'input';
+  const proto=document.getElementById('nft-proto').value;
+  const port=document.getElementById('nft-port').value;
+  const src=document.getElementById('nft-src').value;
+  const action=document.getElementById('nft-action').value;
+
+  const conds=[];
+  if(src) conds.push(`ip saddr ${src}`);
+  if(proto) conds.push(proto);
+  if(port&&proto) conds.push(`dport ${port}`);
+  conds.push(action);
+
+  return `nft add rule ${table} ${chain} ${conds.join(' ')}`;
+}
+
+function build(){
+  let out='';
+  if(mode==='firewalld') out=buildFirewalld();
+  else if(mode==='iptables') out=buildIptables();
+  else out=buildNftables();
+  document.getElementById('output').textContent=out;
+}
+
+function copyCmd(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+function loadFwPreset(action,svc){ document.getElementById('fw-action').value=action; document.getElementById('fw-action').onchange(); document.getElementById('fw-service').value=svc; build(); }
+function loadPortPreset(p,pr){ document.getElementById('fw-action').value='add-port'; document.getElementById('fw-action').onchange(); document.getElementById('fw-port').value=p; document.getElementById('fw-proto').value=pr; build(); }
+function loadSourcePreset(s){ document.getElementById('fw-action').value='add-source'; document.getElementById('fw-action').onchange(); document.getElementById('fw-source').value=s; build(); }
+function loadIptPreset(chain,target,proto){ setMode('iptables',document.getElementById('tab-ipt')); document.getElementById('ipt-chain').value=chain; document.getElementById('ipt-target').value=target; document.getElementById('ipt-proto').value=proto; build(); }
+function loadIptEstablished(){ setMode('iptables',document.getElementById('tab-ipt')); document.getElementById('ipt-chain').value='INPUT'; document.getElementById('ipt-target').value='ACCEPT'; document.getElementById('ipt-state').checked=true; build(); }
+
+const pe=document.getElementById('presets');
+PRESETS.forEach(p=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=p.l; b.onclick=p.f; pe.appendChild(b); });
+
+build();
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<!-- jq Query Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jq Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:800px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .query-bar{display:flex;align-items:center;gap:.5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem .75rem;margin-bottom:1rem;transition:border-color var(--transition);}
+    .query-bar:focus-within{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(88,166,255,.15);}
+    .query-prefix{font-family:var(--font-mono);color:var(--accent);font-size:.9rem;white-space:nowrap;}
+    .query-field{flex:1;background:transparent;border:none;color:var(--text-primary);font-family:var(--font-mono);font-size:.9rem;outline:none;}
+    .quick-btns{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem;}
+    .qbtn{padding:.2rem .6rem;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--accent2);font-size:.78rem;cursor:pointer;font-family:var(--font-mono);transition:all var(--transition);}
+    .qbtn:hover{border-color:var(--accent);color:var(--text-primary);}
+    .json-area{min-height:200px;resize:vertical;font-family:var(--font-mono);font-size:.82rem;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.82rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:120px;color:var(--text-primary);max-height:400px;overflow:auto;}
+    .cmd-output{font-family:var(--font-mono);font-size:.82rem;padding:.75rem 1rem;background:var(--bg-input);border-top:1px solid var(--border);color:var(--accent2);}
+    .error{color:var(--danger);}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.5rem;}
+    .ref-row{display:flex;gap:.5rem;padding:.35rem .6rem;background:var(--bg-input);border-radius:var(--radius-sm);cursor:pointer;transition:background var(--transition);}
+    .ref-row:hover{background:var(--bg-card-hover);}
+    .ref-expr{font-family:var(--font-mono);font-size:.78rem;color:var(--accent2);white-space:nowrap;}
+    .ref-desc{font-size:.75rem;color:var(--text-muted);}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>jq Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="layout">
+    <!-- Gauche : JSON + query -->
+    <div>
+      <p class="section-title">JSON d'entrée</p>
+      <textarea class="input json-area" id="json-in" placeholder='{"users":[{"name":"Alice","age":30},{"name":"Bob","age":25}]}' oninput="run()" spellcheck="false"></textarea>
+      <button class="btn btn--ghost btn--sm mt-sm" onclick="formatJson()">Formater JSON</button>
+
+      <p class="section-title mt-lg">Filtre jq</p>
+      <div class="query-bar">
+        <span class="query-prefix">jq&nbsp;</span>
+        <input class="query-field" id="query" value="." oninput="run()" placeholder=".key" spellcheck="false">
+      </div>
+
+      <div class="quick-btns" id="quick-btns"></div>
+
+      <div>
+        <p class="section-title">Référence rapide (clic pour insérer)</p>
+        <div class="ref-grid" id="ref-grid"></div>
+      </div>
+    </div>
+
+    <!-- Droite : output -->
+    <div>
+      <p class="section-title">Commande shell générée</p>
+      <div class="output-box" style="margin-bottom:1rem;">
+        <div class="output-header">
+          <span>Shell</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyCmd()">Copier</button>
+        </div>
+        <div class="cmd-output" id="cmd-output"></div>
+      </div>
+
+      <p class="section-title">Résultat (simulation JS)</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span>Output</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyResult()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const QUICK=[
+  {l:'.',          h:'Identité (tout)'},
+  {l:'.key',       h:'Champ'},
+  {l:'.[]',        h:'Tous les éléments'},
+  {l:'.[0]',       h:'Premier élément'},
+  {l:'keys',       h:'Clés'},
+  {l:'values',     h:'Valeurs'},
+  {l:'length',     h:'Longueur'},
+  {l:'type',       h:'Type'},
+];
+const REF=[
+  {e:'.foo',                  d:'Champ foo'},
+  {e:'.foo.bar',              d:'Champ imbriqué'},
+  {e:'.[2]',                  d:'Élément index 2'},
+  {e:'.[-1]',                 d:'Dernier élément'},
+  {e:'.[2:5]',                d:'Slice index 2–5'},
+  {e:'.[] | .name',           d:'Extraire .name de chaque élément'},
+  {e:'[.[] | .id]',           d:'Tableau des ids'},
+  {e:'.[] | select(.age>25)', d:'Filtrer par condition'},
+  {e:'map(.name)',             d:'map() — équivalent [.[] | .name]'},
+  {e:'map(select(.active))',   d:'Filtrer avec map+select'},
+  {e:'has("key")',             d:'L\'objet a la clé ?'},
+  {e:'keys | length',         d:'Nombre de clés'},
+  {e:'to_entries',             d:'Convertir en [{key,value}]'},
+  {e:'from_entries',           d:'Reconvertir en objet'},
+  {e:'add',                    d:'Sommer / concaténer'},
+  {e:'unique',                 d:'Dédupliquer un tableau'},
+  {e:'sort_by(.name)',         d:'Trier par champ'},
+  {e:'group_by(.type)',        d:'Grouper par champ'},
+  {e:'min_by(.val)',           d:'Élément minimum'},
+  {e:'max_by(.val)',           d:'Élément maximum'},
+  {e:'@base64',                d:'Encoder en base64'},
+  {e:'@csv',                   d:'Formater en CSV'},
+  {e:'@html',                  d:'Échapper le HTML'},
+  {e:'env',                    d:'Variables d\'environnement'},
+];
+
+const qb=document.getElementById('quick-btns');
+QUICK.forEach(q=>{
+  const b=document.createElement('button'); b.className='qbtn'; b.title=q.h; b.textContent=q.l;
+  b.onclick=()=>{ document.getElementById('query').value=q.l; run(); };
+  qb.appendChild(b);
+});
+
+const rg=document.getElementById('ref-grid');
+REF.forEach(r=>{
+  const d=document.createElement('div'); d.className='ref-row';
+  d.innerHTML=`<span class="ref-expr">${r.e}</span><span class="ref-desc">${r.d}</span>`;
+  d.onclick=()=>{ document.getElementById('query').value=r.e; run(); };
+  rg.appendChild(d);
+});
+
+// Basic jq interpreter
+function jqEval(data, expr) {
+  expr = expr.trim();
+  if (!expr || expr === '.') return data;
+
+  // Pipe
+  if (expr.includes('|')) {
+    const pipes = splitPipes(expr);
+    let result = data;
+    for (const p of pipes) {
+      if (Array.isArray(result)) {
+        result = result.map(item => { try { return jqEval(item, p.trim()); } catch(e) { return null; } }).flat();
+      } else {
+        result = jqEval(result, p.trim());
+      }
+    }
+    return result;
+  }
+
+  // Bracket array construction
+  if (expr.startsWith('[') && expr.endsWith(']')) {
+    const inner = expr.slice(1,-1).trim();
+    const r = jqEval(data, inner);
+    return Array.isArray(r) ? r : [r];
+  }
+
+  // map()
+  const mapMatch = expr.match(/^map\((.+)\)$/);
+  if (mapMatch) {
+    const arr = Array.isArray(data) ? data : Object.values(data||{});
+    return arr.map(item => jqEval(item, mapMatch[1]));
+  }
+
+  // select()
+  const selMatch = expr.match(/^select\((.+)\)$/);
+  if (selMatch) {
+    try {
+      const cond = selMatch[1];
+      const opMatch = cond.match(/^(.+?)\s*(==|!=|>|>=|<|<=)\s*(.+)$/);
+      if (opMatch) {
+        const left = jqEval(data, opMatch[1].trim());
+        let right = opMatch[3].trim();
+        if (right.startsWith('"') && right.endsWith('"')) right = right.slice(1,-1);
+        else if (!isNaN(right)) right = Number(right);
+        else if (right==='true') right=true;
+        else if (right==='false') right=false;
+        const ops = {'==':left==right,'!=':left!=right,'>':left>right,'>=':left>=right,'<':left<right,'<=':left<=right};
+        return ops[opMatch[2]] ? data : undefined;
+      }
+      const r = jqEval(data, cond);
+      return r ? data : undefined;
+    } catch(e) { return undefined; }
+  }
+
+  // Builtins
+  if (expr==='keys')   return data && typeof data==='object' ? (Array.isArray(data)?[...data.keys()]:Object.keys(data)) : null;
+  if (expr==='values') return data && typeof data==='object' ? (Array.isArray(data)?data:Object.values(data)) : null;
+  if (expr==='length') return data==null?0:(typeof data==='string'||Array.isArray(data)?data.length:typeof data==='object'?Object.keys(data).length:0);
+  if (expr==='type')   return data===null?'null':Array.isArray(data)?'array':typeof data;
+  if (expr==='not')    return !data;
+  if (expr==='empty')  return undefined;
+  if (expr==='add')    return Array.isArray(data)?data.reduce((a,b)=>typeof a==='string'?a+b:a+b,typeof data[0]==='string'?'':0):null;
+  if (expr==='unique') return [...new Set(Array.isArray(data)?data:[])];
+  if (expr==='reverse') return Array.isArray(data)?[...data].reverse():data;
+  if (expr==='flatten') return Array.isArray(data)?data.flat(Infinity):data;
+  if (expr==='to_entries') return typeof data==='object'&&!Array.isArray(data)?Object.entries(data||{}).map(([k,v])=>({key:k,value:v})):null;
+  if (expr==='from_entries') return Array.isArray(data)?Object.fromEntries(data.map(e=>[e.key??e.name,e.value])):null;
+  if (expr==='env') return {};
+
+  const sortMatch=expr.match(/^sort_by\((.+)\)$/);
+  if(sortMatch){ return Array.isArray(data)?[...data].sort((a,b)=>{ const k=sortMatch[1].replace(/^\./,''); return a[k]<b[k]?-1:a[k]>b[k]?1:0; }):data; }
+  const groupMatch=expr.match(/^group_by\((.+)\)$/);
+  if(groupMatch){ if(!Array.isArray(data))return data; const k=groupMatch[1].replace(/^\./,''); const m={}; data.forEach(item=>{ const v=item[k]; if(!m[v])m[v]=[]; m[v].push(item); }); return Object.values(m); }
+  const minByMatch=expr.match(/^min_by\((.+)\)$/);
+  if(minByMatch){ const k=minByMatch[1].replace(/^\./,''); return Array.isArray(data)?data.reduce((a,b)=>a[k]<b[k]?a:b):data; }
+  const maxByMatch=expr.match(/^max_by\((.+)\)$/);
+  if(maxByMatch){ const k=maxByMatch[1].replace(/^\./,''); return Array.isArray(data)?data.reduce((a,b)=>a[k]>b[k]?a:b):data; }
+  const hasMatch=expr.match(/^has\("?([^"]+)"?\)$/);
+  if(hasMatch){ return typeof data==='object'&&data!==null?(Array.isArray(data)?parseInt(hasMatch[1])<data.length:hasMatch[1] in data):false; }
+  const inMatch=expr.match(/^in\((.+)\)$/);
+  if(inMatch){ try{ const obj=JSON.parse(inMatch[1]); return data in obj; }catch(e){return false;} }
+
+  // .[] iterate
+  if (expr==='.[]') { return Array.isArray(data)?data:typeof data==='object'?Object.values(data||{}):[]; }
+
+  // Slice .[a:b]
+  const sliceMatch = expr.match(/^\.\[(-?\d*):(-?\d*)\]$/);
+  if (sliceMatch) {
+    const a=sliceMatch[1]===''?0:parseInt(sliceMatch[1]);
+    const b=sliceMatch[2]===''?undefined:parseInt(sliceMatch[2]);
+    return (Array.isArray(data)?data:typeof data==='string'?data.split(''):[]).slice(a,b);
+  }
+
+  // .[n]
+  const idxMatch = expr.match(/^\.\[(-?\d+)\]$/);
+  if (idxMatch) {
+    const i=parseInt(idxMatch[1]);
+    return Array.isArray(data)?data[i<0?data.length+i:i]:undefined;
+  }
+
+  // Path expression: .foo.bar[0].baz
+  if (expr.startsWith('.')) {
+    let path = expr.slice(1);
+    if (!path) return data;
+    // Split on . and [] boundaries
+    const segments = [];
+    const re = /([^.[]+)|\[(-?\d+)\]/g;
+    let m;
+    while ((m=re.exec(path))!==null) {
+      segments.push(m[1]!==undefined?m[1]:parseInt(m[2]));
+    }
+    let cur = data;
+    for (const seg of segments) {
+      if (cur==null) return null;
+      cur = cur[seg];
+    }
+    return cur;
+  }
+
+  // String literal
+  if (expr.startsWith('"') && expr.endsWith('"')) return expr.slice(1,-1);
+  // Number
+  if (!isNaN(expr)) return Number(expr);
+
+  return `<expression non supportée: ${expr}>`;
+}
+
+function splitPipes(expr) {
+  const parts=[];let depth=0;let cur='';
+  for(const ch of expr){
+    if(ch==='('||ch==='['||ch==='{') depth++;
+    else if(ch===')'||ch===']'||ch==='}') depth--;
+    else if(ch==='|'&&depth===0){ parts.push(cur); cur=''; continue; }
+    cur+=ch;
+  }
+  parts.push(cur);
+  return parts;
+}
+
+function formatJson(){
+  try{
+    const raw=document.getElementById('json-in').value.trim();
+    document.getElementById('json-in').value=JSON.stringify(JSON.parse(raw),null,2);
+    run();
+  }catch(e){}
+}
+
+function run(){
+  const raw=document.getElementById('json-in').value.trim();
+  const q=document.getElementById('query').value.trim()||'.';
+  const out=document.getElementById('output');
+
+  // Build shell command
+  document.getElementById('cmd-output').textContent=`echo '…' | jq '${q}'`;
+
+  if(!raw){ out.textContent='(entrez du JSON ci-contre)'; out.className='output-pre'; return; }
+
+  let data;
+  try{ data=JSON.parse(raw); }
+  catch(e){ out.textContent='JSON invalide : '+e.message; out.className='output-pre error'; return; }
+
+  try{
+    let result=jqEval(data,q);
+    // Filter undefineds from arrays
+    if(Array.isArray(result)) result=result.filter(x=>x!==undefined);
+    out.textContent=JSON.stringify(result,null,2);
+    out.className='output-pre';
+  }catch(e){
+    out.textContent='Erreur : '+e.message;
+    out.className='output-pre error';
+  }
+}
+
+function copyCmd(){
+  navigator.clipboard.writeText(document.getElementById('cmd-output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+function copyResult(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+// Init with sample
+document.getElementById('json-in').value=JSON.stringify({"users":[{"name":"Alice","age":30,"active":true},{"name":"Bob","age":25,"active":false},{"name":"Carol","age":35,"active":true}],"count":3},null,2);
+run();
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<!-- PowerShell Pipeline Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PowerShell Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:850px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .stage{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;margin-bottom:.75rem;position:relative;}
+    .stage-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;}
+    .stage-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);flex:1;}
+    .pipe-arrow{text-align:center;color:var(--text-muted);font-size:1.1rem;margin:.2rem 0;}
+    .params-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.875rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--text-primary);}
+    .presets{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+    .cmdlet-info{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.6rem .85rem;font-size:.82rem;color:var(--text-secondary);margin-top:.5rem;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>PowerShell Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <p class="section-title">Modèles rapides</p>
+  <div class="presets" id="presets"></div>
+
+  <div class="layout">
+    <!-- Gauche : stages -->
+    <div>
+      <p class="section-title">Pipeline</p>
+      <div id="stages"></div>
+      <button class="btn btn--secondary btn--sm mt-md" onclick="addStage()">+ Ajouter un stage</button>
+    </div>
+
+    <!-- Droite : output -->
+    <div>
+      <p class="section-title">Commande générée</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span>PowerShell</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyCmd()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const CMDLETS = {
+  'Get-Process':    {params:['Name','Id','ComputerName'],         desc:'Processus en cours d\'exécution'},
+  'Get-Service':    {params:['Name','DisplayName','Status'],      desc:'Services Windows'},
+  'Get-ChildItem':  {params:['Path','Filter','Recurse','Depth'],  desc:'Contenu d\'un dossier (ls)'},
+  'Get-Content':    {params:['Path','TotalCount','Tail'],         desc:'Lire un fichier'},
+  'Get-EventLog':   {params:['LogName','EntryType','Newest'],     desc:'Journaux d\'événements'},
+  'Get-WinEvent':   {params:['LogName','MaxEvents','FilterHashtable'],desc:'Événements Windows (modern)'},
+  'Get-NetAdapter': {params:['Name','InterfaceDescription'],      desc:'Adaptateurs réseau'},
+  'Get-NetTCPConnection':{params:['State','LocalPort','RemoteAddress'],desc:'Connexions TCP'},
+  'Get-LocalUser':  {params:['Name','Enabled'],                   desc:'Utilisateurs locaux'},
+  'Get-LocalGroup': {params:['Name'],                             desc:'Groupes locaux'},
+  'Get-ADUser':     {params:['Identity','Filter','SearchBase','Properties'],desc:'Utilisateurs Active Directory'},
+  'Get-ADGroup':    {params:['Identity','Filter','SearchBase'],   desc:'Groupes Active Directory'},
+  'Get-Disk':       {params:['Number','FriendlyName'],            desc:'Disques physiques'},
+  'Get-Volume':     {params:['DriveLetter','FileSystemLabel'],    desc:'Volumes'},
+  'Get-Package':    {params:['Name','ProviderName'],              desc:'Paquets installés'},
+};
+
+const PIPE_CMDS = {
+  'Where-Object':   {params:['Property','Value','Operator'],  desc:'Filtrer les objets'},
+  'Select-Object':  {params:['Property','First','Last','Skip'],desc:'Sélectionner propriétés / éléments'},
+  'Sort-Object':    {params:['Property','Descending'],         desc:'Trier'},
+  'Group-Object':   {params:['Property'],                      desc:'Regrouper par propriété'},
+  'Measure-Object': {params:['Property','Sum','Average','Count'],desc:'Mesures statistiques'},
+  'Format-Table':   {params:['Property','AutoSize','Wrap'],    desc:'Affichage en tableau'},
+  'Format-List':    {params:['Property'],                      desc:'Affichage en liste'},
+  'Export-Csv':     {params:['Path','Delimiter','NoTypeInformation'],desc:'Exporter en CSV'},
+  'Out-File':       {params:['FilePath','Append','Encoding'],  desc:'Écrire dans un fichier'},
+  'Out-GridView':   {params:['Title','PassThru'],              desc:'Afficher en grille interactive'},
+  'ConvertTo-Json': {params:['Depth','Compress'],              desc:'Convertir en JSON'},
+  'Set-Content':    {params:['Path','Value'],                  desc:'Écrire dans un fichier'},
+  'Stop-Process':   {params:['Force'],                         desc:'Arrêter les processus'},
+  'Stop-Service':   {params:['Force'],                         desc:'Arrêter les services'},
+  'Start-Service':  {params:[],                                desc:'Démarrer les services'},
+};
+
+const PRESETS_DATA=[
+  {l:'Services en cours',   p:['Get-Service name=*','Where-Object prop=Status|val=Running','Select-Object prop=Name,DisplayName,Status|first=20']},
+  {l:'Processus > 100 Mo',  p:['Get-Process name=*','Where-Object prop=WorkingSet|val=100MB|op=GT','Select-Object prop=Name,Id,WorkingSet|first=20','Sort-Object prop=WorkingSet|desc=true']},
+  {l:'Logs d\'erreur',      p:['Get-EventLog log=System|entry=Error|newest=50','Select-Object prop=TimeGenerated,Source,Message']},
+  {l:'Fichiers > 50 Mo',    p:['Get-ChildItem path=C:\\|recurse=true','Where-Object prop=Length|val=52428800|op=GT','Select-Object prop=Name,Length,FullName']},
+];
+
+let stageCount=0;
+
+function addStage(cmdName='', params={}, isFirst=null) {
+  const isInitial = stageCount===0;
+  const idx = stageCount++;
+  const stages = document.getElementById('stages');
+
+  if (!isInitial) {
+    const arrow=document.createElement('div'); arrow.className='pipe-arrow'; arrow.textContent='| ↓';
+    stages.appendChild(arrow);
+  }
+
+  const div=document.createElement('div'); div.className='stage'; div.id=`stage-${idx}`;
+  const cmdlist = isInitial
+    ? Object.keys(CMDLETS).map(k=>`<option value="${k}" ${k===cmdName?'selected':''}>${k}</option>`).join('')
+    : Object.keys(PIPE_CMDS).map(k=>`<option value="${k}" ${k===cmdName?'selected':''}>${k}</option>`).join('');
+
+  div.innerHTML=`<div class="stage-header">
+    <span class="stage-label">${isInitial?'Cmdlet source':'Stage '+(idx)}</span>
+    ${!isInitial?`<button class="btn btn--ghost btn--sm" onclick="removeStage(${idx})">✕</button>`:''}
+  </div>
+  <select class="select" id="cmd-${idx}" onchange="onCmdChange(${idx})">${cmdlist}</select>
+  <div class="cmdlet-info" id="info-${idx}"></div>
+  <div class="params-grid" id="params-${idx}"></div>`;
+  stages.appendChild(div);
+  onCmdChange(idx);
+  if (Object.keys(params).length) {
+    Object.entries(params).forEach(([k,v])=>{
+      const el=document.getElementById(`p-${idx}-${k}`);
+      if(el) el.value=v;
+    });
+    build();
+  }
+}
+
+function removeStage(idx){
+  const stage=document.getElementById(`stage-${idx}`);
+  const prev=stage.previousElementSibling;
+  if(prev&&prev.className==='pipe-arrow') prev.remove();
+  stage.remove();
+  build();
+}
+
+function onCmdChange(idx){
+  const cmd=document.getElementById(`cmd-${idx}`).value;
+  const isFirst=idx===0;
+  const def=(isFirst?CMDLETS:PIPE_CMDS)[cmd];
+  document.getElementById(`info-${idx}`).textContent=def?.desc||'';
+  const pg=document.getElementById(`params-${idx}`);
+  pg.innerHTML='';
+  if(!def) return;
+  def.params.forEach(p=>{
+    const lp=p.toLowerCase();
+    const div=document.createElement('div');
+    div.innerHTML=`<label>${p}</label><input class="input" id="p-${idx}-${lp}" placeholder="" oninput="build()">`;
+    pg.appendChild(div);
+  });
+  build();
+}
+
+function getStageValue(idx){
+  const cmd=document.getElementById(`cmd-${idx}`)?.value;
+  if(!cmd) return null;
+  const isFirst=idx===0;
+  const def=(isFirst?CMDLETS:PIPE_CMDS)[cmd];
+  if(!def) return cmd;
+
+  const parts=[cmd];
+  def.params.forEach(p=>{
+    const lp=p.toLowerCase();
+    const el=document.getElementById(`p-${idx}-${lp}`);
+    const v=el?.value?.trim();
+    if(!v) return;
+    // Special handling
+    if(cmd==='Where-Object'&&lp==='property'){
+      const val=document.getElementById(`p-${idx}-value`)?.value?.trim()||'VALUE';
+      const op=document.getElementById(`p-${idx}-operator`)?.value?.trim()||'-eq';
+      parts.push(`{ $_.${v} ${op} ${isNaN(val)?`'${val}'`:val} }`);
+      return;
+    }
+    if(['value','operator'].includes(lp)&&cmd==='Where-Object') return;
+    if(lp==='recurse'&&v.toLowerCase()==='true'){ parts.push(`-${p}`); return; }
+    if(lp==='descending'&&v.toLowerCase()==='true'){ parts.push(`-${p}`); return; }
+    if(lp==='compress'&&v.toLowerCase()==='true'){ parts.push(`-${p}`); return; }
+    if(lp==='notypeinformation'&&v.toLowerCase()==='true'){ parts.push(`-${p}`); return; }
+    if(lp==='autosize'&&v.toLowerCase()==='true'){ parts.push(`-${p}`); return; }
+    if(lp==='passthru'&&v.toLowerCase()==='true'){ parts.push(`-${p}`); return; }
+    parts.push(`-${p} ${v}`);
+  });
+  return parts.join(' ');
+}
+
+function build(){
+  const stages=document.querySelectorAll('.stage');
+  const parts=[];
+  stages.forEach((s,i)=>{
+    const idx=parseInt(s.id.split('-')[1]);
+    const v=getStageValue(idx);
+    if(v) parts.push(v);
+  });
+  document.getElementById('output').textContent=parts.join('\n  | ');
+}
+
+function copyCmd(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+function loadPreset(stages){
+  document.getElementById('stages').innerHTML='';
+  stageCount=0;
+  stages.forEach(s=>{
+    const [cmd,...kv]=s.split(' ');
+    const params={};
+    kv.forEach(pair=>{ const[k,v]=pair.split('='); params[k.toLowerCase()]=v; });
+    addStage(cmd,params);
+  });
+}
+
+// Presets buttons
+const pe=document.getElementById('presets');
+PRESETS_DATA.forEach(p=>{
+  const b=document.createElement('button'); b.className='btn btn--secondary btn--sm';
+  b.textContent=p.l; b.onclick=()=>loadPreset(p.p); pe.appendChild(b);
+});
+
+addStage('Get-Service');
+</script>
+</body>
+</html>

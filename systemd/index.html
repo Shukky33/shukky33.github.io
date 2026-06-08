@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!-- systemd Unit Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>systemd Unit Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:850px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.82rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:200px;color:var(--text-primary);}
+    .section-header{font-family:var(--font-mono);font-size:.85rem;color:var(--accent);font-weight:700;background:var(--bg-input);padding:.4rem .75rem;border-radius:var(--radius-sm);margin-bottom:.75rem;}
+    .templates{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+    .kv-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.4rem;}
+    .kv-row{display:flex;gap:.4rem;align-items:center;}
+    .kv-row input{flex:1;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>systemd Unit Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <p class="section-title">Templates</p>
+  <div class="templates" id="templates"></div>
+
+  <div class="layout">
+    <!-- Gauche : form -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- [Unit] -->
+      <div class="card">
+        <div class="section-header">[Unit]</div>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div><label>Description</label><input class="input" id="u-desc" placeholder="Mon service applicatif" oninput="build()"></div>
+          <div><label>After</label><input class="input" id="u-after" placeholder="network.target" oninput="build()"></div>
+          <div><label>Requires</label><input class="input" id="u-requires" placeholder="" oninput="build()"></div>
+          <div><label>Wants</label><input class="input" id="u-wants" placeholder="" oninput="build()"></div>
+          <div><label>Documentation</label><input class="input" id="u-docs" placeholder="https://exemple.com/docs" oninput="build()"></div>
+        </div>
+      </div>
+
+      <!-- [Service] -->
+      <div class="card">
+        <div class="section-header">[Service]</div>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div class="two-col">
+            <div><label>Type</label>
+              <select class="select" id="s-type" onchange="build()">
+                <option>simple</option><option>exec</option><option>forking</option>
+                <option>oneshot</option><option>notify</option><option>idle</option>
+              </select>
+            </div>
+            <div><label>User</label><input class="input" id="s-user" placeholder="www-data" oninput="build()"></div>
+          </div>
+          <div><label>Group</label><input class="input" id="s-group" placeholder="" oninput="build()"></div>
+          <div><label>WorkingDirectory</label><input class="input" id="s-workdir" placeholder="/opt/app" oninput="build()"></div>
+          <div><label>ExecStart</label><input class="input" id="s-start" placeholder="/usr/bin/python3 /opt/app/main.py" oninput="build()"></div>
+          <div><label>ExecStartPre</label><input class="input" id="s-startpre" placeholder="" oninput="build()"></div>
+          <div><label>ExecStop</label><input class="input" id="s-stop" placeholder="" oninput="build()"></div>
+          <div><label>ExecReload</label><input class="input" id="s-reload" placeholder="" oninput="build()"></div>
+          <div class="two-col">
+            <div><label>Restart</label>
+              <select class="select" id="s-restart" onchange="build()">
+                <option value="">—</option><option>no</option><option>always</option>
+                <option>on-success</option><option>on-failure</option><option>on-abnormal</option>
+              </select>
+            </div>
+            <div><label>RestartSec</label><input class="input" id="s-restartsec" placeholder="5s" oninput="build()"></div>
+          </div>
+          <div><label>Environment</label><input class="input" id="s-env" placeholder="NODE_ENV=production PORT=3000" oninput="build()"></div>
+          <div><label>EnvironmentFile</label><input class="input" id="s-envfile" placeholder="/etc/app/env" oninput="build()"></div>
+          <div class="two-col">
+            <div><label>StandardOutput</label>
+              <select class="select" id="s-stdout" onchange="build()">
+                <option value="">—</option><option>journal</option><option>syslog</option>
+                <option>null</option><option>file:/var/log/app.log</option>
+              </select>
+            </div>
+            <div><label>StandardError</label>
+              <select class="select" id="s-stderr" onchange="build()">
+                <option value="">—</option><option>journal</option><option>syslog</option>
+                <option>null</option>
+              </select>
+            </div>
+          </div>
+          <div><label>TimeoutStartSec</label><input class="input" id="s-timeout" placeholder="" oninput="build()"></div>
+          <div><label>PIDFile</label><input class="input" id="s-pid" placeholder="" oninput="build()"></div>
+          <p class="section-title mt-md">Sécurité</p>
+          <div class="two-col">
+            <div><select class="select" id="s-priv" onchange="build()"><option value="">PrivateTmp —</option><option value="yes">PrivateTmp=yes</option></select></div>
+            <div><select class="select" id="s-ns" onchange="build()"><option value="">NoNewPrivileges —</option><option value="yes">NoNewPrivileges=yes</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- [Install] -->
+      <div class="card">
+        <div class="section-header">[Install]</div>
+        <div><label>WantedBy</label>
+          <select class="select" id="i-wantedby" onchange="build()">
+            <option>multi-user.target</option><option>graphical.target</option>
+            <option>network-online.target</option><option>default.target</option>
+          </select>
+        </div>
+        <div style="margin-top:.5rem;"><label>Alias</label><input class="input" id="i-alias" placeholder="" oninput="build()"></div>
+      </div>
+    </div>
+
+    <!-- Droite : output -->
+    <div>
+      <p class="section-title">Fichier .service généré</p>
+      <div class="output-box" style="margin-bottom:1rem;">
+        <div class="output-header">
+          <span id="filename-display">mon-service.service</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyUnit()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Commandes d'installation</p>
+        <pre class="output-pre" id="install-cmds" style="min-height:auto;padding:.75rem;font-size:.8rem;color:var(--accent2);"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const TEMPLATES=[
+  {l:'Service Python simple',  f:()=>loadTpl('python')},
+  {l:'Service Node.js',        f:()=>loadTpl('node')},
+  {l:'Service Spring Boot',    f:()=>loadTpl('java')},
+  {l:'Script oneshot (cron)',  f:()=>loadTpl('oneshot')},
+  {l:'Timer systemd',          f:()=>loadTpl('timer')},
+];
+
+function v(id){ return document.getElementById(id)?.value?.trim()||''; }
+function add(lines,key,val){ if(val) lines.push(`${key}=${val}`); }
+
+function build(){
+  const lines=['[Unit]'];
+  add(lines,'Description',v('u-desc')||'Mon service');
+  add(lines,'After',v('u-after')||'network.target');
+  add(lines,'Requires',v('u-requires'));
+  add(lines,'Wants',v('u-wants'));
+  add(lines,'Documentation',v('u-docs'));
+
+  lines.push('','[Service]');
+  add(lines,'Type',v('s-type')||'simple');
+  add(lines,'User',v('s-user'));
+  add(lines,'Group',v('s-group'));
+  add(lines,'WorkingDirectory',v('s-workdir'));
+  add(lines,'ExecStartPre',v('s-startpre'));
+  add(lines,'ExecStart',v('s-start'));
+  add(lines,'ExecStop',v('s-stop'));
+  add(lines,'ExecReload',v('s-reload'));
+  add(lines,'Restart',v('s-restart'));
+  add(lines,'RestartSec',v('s-restartsec'));
+  add(lines,'Environment',v('s-env')?`"${v('s-env')}"`:null);
+  add(lines,'EnvironmentFile',v('s-envfile'));
+  add(lines,'StandardOutput',v('s-stdout'));
+  add(lines,'StandardError',v('s-stderr'));
+  add(lines,'TimeoutStartSec',v('s-timeout'));
+  add(lines,'PIDFile',v('s-pid'));
+  add(lines,'PrivateTmp',v('s-priv'));
+  add(lines,'NoNewPrivileges',v('s-ns'));
+
+  lines.push('','[Install]');
+  add(lines,'WantedBy',v('i-wantedby')||'multi-user.target');
+  add(lines,'Alias',v('i-alias'));
+
+  document.getElementById('output').textContent=lines.join('\n');
+
+  const svcName=(v('u-desc')||'mon-service').toLowerCase().replace(/\s+/g,'-');
+  document.getElementById('filename-display').textContent=`${svcName}.service`;
+  document.getElementById('install-cmds').textContent=
+`# Copier le fichier dans systemd
+sudo cp ${svcName}.service /etc/systemd/system/
+
+# Recharger la config systemd
+sudo systemctl daemon-reload
+
+# Activer et démarrer le service
+sudo systemctl enable --now ${svcName}
+
+# Voir les logs
+journalctl -u ${svcName} -f`;
+}
+
+function copyUnit(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+function set(id,val){ const el=document.getElementById(id); if(el) el.value=val; }
+
+function loadTpl(t){
+  if(t==='python'){
+    set('u-desc','Service Python'); set('u-after','network.target');
+    set('s-user','appuser'); set('s-workdir','/opt/app');
+    set('s-start','/usr/bin/python3 /opt/app/main.py');
+    set('s-restart','on-failure'); set('s-restartsec','5s');
+    set('s-env','PYTHONUNBUFFERED=1'); set('s-stdout','journal'); set('s-stderr','journal');
+    set('s-type','simple'); set('s-priv','yes'); set('s-ns','yes');
+    set('i-wantedby','multi-user.target');
+  } else if(t==='node'){
+    set('u-desc','Service Node.js'); set('u-after','network.target');
+    set('s-user','nodeapp'); set('s-workdir','/opt/app');
+    set('s-start','/usr/bin/node /opt/app/server.js');
+    set('s-restart','always'); set('s-restartsec','3s');
+    set('s-env','NODE_ENV=production PORT=3000');
+    set('s-stdout','syslog'); set('s-stderr','syslog');
+    set('s-type','simple'); set('i-wantedby','multi-user.target');
+  } else if(t==='java'){
+    set('u-desc','Service Spring Boot'); set('u-after','network.target');
+    set('s-user','spring'); set('s-workdir','/opt/app');
+    set('s-start','/usr/bin/java -jar /opt/app/app.jar --spring.profiles.active=prod');
+    set('s-restart','on-failure'); set('s-timeout','90');
+    set('s-stdout','journal'); set('s-type','notify');
+    set('i-wantedby','multi-user.target');
+  } else if(t==='oneshot'){
+    set('u-desc','Script de backup'); set('u-after','network.target');
+    set('s-type','oneshot'); set('s-user','backup');
+    set('s-start','/opt/scripts/backup.sh');
+    set('i-wantedby','multi-user.target');
+  }
+  build();
+}
+
+const te=document.getElementById('templates');
+TEMPLATES.forEach(t=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=t.l; b.onclick=()=>{ document.querySelectorAll('.card input,.card select').forEach(el=>{ if(el.type!=='button') el.value=''; }); t.f(); }; te.appendChild(b); });
+
+// Defaults
+set('u-after','network.target'); set('s-type','simple'); set('i-wantedby','multi-user.target');
+build();
+</script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!-- Ansible ad-hoc Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ansible ad-hoc — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:800px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.875rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--accent2);}
+    .module-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.75rem;}
+    .mod-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);}
+    .mod-card:hover,.mod-card.active{border-color:var(--accent);background:var(--bg-card-hover);}
+    .mod-card strong{display:block;font-family:var(--font-mono);font-size:.8rem;color:var(--accent);}
+    .mod-card span{font-size:.75rem;color:var(--text-muted);}
+    .args-area{font-family:var(--font-mono);font-size:.85rem;min-height:80px;resize:vertical;}
+    .kv-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem;}
+    .kv-row{display:flex;gap:.4rem;align-items:center;}
+    .kv-row input{flex:1;}
+    .check-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;}
+    .check-label input{width:16px;height:16px;accent-color:var(--accent);}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>Ansible ad-hoc Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="layout">
+    <!-- Gauche : form -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <div class="card">
+        <p class="section-title">Inventaire &amp; cible</p>
+        <label>Fichier inventaire (-i)</label>
+        <input class="input" id="inventory" placeholder="/etc/ansible/hosts ou inventory.ini" oninput="build()">
+        <label style="margin-top:.6rem">Cible (hôtes / groupe)</label>
+        <input class="input" id="hosts" placeholder="all, web_servers, srv-01,srv-02" oninput="build()">
+      </div>
+
+      <div class="card">
+        <p class="section-title">Module (-m)</p>
+        <input class="input" id="module-input" placeholder="Rechercher un module…" oninput="filterModules()">
+        <div class="module-grid" id="module-grid"></div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Arguments (-a)</p>
+        <div id="args-builder"></div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Options</p>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <label class="check-label"><input type="checkbox" id="opt-become" onchange="build()"> -b / --become (sudo)</label>
+          <label class="check-label"><input type="checkbox" id="opt-K" onchange="build()"> -K (demander mot de passe sudo)</label>
+          <label class="check-label"><input type="checkbox" id="opt-k" onchange="build()"> -k (demander mot de passe SSH)</label>
+          <label class="check-label"><input type="checkbox" id="opt-check" onchange="build()"> --check (dry-run)</label>
+          <label class="check-label"><input type="checkbox" id="opt-diff" onchange="build()"> --diff (afficher les changements)</label>
+          <div style="display:flex;gap:.5rem;align-items:center;margin-top:.25rem;">
+            <label style="margin:0;flex:0 0 auto">Forks (-f)</label>
+            <input class="input" id="opt-forks" type="number" value="5" min="1" max="100" style="width:80px" oninput="build()">
+            <label style="margin:0;flex:0 0 auto">User (-u)</label>
+            <input class="input" id="opt-user" placeholder="ansible" oninput="build()">
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <label style="margin:0;flex:0 0 auto">Extra vars (-e)</label>
+            <input class="input" id="opt-extra" placeholder="var=valeur" oninput="build()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Droite : output -->
+    <div>
+      <p class="section-title">Commande générée</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span>ansible</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyCmd()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const MODULES=[
+  {n:'ping',         d:'Vérifier la connectivité',      args:[]},
+  {n:'shell',        d:'Exécuter une commande shell',   args:[{k:'cmd',p:'echo hello'}]},
+  {n:'command',      d:'Exécuter une commande (sans sh)',args:[{k:'cmd',p:'uptime'}]},
+  {n:'copy',         d:'Copier un fichier',             args:[{k:'src',p:'/local/file'},{k:'dest',p:'/remote/path'},{k:'mode',p:'0644'}]},
+  {n:'fetch',        d:'Récupérer un fichier distant',  args:[{k:'src',p:'/etc/hosts'},{k:'dest',p:'./fetch/'}]},
+  {n:'file',         d:'Gérer fichiers/dossiers/symlinks',args:[{k:'path',p:'/etc/mydir'},{k:'state',p:'directory'},{k:'mode',p:'0755'}]},
+  {n:'template',     d:'Déployer un template Jinja2',   args:[{k:'src',p:'tmpl.j2'},{k:'dest',p:'/etc/conf.d/conf'}]},
+  {n:'yum',          d:'Gérer les paquets RPM',         args:[{k:'name',p:'httpd'},{k:'state',p:'present'}]},
+  {n:'dnf',          d:'Gérer les paquets DNF (RHEL 8+)',args:[{k:'name',p:'nginx'},{k:'state',p:'latest'}]},
+  {n:'apt',          d:'Gérer les paquets Debian/Ubuntu',args:[{k:'name',p:'nginx'},{k:'state',p:'present'}]},
+  {n:'service',      d:'Gérer les services',            args:[{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}]},
+  {n:'systemd',      d:'Gérer les unités systemd',      args:[{k:'name',p:'nginx'},{k:'state',p:'restarted'},{k:'daemon_reload',p:'yes'}]},
+  {n:'user',         d:'Gérer les utilisateurs',        args:[{k:'name',p:'alice'},{k:'state',p:'present'},{k:'groups',p:'wheel'}]},
+  {n:'group',        d:'Gérer les groupes',             args:[{k:'name',p:'devops'},{k:'state',p:'present'}]},
+  {n:'lineinfile',   d:'Gérer une ligne dans un fichier',args:[{k:'path',p:'/etc/conf'},{k:'line',p:'setting=value'},{k:'state',p:'present'}]},
+  {n:'cron',         d:'Gérer les tâches cron',         args:[{k:'name',p:'backup'},{k:'minute',p:'0'},{k:'hour',p:'2'},{k:'job',p:'/scripts/backup.sh'}]},
+  {n:'firewalld',    d:'Gérer firewalld',               args:[{k:'service',p:'http'},{k:'state',p:'enabled'},{k:'permanent',p:'yes'}]},
+  {n:'selinux',      d:'Gérer SELinux',                 args:[{k:'state',p:'enforcing'}]},
+  {n:'setup',        d:'Récupérer les facts système',   args:[]},
+  {n:'debug',        d:'Afficher un message',           args:[{k:'msg',p:'Hello world'}]},
+  {n:'uri',          d:'Requête HTTP',                  args:[{k:'url',p:'https://api.exemple.com'},{k:'method',p:'GET'}]},
+  {n:'stat',         d:'Infos sur un fichier/dossier',  args:[{k:'path',p:'/etc/hosts'}]},
+  {n:'find',         d:'Rechercher des fichiers',       args:[{k:'paths',p:'/var/log'},{k:'patterns',p:'*.log'}]},
+  {n:'archive',      d:'Créer une archive',             args:[{k:'path',p:'/etc/app'},{k:'dest',p:'/tmp/app.tar.gz'}]},
+];
+
+let selectedModule=null;
+
+function buildModuleGrid(filter=''){
+  const grid=document.getElementById('module-grid');
+  grid.innerHTML='';
+  MODULES.filter(m=>!filter||m.n.includes(filter)||m.d.toLowerCase().includes(filter.toLowerCase())).forEach(m=>{
+    const card=document.createElement('div'); card.className='mod-card'+(m===selectedModule?' active':'');
+    card.innerHTML=`<strong>${m.n}</strong><span>${m.d}</span>`;
+    card.onclick=()=>selectModule(m);
+    grid.appendChild(card);
+  });
+}
+
+function filterModules(){ buildModuleGrid(document.getElementById('module-input').value); }
+
+function selectModule(m){
+  selectedModule=m;
+  buildModuleGrid(document.getElementById('module-input').value);
+  document.getElementById('module-input').value=m.n;
+
+  const ab=document.getElementById('args-builder');
+  if(!m.args.length){ ab.innerHTML='<p style="color:var(--text-muted);font-size:.85rem">Ce module ne nécessite pas d\'arguments.</p>'; build(); return; }
+
+  ab.innerHTML='<div class="kv-list" id="args-kv"></div>';
+  const kv=document.getElementById('args-kv');
+  m.args.forEach(a=>{
+    const row=document.createElement('div'); row.className='kv-row';
+    row.innerHTML=`<input class="input" value="${a.k}" style="flex:0 0 130px" readonly><input class="input" placeholder="${a.p}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+    kv.appendChild(row);
+  });
+  build();
+}
+
+function build(){
+  const inv=document.getElementById('inventory').value;
+  const hosts=document.getElementById('hosts').value||'all';
+  const mod=selectedModule?.n||document.getElementById('module-input').value||'ping';
+  const parts=['ansible'];
+
+  parts.push(hosts);
+  if(inv) parts.push(`-i '${inv}'`);
+  parts.push(`-m ${mod}`);
+
+  // Args
+  const kvRows=document.querySelectorAll('#args-kv .kv-row');
+  if(kvRows.length){
+    const args=[...kvRows].map(r=>{
+      const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
+      return k&&v?`${k}=${v}`:null;
+    }).filter(Boolean);
+    if(args.length) parts.push(`-a '${args.join(' ')}'`);
+  }
+
+  // Options
+  if(document.getElementById('opt-become').checked) parts.push('-b');
+  if(document.getElementById('opt-K').checked)      parts.push('-K');
+  if(document.getElementById('opt-k').checked)      parts.push('-k');
+  if(document.getElementById('opt-check').checked)  parts.push('--check');
+  if(document.getElementById('opt-diff').checked)   parts.push('--diff');
+  const forks=document.getElementById('opt-forks').value;
+  if(forks&&forks!=='5') parts.push(`-f ${forks}`);
+  const user=document.getElementById('opt-user').value;
+  if(user) parts.push(`-u ${user}`);
+  const extra=document.getElementById('opt-extra').value;
+  if(extra) parts.push(`-e '${extra}'`);
+
+  document.getElementById('output').textContent=parts.join(' \\\n  ');
+}
+
+function copyCmd(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+buildModuleGrid();
+selectModule(MODULES[0]); // ping par défaut
+</script>
+</body>
+</html>

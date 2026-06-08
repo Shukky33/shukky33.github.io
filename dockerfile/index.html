@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<!-- Dockerfile Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dockerfile Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:850px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .tabs{display:flex;gap:.3rem;margin-bottom:1.5rem;}
+    .tab{padding:.35rem .9rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.85rem;cursor:pointer;transition:all var(--transition);}
+    .tab.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+    .kv-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.4rem;}
+    .kv-row{display:flex;gap:.4rem;align-items:center;}
+    .kv-row input{flex:1;}
+    .run-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.4rem;}
+    .run-row{display:flex;gap:.4rem;align-items:center;}
+    .run-row input{flex:1;font-family:var(--font-mono);font-size:.85rem;}
+    .copy-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.4rem;}
+    .copy-row{display:flex;gap:.4rem;align-items:center;}
+    .copy-row input{flex:1;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.82rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:180px;color:var(--text-primary);}
+    .templates{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>Dockerfile Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-df" onclick="setTab('dockerfile',this)">Dockerfile</button>
+    <button class="tab" id="tab-run" onclick="setTab('dockerrun',this)">docker run</button>
+  </div>
+
+  <p class="section-title">Templates</p>
+  <div class="templates" id="templates"></div>
+
+  <!-- Dockerfile panel -->
+  <div id="panel-dockerfile">
+    <div class="layout">
+      <!-- Gauche -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+        <div class="card">
+          <p class="section-title">Image de base</p>
+          <div class="two-col">
+            <div>
+              <label>Image</label>
+              <input class="input" id="df-from" list="images-list" placeholder="node" oninput="buildDockerfile()">
+              <datalist id="images-list">
+                <option value="node:20-alpine"><option value="node:20"><option value="python:3.11-slim">
+                <option value="python:3.11"><option value="openjdk:21-jdk-slim"><option value="golang:1.21-alpine">
+                <option value="nginx:alpine"><option value="nginx"><option value="ubuntu:22.04">
+                <option value="debian:bookworm-slim"><option value="alpine:3.18"><option value="centos:stream9">
+                <option value="registry.access.redhat.com/ubi9/ubi">
+              </datalist>
+            </div>
+            <div><label>Alias (AS)</label><input class="input" id="df-as" placeholder="builder" oninput="buildDockerfile()"></div>
+          </div>
+          <label class="mt-sm" style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
+            <input type="checkbox" id="df-multistage" onchange="toggleMultistage()" style="width:16px;height:16px;accent-color:var(--accent)"> Multi-stage build
+          </label>
+          <div id="multistage-panel" style="display:none;margin-top:.6rem;">
+            <label>2ème image (finale)</label>
+            <input class="input" id="df-from2" placeholder="nginx:alpine" oninput="buildDockerfile()">
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">WORKDIR &amp; USER</p>
+          <div class="two-col">
+            <div><label>WORKDIR</label><input class="input" id="df-workdir" placeholder="/app" oninput="buildDockerfile()"></div>
+            <div><label>USER</label><input class="input" id="df-user" placeholder="node" oninput="buildDockerfile()"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Variables d'environnement (ENV)</p>
+          <div class="kv-list" id="env-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addEnv()">+ ENV</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Copie de fichiers (COPY)</p>
+          <div class="copy-list" id="copy-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addCopy()">+ COPY</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Commandes RUN</p>
+          <div class="run-list" id="run-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addRun()">+ RUN</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Ports exposés (EXPOSE)</p>
+          <div class="kv-list" id="expose-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addExpose()">+ EXPOSE</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Démarrage</p>
+          <div class="two-col">
+            <div><label>Type</label>
+              <select class="select" id="df-cmd-type" onchange="buildDockerfile()">
+                <option value="CMD">CMD (shell)</option>
+                <option value="CMD_EXEC">CMD (exec)</option>
+                <option value="ENTRYPOINT">ENTRYPOINT</option>
+              </select>
+            </div>
+            <div><label>Commande</label><input class="input" id="df-cmd" placeholder="node server.js" oninput="buildDockerfile()" style="font-family:var(--font-mono)"></div>
+          </div>
+          <div style="margin-top:.5rem;">
+            <label>HEALTHCHECK</label>
+            <input class="input" id="df-health" placeholder="CMD curl -f http://localhost/ || exit 1" oninput="buildDockerfile()" style="font-family:var(--font-mono)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Droite -->
+      <div>
+        <p class="section-title">Dockerfile généré</p>
+        <div class="output-box">
+          <div class="output-header">
+            <span>Dockerfile</span>
+            <button class="btn btn--sm btn--secondary" onclick="copyOutput('output-df')">Copier</button>
+          </div>
+          <pre class="output-pre" id="output-df"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- docker run panel -->
+  <div id="panel-dockerrun" style="display:none;">
+    <div class="layout">
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+        <div class="card">
+          <p class="section-title">Image &amp; Nom</p>
+          <div class="two-col">
+            <div><label>Image:tag</label><input class="input" id="run-image" placeholder="nginx:latest" oninput="buildDockerRun()"></div>
+            <div><label>Nom (--name)</label><input class="input" id="run-name" placeholder="mon-container" oninput="buildDockerRun()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <p class="section-title">Ports (-p)</p>
+          <div class="kv-list" id="ports-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addPort()">+ Port</button>
+        </div>
+        <div class="card">
+          <p class="section-title">Volumes (-v)</p>
+          <div class="kv-list" id="vols-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addVol()">+ Volume</button>
+        </div>
+        <div class="card">
+          <p class="section-title">Variables d'env (-e)</p>
+          <div class="kv-list" id="run-env-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addRunEnv()">+ Env</button>
+        </div>
+        <div class="card">
+          <p class="section-title">Options</p>
+          <div style="display:flex;flex-direction:column;gap:.4rem;">
+            <select class="select" id="run-mode" onchange="buildDockerRun()">
+              <option value="-d">-d (détaché)</option>
+              <option value="-it">-it (interactif)</option>
+              <option value="--rm">--rm (supprimé à l'arrêt)</option>
+            </select>
+            <div class="two-col">
+              <div><label>Network</label><select class="select" id="run-net" onchange="buildDockerRun()"><option value="">—</option><option>bridge</option><option>host</option><option>none</option><option value="custom">custom</option></select></div>
+              <div><label>Restart policy</label><select class="select" id="run-restart" onchange="buildDockerRun()"><option value="">—</option><option>no</option><option>always</option><option>on-failure</option><option>unless-stopped</option></select></div>
+            </div>
+            <div><label>User (-u)</label><input class="input" id="run-user" placeholder="1000:1000" oninput="buildDockerRun()"></div>
+            <div><label>Commande (optionnelle)</label><input class="input" id="run-cmd" placeholder="bash" oninput="buildDockerRun()" style="font-family:var(--font-mono)"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="section-title">Commande générée</p>
+        <div class="output-box">
+          <div class="output-header">
+            <span>docker run</span>
+            <button class="btn btn--sm btn--secondary" onclick="copyOutput('output-run')">Copier</button>
+          </div>
+          <pre class="output-pre" id="output-run"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let currentTab='dockerfile';
+
+function setTab(tab,btn){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.getElementById('panel-dockerfile').style.display=tab==='dockerfile'?'':'none';
+  document.getElementById('panel-dockerrun').style.display=tab==='dockerrun'?'':'none';
+}
+
+function toggleMultistage(){
+  document.getElementById('multistage-panel').style.display=document.getElementById('df-multistage').checked?'':'none';
+  buildDockerfile();
+}
+
+function v(id){ return document.getElementById(id)?.value?.trim()||''; }
+
+function addEnv(k='',val=''){ const l=document.getElementById('env-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="NOM" value="${k}" oninput="buildDockerfile()"><input class="input" placeholder="valeur" value="${val}" oninput="buildDockerfile()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildDockerfile()">✕</button>`; l.appendChild(r); buildDockerfile(); }
+function addCopy(src='',dst=''){ const l=document.getElementById('copy-list'); const r=document.createElement('div'); r.className='copy-row'; r.innerHTML=`<input class="input" placeholder="source" value="${src}" oninput="buildDockerfile()"><span style="color:var(--text-muted)">→</span><input class="input" placeholder="destination" value="${dst}" oninput="buildDockerfile()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.copy-row').remove();buildDockerfile()">✕</button>`; l.appendChild(r); buildDockerfile(); }
+function addRun(cmd=''){ const l=document.getElementById('run-list'); const r=document.createElement('div'); r.className='run-row'; r.innerHTML=`<input class="input" placeholder="apt-get install -y curl" value="${cmd}" oninput="buildDockerfile()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.run-row').remove();buildDockerfile()">✕</button>`; l.appendChild(r); buildDockerfile(); }
+function addExpose(p=''){ const l=document.getElementById('expose-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" type="number" placeholder="3000" value="${p}" oninput="buildDockerfile()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildDockerfile()">✕</button>`; l.appendChild(r); buildDockerfile(); }
+
+function addPort(h='',c=''){ const l=document.getElementById('ports-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="8080 (hôte)" value="${h}" oninput="buildDockerRun()"><span style="color:var(--text-muted)">:</span><input class="input" placeholder="80 (container)" value="${c}" oninput="buildDockerRun()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildDockerRun()">✕</button>`; l.appendChild(r); buildDockerRun(); }
+function addVol(h='',c=''){ const l=document.getElementById('vols-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="/host/path" value="${h}" oninput="buildDockerRun()"><span style="color:var(--text-muted)">:</span><input class="input" placeholder="/container/path" value="${c}" oninput="buildDockerRun()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildDockerRun()">✕</button>`; l.appendChild(r); buildDockerRun(); }
+function addRunEnv(k='',val=''){ const l=document.getElementById('run-env-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="NOM" value="${k}" oninput="buildDockerRun()"><input class="input" placeholder="valeur" value="${val}" oninput="buildDockerRun()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildDockerRun()">✕</button>`; l.appendChild(r); buildDockerRun(); }
+
+function buildDockerfile(){
+  const from=v('df-from')||'node:20-alpine';
+  const as=v('df-as');
+  const multistage=document.getElementById('df-multistage').checked;
+  const from2=v('df-from2')||'nginx:alpine';
+  const workdir=v('df-workdir');
+  const user=v('df-user');
+  const cmdType=v('df-cmd-type')||'CMD';
+  const cmd=v('df-cmd');
+  const health=v('df-health');
+
+  const lines=[];
+  lines.push(`FROM ${from}${as?' AS '+as:''}`);
+
+  const envRows=[...document.querySelectorAll('#env-list .kv-row')];
+  if(envRows.length){ envRows.forEach(r=>{ const[k,val]=[...r.querySelectorAll('input')].map(i=>i.value); if(k&&val) lines.push(`ENV ${k}=${val}`); }); }
+
+  if(workdir) lines.push(`WORKDIR ${workdir}`);
+
+  const copyRows=[...document.querySelectorAll('.copy-row')];
+  copyRows.forEach(r=>{ const[src,dst]=[...r.querySelectorAll('input')].map(i=>i.value); if(src&&dst) lines.push(`COPY ${src} ${dst}`); });
+
+  const runCmds=[...document.querySelectorAll('#run-list .run-row input')].map(i=>i.value).filter(Boolean);
+  if(runCmds.length) lines.push('RUN '+runCmds.join(' \\\n    && '));
+
+  const exposes=[...document.querySelectorAll('#expose-list .kv-row input')].map(i=>i.value).filter(Boolean);
+  exposes.forEach(p=>lines.push(`EXPOSE ${p}`));
+
+  if(user) lines.push(`USER ${user}`);
+
+  if(health) lines.push(`HEALTHCHECK ${health}`);
+
+  if(cmd){
+    if(cmdType==='CMD') lines.push(`CMD ${cmd}`);
+    else if(cmdType==='CMD_EXEC'){ const parts=cmd.trim().split(/\s+/); lines.push(`CMD ["${parts.join('", "')}"]`); }
+    else if(cmdType==='ENTRYPOINT'){ const parts=cmd.trim().split(/\s+/); lines.push(`ENTRYPOINT ["${parts.join('", "')}"]`); }
+  }
+
+  if(multistage&&from2){
+    lines.push('','# ── Stage final ──────────────────────────────');
+    lines.push(`FROM ${from2}`);
+    if(workdir) lines.push(`WORKDIR ${workdir}`);
+    lines.push(`COPY --from=${as||'builder'} ${workdir||'/app'} ${workdir||'/app'}`);
+  }
+
+  document.getElementById('output-df').textContent=lines.join('\n');
+}
+
+function buildDockerRun(){
+  const image=v('run-image')||'nginx:latest';
+  const name=v('run-name');
+  const mode=v('run-mode')||'-d';
+  const net=v('run-net');
+  const restart=v('run-restart');
+  const user=v('run-user');
+  const cmd=v('run-cmd');
+
+  const parts=['docker run', mode];
+  if(name) parts.push(`--name ${name}`);
+  if(restart) parts.push(`--restart ${restart}`);
+  if(net&&net!=='custom') parts.push(`--network ${net}`);
+  if(user) parts.push(`-u ${user}`);
+
+  document.querySelectorAll('#ports-list .kv-row').forEach(r=>{ const[h,c]=[...r.querySelectorAll('input')].map(i=>i.value); if(h&&c) parts.push(`-p ${h}:${c}`); else if(h) parts.push(`-p ${h}`); });
+  document.querySelectorAll('#vols-list .kv-row').forEach(r=>{ const[h,c]=[...r.querySelectorAll('input')].map(i=>i.value); if(h&&c) parts.push(`-v ${h}:${c}`); else if(h) parts.push(`-v ${h}`); });
+  document.querySelectorAll('#run-env-list .kv-row').forEach(r=>{ const[k,val]=[...r.querySelectorAll('input')].map(i=>i.value); if(k&&val) parts.push(`-e ${k}=${val}`); else if(k) parts.push(`-e ${k}`); });
+
+  parts.push(image);
+  if(cmd) parts.push(cmd);
+
+  document.getElementById('output-run').textContent=parts.join(' \\\n  ');
+}
+
+function copyOutput(id){
+  navigator.clipboard.writeText(document.getElementById(id).textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+const TEMPLATES=[
+  {l:'Node.js',    f:()=>loadTplDf('node')},
+  {l:'Python',     f:()=>loadTplDf('python')},
+  {l:'Nginx',      f:()=>loadTplDf('nginx')},
+  {l:'Multi-stage',f:()=>loadTplDf('multi')},
+];
+
+function loadTplDf(t){
+  document.getElementById('env-list').innerHTML='';
+  document.getElementById('copy-list').innerHTML='';
+  document.getElementById('run-list').innerHTML='';
+  document.getElementById('expose-list').innerHTML='';
+  document.getElementById('df-multistage').checked=false;
+  document.getElementById('multistage-panel').style.display='none';
+  if(t==='node'){
+    document.getElementById('df-from').value='node:20-alpine';
+    document.getElementById('df-workdir').value='/app';
+    document.getElementById('df-user').value='node';
+    addEnv('NODE_ENV','production'); addEnv('PORT','3000');
+    addCopy('package*.json','./'); addRun('npm ci --only=production');
+    addCopy('.','.');
+    addExpose('3000');
+    document.getElementById('df-cmd').value='node server.js';
+    document.getElementById('df-cmd-type').value='CMD_EXEC';
+  } else if(t==='python'){
+    document.getElementById('df-from').value='python:3.11-slim';
+    document.getElementById('df-workdir').value='/app';
+    addEnv('PYTHONDONTWRITEBYTECODE','1'); addEnv('PYTHONUNBUFFERED','1');
+    addCopy('requirements.txt','./'); addRun('pip install --no-cache-dir -r requirements.txt');
+    addCopy('.','.');
+    addExpose('8000');
+    document.getElementById('df-cmd').value='gunicorn app:app -b 0.0.0.0:8000';
+  } else if(t==='nginx'){
+    document.getElementById('df-from').value='nginx:alpine';
+    addCopy('dist/','usr/share/nginx/html/');
+    addCopy('nginx.conf','/etc/nginx/conf.d/default.conf');
+    addExpose('80'); addExpose('443');
+    document.getElementById('df-cmd').value='';
+  } else if(t==='multi'){
+    document.getElementById('df-from').value='node:20-alpine';
+    document.getElementById('df-as').value='builder';
+    document.getElementById('df-workdir').value='/app';
+    addCopy('package*.json','./'); addRun('npm ci');
+    addCopy('.','.');  addRun('npm run build');
+    document.getElementById('df-multistage').checked=true;
+    document.getElementById('multistage-panel').style.display='';
+    document.getElementById('df-from2').value='nginx:alpine';
+  }
+  buildDockerfile();
+}
+
+const te=document.getElementById('templates');
+TEMPLATES.forEach(t=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=t.l; b.onclick=()=>t.f(); te.appendChild(b); });
+
+// Init defaults
+document.getElementById('df-from').value='node:20-alpine';
+document.getElementById('df-workdir').value='/app';
+addCopy('package*.json','./');
+addRun('npm ci --only=production');
+addCopy('.','.');
+addExpose('3000');
+document.getElementById('df-cmd').value='node server.js';
+buildDockerfile();
+addPort('3000','3000');
+buildDockerRun();
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<!-- PromQL Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PromQL Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:800px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .kv-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem;}
+    .kv-row{display:flex;gap:.4rem;align-items:center;}
+    .kv-row input{flex:1;}
+    .kv-row select{flex:0 0 70px;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.9rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--accent);}
+    .presets{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+    .func-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.5rem;}
+    .func-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);}
+    .func-card:hover{border-color:var(--accent);}
+    .func-card strong{display:block;font-family:var(--font-mono);font-size:.8rem;color:var(--accent2);}
+    .func-card span{font-size:.75rem;color:var(--text-muted);}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>PromQL Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <p class="section-title">Modèles courants</p>
+  <div class="presets" id="presets"></div>
+
+  <div class="layout">
+    <!-- Gauche : builder -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <div class="card">
+        <p class="section-title">Métrique</p>
+        <input class="input" id="metric" placeholder="http_requests_total" oninput="build()">
+      </div>
+
+      <div class="card">
+        <p class="section-title">Filtres de labels</p>
+        <div class="kv-list" id="labels"></div>
+        <button class="btn btn--secondary btn--sm" onclick="addLabel()">+ Label</button>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Fonction + plage temporelle</p>
+        <div class="two-col">
+          <div>
+            <label>Fonction</label>
+            <select class="select" id="fn" onchange="onFnChange()">
+              <option value="">— Aucune —</option>
+              <option value="rate">rate()</option>
+              <option value="irate">irate()</option>
+              <option value="increase">increase()</option>
+              <option value="delta">delta()</option>
+              <option value="avg_over_time">avg_over_time()</option>
+              <option value="sum_over_time">sum_over_time()</option>
+              <option value="max_over_time">max_over_time()</option>
+              <option value="min_over_time">min_over_time()</option>
+            </select>
+          </div>
+          <div id="range-div">
+            <label>Plage (range vector)</label>
+            <select class="select" id="range">
+              <option value="1m">1m</option>
+              <option value="5m" selected>5m</option>
+              <option value="15m">15m</option>
+              <option value="1h">1h</option>
+              <option value="6h">6h</option>
+              <option value="24h">24h</option>
+              <option value="custom">Personnalisé</option>
+            </select>
+            <input class="input" id="range-custom" placeholder="ex: 30m" style="display:none;margin-top:.4rem" oninput="build()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Agrégation</p>
+        <div class="two-col">
+          <div>
+            <label>Opérateur</label>
+            <select class="select" id="agg-op" onchange="build()">
+              <option value="">— Aucun —</option>
+              <option value="sum">sum</option>
+              <option value="avg">avg</option>
+              <option value="max">max</option>
+              <option value="min">min</option>
+              <option value="count">count</option>
+              <option value="stddev">stddev</option>
+              <option value="topk">topk</option>
+              <option value="bottomk">bottomk</option>
+            </select>
+          </div>
+          <div>
+            <label>By / Without</label>
+            <select class="select" id="agg-by" onchange="build()">
+              <option value="">—</option>
+              <option value="by">by ()</option>
+              <option value="without">without ()</option>
+            </select>
+            <input class="input" id="agg-labels" placeholder="job, instance" style="margin-top:.4rem" oninput="build()">
+          </div>
+        </div>
+        <div id="topk-val" style="display:none;margin-top:.5rem">
+          <label>k (valeur)</label>
+          <input class="input" id="topk-n" type="number" value="5" min="1" oninput="build()">
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Opération arithmétique (optionnel)</p>
+        <div class="two-col">
+          <div>
+            <label>Opérateur</label>
+            <select class="select" id="arith-op" onchange="build()">
+              <option value="">— Aucun —</option>
+              <option value="*">× Multiplier</option>
+              <option value="/">÷ Diviser</option>
+              <option value="+">+ Additionner</option>
+              <option value="-">− Soustraire</option>
+            </select>
+          </div>
+          <div>
+            <label>Valeur</label>
+            <input class="input" id="arith-val" type="number" placeholder="100" oninput="build()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Droite : output + ref -->
+    <div>
+      <p class="section-title">Requête générée</p>
+      <div class="output-box" style="margin-bottom:1.25rem;">
+        <div class="output-header">
+          <span>PromQL</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyQuery()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+
+      <p class="section-title">Fonctions disponibles</p>
+      <div class="func-grid" id="func-ref"></div>
+    </div>
+  </div>
+</div>
+<script>
+const PRESETS=[
+  {l:'Taux de requêtes HTTP',      f:()=>{setMetric('http_requests_total'); setFn('rate','5m'); setAgg('sum','by','job'); build();}},
+  {l:'CPU usage (%)',               f:()=>{setMetric('node_cpu_seconds_total'); addLabelVal('mode','!=','idle'); setFn('rate','5m'); setAgg('avg','by','instance'); build();}},
+  {l:'Mémoire libre (octets)',      f:()=>{setMetric('node_memory_MemFree_bytes'); build();}},
+  {l:'Taux d\'erreurs HTTP 5xx',    f:()=>{setMetric('http_requests_total'); addLabelVal('status','=~','5..'); setFn('rate','5m'); setAgg('sum','by','service'); build();}},
+  {l:'Latence P95',                 f:()=>{setMetric('http_request_duration_seconds'); build();}},
+];
+
+const FUNCS=[
+  {n:'rate()',            d:'Taux par seconde sur range vector (compteurs)'},
+  {n:'irate()',           d:'Taux instantané (2 derniers points)'},
+  {n:'increase()',        d:'Augmentation absolue sur la plage'},
+  {n:'delta()',           d:'Différence début/fin de plage (jauges)'},
+  {n:'avg_over_time()',   d:'Moyenne sur la plage'},
+  {n:'sum_over_time()',   d:'Somme sur la plage'},
+  {n:'histogram_quantile()',d:'Quantile depuis histogram'},
+  {n:'label_replace()',   d:'Renommer/créer un label dynamiquement'},
+];
+
+document.getElementById('func-ref').innerHTML=FUNCS.map(f=>`<div class="func-card"><strong>${f.n}</strong><span>${f.d}</span></div>`).join('');
+
+document.getElementById('range').onchange=()=>{
+  const v=document.getElementById('range').value;
+  document.getElementById('range-custom').style.display=v==='custom'?'':'none';
+  build();
+};
+
+document.getElementById('agg-op').onchange=()=>{
+  const v=document.getElementById('agg-op').value;
+  document.getElementById('topk-val').style.display=(v==='topk'||v==='bottomk')?'':'none';
+  build();
+};
+
+function onFnChange(){
+  const v=document.getElementById('fn').value;
+  document.getElementById('range-div').style.opacity=v?'1':'.4';
+  build();
+}
+
+function addLabel(k='',op='=',v=''){
+  const list=document.getElementById('labels');
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="label" value="${k}" oninput="build()">
+    <select class="select" onchange="build()">
+      <option ${op==='='?'selected':''} value="=">=</option>
+      <option ${op==='!='?'selected':''} value="!=">!=</option>
+      <option ${op==='=~'?'selected':''} value="=~">=~</option>
+      <option ${op==='!~'?'selected':''} value="!~">!~</option>
+    </select>
+    <input class="input" placeholder="valeur" value="${v}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  list.appendChild(row); build();
+}
+
+function addLabelVal(k,op,v){ document.getElementById('labels').innerHTML=''; addLabel(k,op,v); }
+
+function setMetric(m){ document.getElementById('metric').value=m; build(); }
+function setFn(fn,range){ document.getElementById('fn').value=fn; document.getElementById('range').value=range; build(); }
+function setAgg(op,by,labels){ document.getElementById('agg-op').value=op; document.getElementById('agg-by').value=by; document.getElementById('agg-labels').value=labels; build(); }
+
+function getRange(){
+  const v=document.getElementById('range').value;
+  return v==='custom'?document.getElementById('range-custom').value||'5m':v;
+}
+
+function build(){
+  const metric=document.getElementById('metric').value||'my_metric';
+  const fn=document.getElementById('fn').value;
+  const range=getRange();
+  const aggOp=document.getElementById('agg-op').value;
+  const aggBy=document.getElementById('agg-by').value;
+  const aggLabels=document.getElementById('agg-labels').value;
+  const arithOp=document.getElementById('arith-op').value;
+  const arithVal=document.getElementById('arith-val').value;
+
+  // Labels
+  const labelParts=[];
+  document.querySelectorAll('#labels .kv-row').forEach(r=>{
+    const[k,op,v]=[...r.querySelectorAll('input,select')].map(e=>e.value);
+    if(k) labelParts.push(`${k}${op}"${v}"`);
+  });
+  const selector=labelParts.length?`{${labelParts.join(', ')}}':''}`;
+  const base=`${metric}${labelParts.length?'{'+labelParts.join(', ')+'}':''}`;
+
+  // Range vector
+  let expr=fn?`${fn}(${base}[${range}])`:base;
+
+  // Aggregation
+  if(aggOp){
+    const topkN=document.getElementById('topk-n')?.value||'5';
+    const prefix=(aggOp==='topk'||aggOp==='bottomk')?`${aggOp}(${topkN}, `:` ${aggOp}(`;
+    const byClause=aggBy&&aggLabels?` ${aggBy} (${aggLabels})`:'';
+    if(aggOp==='topk'||aggOp==='bottomk') expr=`${aggOp}(${topkN}, ${expr})${byClause?` ${byClause}`:''}`;
+    else expr=`${aggOp}${byClause}(${expr})`;
+  }
+
+  // Arithmetic
+  if(arithOp&&arithVal) expr=`(${expr}) ${arithOp} ${arithVal}`;
+
+  document.getElementById('output').textContent=expr;
+}
+
+function copyQuery(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+// Presets
+const pe=document.getElementById('presets');
+PRESETS.forEach(p=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=p.l; b.onclick=()=>{ document.getElementById('labels').innerHTML=''; p.f(); }; pe.appendChild(b); });
+
+build();
+</script>
+</body>
+</html>

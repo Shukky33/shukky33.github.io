@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<!-- Ansible Playbook Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ansible Playbook Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:850px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;margin-bottom:.6rem;}
+    .task-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;}
+    .task-num{font-size:.7rem;font-weight:700;background:var(--accent-dim);color:#fff;border-radius:999px;padding:.1rem .45rem;}
+    .task-title-input{flex:1;}
+    .task-params{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem;}
+    .kv-row{display:flex;gap:.4rem;align-items:center;}
+    .kv-row input{flex:1;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.82rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:200px;color:var(--text-primary);}
+    .check-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;}
+    .check-label input{width:16px;height:16px;accent-color:var(--accent);}
+    .templates{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>Ansible Playbook Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <p class="section-title">Templates</p>
+  <div class="templates" id="templates"></div>
+
+  <div class="layout">
+    <!-- Gauche : builder -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <div class="card">
+        <p class="section-title">Play — informations générales</p>
+        <div style="display:flex;flex-direction:column;gap:.6rem;">
+          <div><label>Nom du play</label><input class="input" id="play-name" value="Mon play" oninput="build()"></div>
+          <div><label>Hôtes cibles</label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
+          <label class="check-label"><input type="checkbox" id="play-become" onchange="build()"> become: true (sudo)</label>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <label style="margin:0;white-space:nowrap">gather_facts</label>
+            <select class="select" id="play-facts" onchange="build()" style="width:auto">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Variables (vars)</p>
+        <div class="task-params" id="vars-list"></div>
+        <button class="btn btn--secondary btn--sm" onclick="addVar()">+ Variable</button>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Tâches</p>
+        <div id="tasks-list"></div>
+        <button class="btn btn--secondary btn--sm mt-md" onclick="addTask()">+ Tâche</button>
+      </div>
+    </div>
+
+    <!-- Droite : output -->
+    <div>
+      <p class="section-title">Playbook YAML généré</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span>playbook.yml</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyPlaybook()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const MODULES_DEFS={
+  yum:       [{k:'name',p:'httpd'},{k:'state',p:'present'}],
+  dnf:       [{k:'name',p:'nginx'},{k:'state',p:'latest'}],
+  apt:       [{k:'name',p:'nginx'},{k:'state',p:'present'},{k:'update_cache',p:'yes'}],
+  service:   [{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}],
+  systemd:   [{k:'name',p:'nginx'},{k:'state',p:'restarted'},{k:'daemon_reload',p:'yes'}],
+  copy:      [{k:'src',p:'files/app.conf'},{k:'dest',p:'/etc/app/app.conf'},{k:'mode',p:'0644'}],
+  template:  [{k:'src',p:'templates/app.j2'},{k:'dest',p:'/etc/app/app.conf'}],
+  file:      [{k:'path',p:'/var/app'},{k:'state',p:'directory'},{k:'mode',p:'0755'}],
+  user:      [{k:'name',p:'appuser'},{k:'state',p:'present'},{k:'groups',p:'wheel'},{k:'shell',p:'/bin/bash'}],
+  lineinfile:[{k:'path',p:'/etc/hosts'},{k:'line',p:'192.168.1.1 srv-prod'},{k:'state',p:'present'}],
+  debug:     [{k:'msg',p:'{{ variable }}'}],
+  shell:     [{k:'cmd',p:'echo hello'}],
+  command:   [{k:'cmd',p:'uptime'}],
+  firewalld: [{k:'service',p:'http'},{k:'state',p:'enabled'},{k:'permanent',p:'yes'}],
+  cron:      [{k:'name',p:'backup'},{k:'minute',p:'0'},{k:'hour',p:'2'},{k:'job',p:'/scripts/backup.sh'}],
+  git:       [{k:'repo',p:'https://github.com/org/repo.git'},{k:'dest',p:'/opt/app'},{k:'version',p:'main'}],
+  uri:       [{k:'url',p:'https://api.exemple.com'},{k:'method',p:'GET'}],
+};
+
+const TEMPLATES=[
+  {l:'Installation LAMP',  f:()=>loadTemplate('lamp')},
+  {l:'Déploiement app',    f:()=>loadTemplate('deploy')},
+  {l:'Hardening basique',  f:()=>loadTemplate('hardening')},
+];
+
+let taskCount=0;
+
+function addVar(k='',v=''){
+  const list=document.getElementById('vars-list');
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="nom_var" value="${k}" oninput="build()"><input class="input" placeholder="valeur" value="${v}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  list.appendChild(row); build();
+}
+
+function addTask(name='',module='yum',params=null,notify='',when=''){
+  taskCount++;
+  const list=document.getElementById('tasks-list');
+  const card=document.createElement('div'); card.className='task-card'; card.id=`task-${taskCount}`;
+  const defParams=params||MODULES_DEFS[module]||[];
+
+  const modOpts=Object.keys(MODULES_DEFS).map(m=>`<option value="${m}" ${m===module?'selected':''}>${m}</option>`).join('');
+  const paramsHtml=defParams.map(p=>`<div class="kv-row"><input class="input" value="${p.k}" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="${p.p}" value="${p.p}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
+
+  card.innerHTML=`<div class="task-header">
+    <span class="task-num">${taskCount}</span>
+    <input class="input task-title-input" placeholder="Nom de la tâche" value="${name||'Tâche '+taskCount}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();build()">✕</button>
+  </div>
+  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;">
+    <label style="margin:0;flex:0 0 auto">Module</label>
+    <select class="select" onchange="onModuleChange(this)" style="width:auto">${modOpts}</select>
+    <button class="btn btn--ghost btn--sm" onclick="addTaskParam(this)">+ arg</button>
+  </div>
+  <div class="task-params">${paramsHtml}</div>
+  <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;">
+    <input class="input" placeholder="notify: handler_name" value="${notify}" style="flex:1" oninput="build()">
+    <input class="input" placeholder="when: condition" value="${when}" style="flex:1" oninput="build()">
+  </div>`;
+  list.appendChild(card); build();
+}
+
+function onModuleChange(sel){
+  const card=sel.closest('.task-card');
+  const mod=sel.value;
+  const params=MODULES_DEFS[mod]||[];
+  const pp=card.querySelector('.task-params');
+  pp.innerHTML=params.map(p=>`<div class="kv-row"><input class="input" value="${p.k}" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="${p.p}" value="${p.p}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
+  build();
+}
+
+function addTaskParam(btn){
+  const pp=btn.closest('.task-card').querySelector('.task-params');
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="param" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  pp.appendChild(row); build();
+}
+
+function y(indent,key,val){ return ' '.repeat(indent)+(val===undefined?`${key}`:`${key}: ${val}`); }
+
+function build(){
+  const name=document.getElementById('play-name').value||'Mon play';
+  const hosts=document.getElementById('play-hosts').value||'all';
+  const become=document.getElementById('play-become').checked;
+  const facts=document.getElementById('play-facts').value;
+
+  const lines=['---','- name: '+name,'  hosts: '+hosts];
+  if(become) lines.push('  become: true');
+  lines.push('  gather_facts: '+facts);
+
+  // vars
+  const varRows=[...document.querySelectorAll('#vars-list .kv-row')];
+  if(varRows.length){
+    lines.push('  vars:');
+    varRows.forEach(r=>{
+      const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
+      if(k) lines.push(`    ${k}: ${v}`);
+    });
+  }
+
+  // tasks
+  const taskCards=[...document.querySelectorAll('.task-card')];
+  if(taskCards.length){
+    lines.push('  tasks:');
+    taskCards.forEach(card=>{
+      const taskName=card.querySelector('.task-title-input').value||'Task';
+      const modSel=card.querySelector('select');
+      const mod=modSel?.value||'shell';
+      lines.push(`    - name: ${taskName}`);
+      lines.push(`      ${mod}:`);
+      card.querySelectorAll('.task-params .kv-row').forEach(r=>{
+        const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
+        if(k&&v) lines.push(`        ${k}: ${v}`);
+      });
+      const[notifyEl,whenEl]=[...card.querySelectorAll('div:last-child input')];
+      const notify=notifyEl?.value;
+      const when=whenEl?.value;
+      if(notify) lines.push(`      notify: ${notify}`);
+      if(when)   lines.push(`      when: ${when}`);
+    });
+  }
+
+  document.getElementById('output').textContent=lines.join('\n');
+}
+
+function copyPlaybook(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+function loadTemplate(tpl){
+  document.getElementById('tasks-list').innerHTML='';
+  document.getElementById('vars-list').innerHTML='';
+  taskCount=0;
+  if(tpl==='lamp'){
+    document.getElementById('play-name').value='Installation LAMP';
+    document.getElementById('play-hosts').value='web_servers';
+    document.getElementById('play-become').checked=true;
+    addTask('Installer Apache','yum',[{k:'name',p:'httpd'},{k:'state',p:'present'}],'restart httpd','');
+    addTask('Installer PHP','yum',[{k:'name',p:'php php-mysqlnd'},{k:'state',p:'present'}],'','');
+    addTask('Installer MariaDB','yum',[{k:'name',p:'mariadb-server'},{k:'state',p:'present'}],'','');
+    addTask('Démarrer Apache','service',[{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}],'','');
+  } else if(tpl==='deploy'){
+    document.getElementById('play-name').value='Déploiement application';
+    document.getElementById('play-hosts').value='app_servers');
+    document.getElementById('play-become').checked=true;
+    addVar('app_version','1.2.0');
+    addVar('app_dir','/opt/app');
+    addTask('Cloner le dépôt','git',[{k:'repo',p:'https://github.com/org/app.git'},{k:'dest',p:'{{ app_dir }}'},{k:'version',p:'{{ app_version }}'}],'','');
+    addTask('Installer les dépendances','yum',[{k:'name',p:'python3 python3-pip'},{k:'state',p:'present'}],'','');
+    addTask('Créer le service systemd','template',[{k:'src',p:'app.service.j2'},{k:'dest',p:'/etc/systemd/system/app.service'}],'restart app','');
+    addTask('Activer le service','systemd',[{k:'name',p:'app'},{k:'state',p:'started'},{k:'enabled',p:'yes'},{k:'daemon_reload',p:'yes'}],'','');
+  } else if(tpl==='hardening'){
+    document.getElementById('play-name').value='Hardening basique RHEL';
+    document.getElementById('play-hosts').value='all');
+    document.getElementById('play-become').checked=true;
+    addTask('Désactiver SSH root login','lineinfile',[{k:'path',p:'/etc/ssh/sshd_config'},{k:'line',p:'PermitRootLogin no'},{k:'state',p:'present'}],'restart sshd','');
+    addTask('Configurer firewalld','firewalld',[{k:'service',p:'ssh'},{k:'state',p:'enabled'},{k:'permanent',p:'yes'}],'','');
+    addTask('SELinux en mode enforcing','selinux',[{k:'state',p:'enforcing'}],'','');
+  }
+  build();
+}
+
+const te=document.getElementById('templates');
+TEMPLATES.forEach(t=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=t.l; b.onclick=t.f; te.appendChild(b); });
+
+addTask('Installer le paquet','yum');
+</script>
+</body>
+</html>

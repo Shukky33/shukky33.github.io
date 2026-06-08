@@ -7,142 +7,305 @@
   <title>Portail Personnel</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ── Styles spécifiques à l'index ────────────────────────── */
-    .portal-header {
-      padding: 3rem 0 2rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 2.5rem;
-    }
-    .portal-header__eyebrow {
-      font-size: .8rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: .6rem;
-    }
-    .portal-header h1 { margin-bottom: .4rem; }
-    .portal-header p   { font-size: 1rem; }
+    .portal-header { padding:3rem 0 2rem; border-bottom:1px solid var(--border); margin-bottom:2.5rem; }
+    .portal-header__eyebrow { font-size:.75rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:.5rem; }
+    .portal-header h1 { margin-bottom:.4rem; }
+    .portal-header p { font-size:1rem; }
 
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
-      padding-bottom: 4rem;
-    }
+    .category-title { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--text-muted); margin:2rem 0 .75rem; display:flex; align-items:center; gap:.75rem; }
+    .category-title::after { content:''; flex:1; height:1px; background:var(--border); }
 
-    /* Tool card */
-    .tool-card {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-    .tool-card__meta {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      flex-wrap: wrap;
-    }
-    .tool-card__icon {
-      font-size: 1.6rem;
-      line-height: 1;
-    }
-    .tool-card__body { flex: 1; }
-    .tool-card__body h2 { font-size: 1.1rem; margin-bottom: .3rem; }
-    .tool-card__body p  { font-size: .875rem; }
+    .tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; }
 
-    .tool-card__actions {
-      display: flex;
-      gap: .6rem;
-    }
-    .tool-card__actions .btn { flex: 1; justify-content: center; }
+    .tool-card { display:flex; flex-direction:column; gap:1rem; }
+    .tool-card__meta { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .tool-card__icon { font-size:1.5rem; line-height:1; }
+    .tool-card__body { flex:1; }
+    .tool-card__body h2 { font-size:1rem; margin-bottom:.25rem; }
+    .tool-card__body p { font-size:.82rem; }
+    .tool-card__actions { display:flex; gap:.5rem; }
+    .tool-card__actions .btn { flex:1; justify-content:center; font-size:.8rem; }
 
-    /* Empty state */
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 4rem 2rem;
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-lg);
-    }
-    .empty-state__icon { font-size: 2.5rem; margin-bottom: 1rem; }
-    .empty-state h2 { color: var(--text-secondary); font-weight: 500; margin-bottom: .5rem; }
-    .empty-state p  { font-size: .875rem; }
+    .portal-footer { border-top:1px solid var(--border); padding:1.25rem 0; text-align:center; font-size:.8rem; color:var(--text-muted); margin-top:3rem; }
 
-    /* Footer */
-    .portal-footer {
-      border-top: 1px solid var(--border);
-      padding: 1.25rem 0;
-      text-align: center;
-      font-size: .8rem;
-      color: var(--text-muted);
-    }
+    .search-bar { margin-bottom:1.5rem; }
+    .tool-card.hidden { display:none !important; }
   </style>
 </head>
 <body>
-
 <div class="container">
 
-  <!-- ── En-tête ──────────────────────────────────────────── -->
   <header class="portal-header">
     <p class="portal-header__eyebrow">Portail d'outils</p>
     <h1>Boîte à outils</h1>
-    <p>Outils personnels — 100 % client, aucune donnée envoyée.</p>
+    <p>15 outils — 100 % client, sans dépendance externe, utilisables hors-ligne.</p>
   </header>
 
-  <!-- ── Grille d'outils ──────────────────────────────────── -->
-  <main>
-    <div class="tools-grid" id="tools-grid">
+  <div class="search-bar">
+    <input class="input" id="search" type="text" placeholder="Filtrer les outils…" oninput="filterTools()">
+  </div>
 
-      <!--
-        ╔══════════════════════════════════════════════════════╗
-        ║  MODÈLE — copier ce bloc pour ajouter un outil      ║
-        ║                                                      ║
-        ║  <div class="card tool-card">                       ║
-        ║    <div class="tool-card__meta">                    ║
-        ║      <span class="tool-card__icon">🔧</span>        ║
-        ║      <span class="badge badge--version">v1.0.0</span>║
-        ║      <!-- <span class="badge badge--new">Nouveau</span> -->
-        ║    </div>                                           ║
-        ║    <div class="tool-card__body">                    ║
-        ║      <h2>Nom de l'outil</h2>                        ║
-        ║      <p>Description courte de ce que fait l'outil.</p>║
-        ║    </div>                                           ║
-        ║    <div class="tool-card__actions">                 ║
-        ║      <a href="nom-outil/" class="btn btn--primary"> ║
-        ║        Ouvrir                                       ║
-        ║      </a>                                           ║
-        ║      <a href="nom-outil/index.html"                 ║
-        ║         download="nom-outil.html"                   ║
-        ║         class="btn btn--secondary">                 ║
-        ║        ↓ Télécharger                                ║
-        ║      </a>                                           ║
-        ║    </div>                                           ║
-        ║  </div>                                             ║
-        ╚══════════════════════════════════════════════════════╝
-      -->
+  <!-- ── Langages & Syntaxes ─────────────────────────────── -->
+  <div class="category-title">Langages &amp; Syntaxes</div>
+  <div class="tools-grid">
 
-      <!-- État vide — à supprimer quand des outils sont ajoutés -->
-      <div class="empty-state">
-        <div class="empty-state__icon">🧰</div>
-        <h2>Aucun outil pour l'instant</h2>
-        <p>Les outils apparaîtront ici une fois ajoutés.</p>
+    <div class="card tool-card" data-tags="regex regexp expression régulière pattern">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🔍</span>
+        <span class="badge badge--version">v1.0.0</span>
       </div>
-
+      <div class="tool-card__body">
+        <h2>Regex Tester</h2>
+        <p>Test interactif avec highlighting, flags, et raccourcis (email, IP, UUID…)</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="regex/" class="btn btn--primary">Ouvrir</a>
+        <a href="regex/index.html" download="regex-tester.html" class="btn btn--secondary">↓</a>
+      </div>
     </div>
-  </main>
+
+    <div class="card tool-card" data-tags="ldap filter active directory ad objectclass samaccountname">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🗂️</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>LDAP Filter Generator</h2>
+        <p>Constructeur visuel de filtres LDAP/AD avec AND, OR, NOT imbriqués</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="ldap-filter/" class="btn btn--primary">Ouvrir</a>
+        <a href="ldap-filter/index.html" download="ldap-filter.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="jq json query selector pipe filter">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">📦</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>jq Builder</h2>
+        <p>Constructeur de requêtes jq avec évaluation JS basique et référence rapide</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="jq/" class="btn btn--primary">Ouvrir</a>
+        <a href="jq/index.html" download="jq-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="promql prometheus metric rate sum labels monitoring">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">📈</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>PromQL Builder</h2>
+        <p>Constructeur de requêtes Prometheus — rate(), aggregations, labels</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="promql/" class="btn btn--primary">Ouvrir</a>
+        <a href="promql/index.html" download="promql-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="kql lucene kibana elastic elasticsearch logs search">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🔎</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>KQL / Lucene Builder</h2>
+        <p>Constructeur de requêtes Kibana/Elastic — champs, plages, AND/OR/NOT</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="kql/" class="btn btn--primary">Ouvrir</a>
+        <a href="kql/index.html" download="kql-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Outils CLI ───────────────────────────────────────── -->
+  <div class="category-title">Outils CLI</div>
+  <div class="tools-grid">
+
+    <div class="card tool-card" data-tags="bash find grep awk sed tar rsync linux shell">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🐚</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Bash Reference</h2>
+        <p>Aide-mémoire searchable — find, grep, awk, sed, tar, rsync avec exemples</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="bash-ref/" class="btn btn--primary">Ouvrir</a>
+        <a href="bash-ref/index.html" download="bash-ref.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="powershell pipeline where-object select-object get-service windows">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">💙</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>PowerShell Builder</h2>
+        <p>Constructeur de pipelines PowerShell — Get-*, Where-Object, Export-Csv…</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="powershell/" class="btn btn--primary">Ouvrir</a>
+        <a href="powershell/index.html" download="powershell-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="curl http api request headers auth bearer post get">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🌐</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>curl Builder</h2>
+        <p>Générateur de commandes curl — méthode, headers, body JSON/form, auth</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="curl/" class="btn btn--primary">Ouvrir</a>
+        <a href="curl/index.html" download="curl-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="git commit branch push pull merge rebase stash reference">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🌿</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Git Reference</h2>
+        <p>Aide-mémoire searchable git — commit, branch, merge, remote, stash, tags</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="git-ref/" class="btn btn--primary">Ouvrir</a>
+        <a href="git-ref/index.html" download="git-ref.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="ansible adhoc module yum service ping rhel">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">⚙️</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Ansible ad-hoc</h2>
+        <p>Générateur de commandes ad-hoc Ansible — inventaire, modules, args, options</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="ansible-adhoc/" class="btn btn--primary">Ouvrir</a>
+        <a href="ansible-adhoc/index.html" download="ansible-adhoc.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Automation & Config ─────────────────────────────── -->
+  <div class="category-title">Automation &amp; Configuration</div>
+  <div class="tools-grid">
+
+    <div class="card tool-card" data-tags="cron expression schedule planification tâche timer">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">⏰</span>
+        <span class="badge badge--version">v1.0.0</span>
+        <span class="badge badge--new">Favori</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Cron Builder</h2>
+        <p>Générateur d'expressions cron avec description humaine et prochaines exécutions</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="cron/" class="btn btn--primary">Ouvrir</a>
+        <a href="cron/index.html" download="cron-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="ansible playbook yaml tasks hosts modules rhel automation">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">📋</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Ansible Playbook Builder</h2>
+        <p>Générateur de playbooks YAML Ansible — play, tasks, vars, templates</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="ansible-playbook/" class="btn btn--primary">Ouvrir</a>
+        <a href="ansible-playbook/index.html" download="ansible-playbook.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="firewall firewalld iptables nftables zone port réseau règle">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🛡️</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Firewall Rule Builder</h2>
+        <p>Générateur de règles firewalld, iptables et nftables avec presets</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="firewall/" class="btn btn--primary">Ouvrir</a>
+        <a href="firewall/index.html" download="firewall-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="systemd service unit execstart timer daemon linux">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🔧</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>systemd Unit Builder</h2>
+        <p>Générateur de fichiers .service systemd avec [Unit], [Service], [Install]</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="systemd/" class="btn btn--primary">Ouvrir</a>
+        <a href="systemd/index.html" download="systemd-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="docker dockerfile container image build run volumes ports env">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🐳</span>
+        <span class="badge badge--version">v1.0.0</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Dockerfile Builder</h2>
+        <p>Générateur de Dockerfile et commandes docker run — multi-stage, volumes, env</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="dockerfile/" class="btn btn--primary">Ouvrir</a>
+        <a href="dockerfile/index.html" download="dockerfile-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+  </div>
 
 </div>
 
-<!-- ── Pied de page ──────────────────────────────────────── -->
 <footer class="portal-footer">
   <div class="container">
-    Portail personnel — open source, usage local &nbsp;·&nbsp;
-    <a href="https://github.com/shukky33/shukky33.github.io" target="_blank" rel="noopener">
-      GitHub
-    </a>
+    Portail personnel — open source &nbsp;·&nbsp;
+    <a href="https://github.com/shukky33/shukky33.github.io" target="_blank" rel="noopener">GitHub</a>
   </div>
 </footer>
 
+<script>
+function filterTools() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.tool-card').forEach(card => {
+    const text = (card.dataset.tags + ' ' + card.querySelector('h2').textContent + ' ' + card.querySelector('p').textContent).toLowerCase();
+    card.classList.toggle('hidden', q && !text.includes(q));
+  });
+}
+</script>
 </body>
 </html>

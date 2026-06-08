@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<!-- curl Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>curl Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:850px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .url-row{display:flex;gap:.5rem;align-items:stretch;}
+    .url-row select{flex:0 0 110px;}
+    .url-row input{flex:1;}
+    .kv-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem;}
+    .kv-row{display:flex;gap:.4rem;align-items:center;}
+    .kv-row input{flex:1;}
+    .kv-row button{flex:0 0 auto;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.875rem;padding:1rem;overflow-x:auto;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--text-primary);}
+    .opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;}
+    .opt-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;}
+    .opt-label input{width:16px;height:16px;accent-color:var(--accent);}
+    .tabs{display:flex;gap:.3rem;margin-bottom:.75rem;}
+    .tab{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;cursor:pointer;transition:all var(--transition);}
+    .tab.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+    .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>curl Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="layout">
+    <!-- Gauche : formulaire -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- Méthode + URL -->
+      <div>
+        <p class="section-title">URL</p>
+        <div class="url-row">
+          <select class="select" id="method" onchange="build()">
+            <option>GET</option><option>POST</option><option>PUT</option>
+            <option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option>
+          </select>
+          <input class="input" id="url" type="text" placeholder="https://api.exemple.com/endpoint" oninput="build()">
+        </div>
+      </div>
+
+      <!-- Headers -->
+      <div>
+        <p class="section-title">Headers</p>
+        <div class="kv-list" id="headers-list"></div>
+        <button class="btn btn--secondary btn--sm" onclick="addHeader()">+ Ajouter un header</button>
+      </div>
+
+      <!-- Auth -->
+      <div>
+        <p class="section-title">Authentification</p>
+        <select class="select" id="auth-type" onchange="onAuthType()">
+          <option value="none">Aucune</option>
+          <option value="basic">Basic (user:pass)</option>
+          <option value="bearer">Bearer token</option>
+          <option value="apikey">API Key (header)</option>
+        </select>
+        <div id="auth-fields" style="margin-top:.6rem"></div>
+      </div>
+
+      <!-- Body -->
+      <div id="body-section">
+        <p class="section-title">Corps (body)</p>
+        <div class="tabs">
+          <button class="tab active" onclick="setBodyType('none',this)">Aucun</button>
+          <button class="tab" onclick="setBodyType('json',this)">JSON</button>
+          <button class="tab" onclick="setBodyType('form',this)">Form URL-encoded</button>
+          <button class="tab" onclick="setBodyType('raw',this)">Raw</button>
+        </div>
+        <div id="body-input"></div>
+      </div>
+
+      <!-- Options -->
+      <div>
+        <p class="section-title">Options</p>
+        <div class="opts-grid">
+          <label class="opt-label"><input type="checkbox" id="opt-k" onchange="build()"> -k (ignore SSL)</label>
+          <label class="opt-label"><input type="checkbox" id="opt-v" onchange="build()"> -v (verbose)</label>
+          <label class="opt-label"><input type="checkbox" id="opt-L" onchange="build()"> -L (suivre redirects)</label>
+          <label class="opt-label"><input type="checkbox" id="opt-s" onchange="build()"> -s (silencieux)</label>
+          <label class="opt-label"><input type="checkbox" id="opt-compressed" onchange="build()"> --compressed</label>
+          <label class="opt-label"><input type="checkbox" id="opt-include" onchange="build()"> -i (inclure headers réponse)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Droite : output -->
+    <div>
+      <p class="section-title">Commande générée</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span>curl</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyCmd()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let bodyType = 'none';
+
+function addHeader(k='',v='') {
+  const list = document.getElementById('headers-list');
+  const row  = document.createElement('div');
+  row.className = 'kv-row';
+  row.innerHTML = `<input class="input" placeholder="Header" value="${k}" oninput="build()">
+    <input class="input" placeholder="Valeur" value="${v}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.parentElement.remove();build()">✕</button>`;
+  list.appendChild(row);
+  build();
+}
+
+function onAuthType() {
+  const t = document.getElementById('auth-type').value;
+  const f = document.getElementById('auth-fields');
+  if (t==='basic')   f.innerHTML = `<div class="auth-grid"><input class="input" id="auth-user" placeholder="Utilisateur" oninput="build()"><input class="input" id="auth-pass" placeholder="Mot de passe" type="password" oninput="build()"></div>`;
+  else if (t==='bearer') f.innerHTML = `<input class="input" id="auth-token" placeholder="Token JWT / OAuth" oninput="build()">`;
+  else if (t==='apikey') f.innerHTML = `<div class="auth-grid"><input class="input" id="auth-key-name" placeholder="Nom du header" value="X-API-Key" oninput="build()"><input class="input" id="auth-key-val" placeholder="Valeur" oninput="build()"></div>`;
+  else f.innerHTML = '';
+  build();
+}
+
+function setBodyType(t, btn) {
+  bodyType = t;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const bi = document.getElementById('body-input');
+  if (t==='json') bi.innerHTML = `<textarea class="input" id="body-content" rows="6" placeholder='{"key":"value"}' oninput="build()" spellcheck="false" style="font-family:var(--font-mono);font-size:.85rem"></textarea>`;
+  else if (t==='form') {
+    bi.innerHTML = `<div class="kv-list" id="form-list"></div><button class="btn btn--secondary btn--sm" onclick="addFormField()">+ Champ</button>`;
+    addFormField();
+  }
+  else if (t==='raw') bi.innerHTML = `<textarea class="input" id="body-content" rows="6" placeholder="Contenu brut" oninput="build()" style="font-family:var(--font-mono);font-size:.85rem"></textarea>`;
+  else bi.innerHTML='';
+  build();
+}
+
+function addFormField() {
+  const list = document.getElementById('form-list');
+  const row = document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="nom" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.parentElement.remove();build()">✕</button>`;
+  list.appendChild(row); build();
+}
+
+function esc(s){ return s.replace(/'/g,"'\\''"); }
+
+function build() {
+  const method  = document.getElementById('method').value;
+  const url     = document.getElementById('url').value || 'https://api.exemple.com';
+  const authT   = document.getElementById('auth-type').value;
+  const parts   = ['curl'];
+
+  // Options
+  if (document.getElementById('opt-s')?.checked)          parts.push('-s');
+  if (document.getElementById('opt-v')?.checked)          parts.push('-v');
+  if (document.getElementById('opt-i')?.checked)          {}
+  if (document.getElementById('opt-include')?.checked)    parts.push('-i');
+  if (document.getElementById('opt-k')?.checked)          parts.push('-k');
+  if (document.getElementById('opt-L')?.checked)          parts.push('-L');
+  if (document.getElementById('opt-compressed')?.checked) parts.push('--compressed');
+
+  // Méthode
+  if (method !== 'GET') parts.push(`-X ${method}`);
+
+  // Auth
+  if (authT==='basic') {
+    const u=document.getElementById('auth-user')?.value||'user', p=document.getElementById('auth-pass')?.value||'pass';
+    parts.push(`-u '${esc(u)}:${esc(p)}'`);
+  } else if (authT==='bearer') {
+    const t=document.getElementById('auth-token')?.value||'TOKEN';
+    parts.push(`-H 'Authorization: Bearer ${esc(t)}'`);
+  } else if (authT==='apikey') {
+    const n=document.getElementById('auth-key-name')?.value||'X-API-Key', v=document.getElementById('auth-key-val')?.value||'KEY';
+    parts.push(`-H '${esc(n)}: ${esc(v)}'`);
+  }
+
+  // Headers
+  document.querySelectorAll('#headers-list .kv-row').forEach(r=>{
+    const [k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
+    if(k) parts.push(`-H '${esc(k)}: ${esc(v)}'`);
+  });
+
+  // Body
+  if (bodyType==='json') {
+    const body = document.getElementById('body-content')?.value||'{}';
+    parts.push(`-H 'Content-Type: application/json'`);
+    parts.push(`-d '${esc(body)}'`);
+  } else if (bodyType==='form') {
+    const pairs=[];
+    document.querySelectorAll('#form-list .kv-row').forEach(r=>{
+      const [k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
+      if(k) pairs.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+    });
+    if(pairs.length) parts.push(`-d '${pairs.join('&')}'`);
+  } else if (bodyType==='raw') {
+    const body = document.getElementById('body-content')?.value||'';
+    if(body) parts.push(`-d '${esc(body)}'`);
+  }
+
+  // URL
+  parts.push(`'${esc(url)}'`);
+
+  // Format multi-ligne
+  const cmd = parts.join(' \\\n  ');
+  document.getElementById('output').textContent = cmd;
+}
+
+function copyCmd(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+// Init
+addHeader('Accept','application/json');
+build();
+</script>
+</body>
+</html>

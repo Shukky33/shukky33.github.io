@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<!-- Git Reference — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git Reference — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .search-bar{position:sticky;top:0;background:var(--bg-base);padding:.75rem 0;z-index:10;border-bottom:1px solid var(--border);margin-bottom:1.5rem;}
+    .cat-filters{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.25rem;}
+    .cat-btn{padding:.3rem .75rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.78rem;cursor:pointer;transition:all var(--transition);}
+    .cat-btn.active,.cat-btn:hover{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+    .section-title{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:.75rem;margin-top:1.5rem;}
+    .cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:.6rem;}
+    .cmd-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;cursor:pointer;transition:border-color var(--transition);}
+    .cmd-card:hover{border-color:var(--border-focus);}
+    .cmd-line{font-family:var(--font-mono);font-size:.82rem;padding:.6rem 1rem;color:var(--accent2);background:var(--bg-input);}
+    .cmd-desc{padding:.45rem 1rem;font-size:.82rem;color:var(--text-secondary);border-top:1px solid var(--border);}
+    .hidden{display:none!important;}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--success);color:#fff;padding:.5rem 1.1rem;border-radius:var(--radius-sm);font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none;}
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>Git Reference</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="search-bar">
+    <input class="input" id="search" type="text" placeholder="Rechercher commande ou description…" oninput="filter()">
+  </div>
+
+  <div class="cat-filters" id="cat-filters"></div>
+  <div id="content"></div>
+</div>
+<div class="toast" id="toast">Copié !</div>
+<script>
+const DATA=[
+  {cat:'Init / Config', items:[
+    {c:'git init',                                d:'Initialiser un dépôt local'},
+    {c:'git init --bare',                         d:'Dépôt nu (bare) — pour serveurs'},
+    {c:'git clone <url>',                         d:'Cloner un dépôt distant'},
+    {c:'git clone <url> --depth=1',               d:'Clonage superficiel (1 commit)'},
+    {c:'git config --global user.name "Prénom"',  d:'Configurer le nom utilisateur'},
+    {c:'git config --global user.email "e@mail"', d:'Configurer l\'email'},
+    {c:'git config --list',                       d:'Lister toute la configuration'},
+    {c:'git config --global core.editor nvim',    d:'Définir l\'éditeur par défaut'},
+  ]},
+  {cat:'Staging / Commit', items:[
+    {c:'git status',                              d:'État du dépôt (fichiers modifiés, staged)'},
+    {c:'git add fichier.txt',                     d:'Stager un fichier'},
+    {c:'git add .',                               d:'Stager tous les changements'},
+    {c:'git add -p',                              d:'Stager interactivement (hunk par hunk)'},
+    {c:'git commit -m "message"',                 d:'Committer avec un message'},
+    {c:'git commit --amend',                      d:'Modifier le dernier commit (message ou fichiers)'},
+    {c:'git commit --amend --no-edit',            d:'Amend sans changer le message'},
+    {c:'git restore fichier',                     d:'Annuler les modifs non stagées'},
+    {c:'git restore --staged fichier',            d:'Dé-stager un fichier'},
+    {c:'git rm fichier',                          d:'Supprimer un fichier et stager la suppression'},
+    {c:'git mv ancien.txt nouveau.txt',           d:'Renommer/déplacer un fichier'},
+  ]},
+  {cat:'Branches', items:[
+    {c:'git branch',                              d:'Lister les branches locales'},
+    {c:'git branch -a',                           d:'Lister toutes les branches (locales + distantes)'},
+    {c:'git branch ma-branche',                   d:'Créer une nouvelle branche'},
+    {c:'git checkout ma-branche',                 d:'Basculer sur une branche'},
+    {c:'git checkout -b ma-branche',              d:'Créer et basculer en une commande'},
+    {c:'git switch ma-branche',                   d:'Basculer (nouvelle syntaxe)'},
+    {c:'git switch -c ma-branche',                d:'Créer et basculer (nouvelle syntaxe)'},
+    {c:'git branch -d ma-branche',                d:'Supprimer une branche locale (safe)'},
+    {c:'git branch -D ma-branche',                d:'Forcer la suppression d\'une branche'},
+    {c:'git branch -m ancien nouveau',            d:'Renommer une branche'},
+  ]},
+  {cat:'Merge / Rebase', items:[
+    {c:'git merge ma-branche',                    d:'Fusionner une branche dans la courante'},
+    {c:'git merge --no-ff ma-branche',            d:'Merge avec commit de fusion (no fast-forward)'},
+    {c:'git merge --squash ma-branche',           d:'Squash tous les commits avant le merge'},
+    {c:'git rebase main',                         d:'Rebaser la branche courante sur main'},
+    {c:'git rebase -i HEAD~3',                    d:'Rebase interactif sur les 3 derniers commits'},
+    {c:'git cherry-pick abc1234',                 d:'Appliquer un commit spécifique'},
+    {c:'git mergetool',                           d:'Lancer l\'outil de résolution de conflits'},
+    {c:'git merge --abort',                       d:'Annuler un merge en cours'},
+    {c:'git rebase --abort',                      d:'Annuler un rebase en cours'},
+  ]},
+  {cat:'Historique / Log', items:[
+    {c:'git log',                                 d:'Historique des commits'},
+    {c:'git log --oneline --graph --all',         d:'Historique visuel avec branches'},
+    {c:'git log --author="Alice"',                d:'Commits d\'un auteur'},
+    {c:'git log --since="2 weeks ago"',           d:'Commits récents'},
+    {c:'git log -p fichier.txt',                  d:'Historique d\'un fichier avec diffs'},
+    {c:'git log --follow fichier.txt',            d:'Historique avec renommages'},
+    {c:'git diff',                                d:'Diff des changements non stagés'},
+    {c:'git diff --staged',                       d:'Diff des changements stagés'},
+    {c:'git diff branche1..branche2',             d:'Diff entre deux branches'},
+    {c:'git show abc1234',                        d:'Détails d\'un commit'},
+    {c:'git blame fichier.txt',                   d:'Qui a modifié chaque ligne'},
+  ]},
+  {cat:'Remote / Sync', items:[
+    {c:'git remote -v',                           d:'Lister les dépôts distants'},
+    {c:'git remote add origin <url>',             d:'Ajouter un dépôt distant'},
+    {c:'git remote set-url origin <url>',         d:'Changer l\'URL du remote'},
+    {c:'git fetch',                               d:'Récupérer les changements sans merger'},
+    {c:'git fetch --prune',                       d:'Récupérer et nettoyer les branches supprimées'},
+    {c:'git pull',                                d:'Fetch + merge (ou rebase selon config)'},
+    {c:'git pull --rebase',                       d:'Fetch + rebase'},
+    {c:'git push origin ma-branche',              d:'Pousser une branche'},
+    {c:'git push -u origin ma-branche',           d:'Pousser et définir l\'upstream'},
+    {c:'git push origin --delete ma-branche',     d:'Supprimer une branche distante'},
+    {c:'git push --force-with-lease',             d:'Force push sécurisé'},
+  ]},
+  {cat:'Stash', items:[
+    {c:'git stash',                               d:'Mettre les changements de côté'},
+    {c:'git stash push -m "description"',         d:'Stash avec un nom'},
+    {c:'git stash list',                          d:'Lister les stashs'},
+    {c:'git stash pop',                           d:'Appliquer le dernier stash et le supprimer'},
+    {c:'git stash apply stash@{2}',               d:'Appliquer un stash spécifique sans le supprimer'},
+    {c:'git stash drop stash@{0}',                d:'Supprimer un stash spécifique'},
+    {c:'git stash clear',                         d:'Supprimer tous les stashs'},
+    {c:'git stash branch nouvelle-branche',       d:'Créer une branche depuis un stash'},
+  ]},
+  {cat:'Tags', items:[
+    {c:'git tag',                                 d:'Lister les tags'},
+    {c:'git tag v1.0.0',                          d:'Créer un tag léger'},
+    {c:'git tag -a v1.0.0 -m "Release 1.0"',      d:'Créer un tag annoté'},
+    {c:'git push origin v1.0.0',                  d:'Pousser un tag'},
+    {c:'git push origin --tags',                  d:'Pousser tous les tags'},
+    {c:'git tag -d v1.0.0',                       d:'Supprimer un tag local'},
+    {c:'git push origin --delete v1.0.0',         d:'Supprimer un tag distant'},
+  ]},
+  {cat:'Annulation / Reset', items:[
+    {c:'git revert HEAD',                         d:'Annuler le dernier commit (crée un nouveau commit)'},
+    {c:'git revert abc1234',                      d:'Annuler un commit spécifique'},
+    {c:'git reset --soft HEAD~1',                 d:'Défaire le dernier commit, garder les fichiers stagés'},
+    {c:'git reset --mixed HEAD~1',                d:'Défaire le commit, fichiers non stagés'},
+    {c:'git reset --hard HEAD~1',                 d:'Défaire le commit et les changements (DESTRUCTIF)'},
+    {c:'git clean -fd',                           d:'Supprimer les fichiers non suivis'},
+    {c:'git reflog',                              d:'Historique complet des références (récupération)'},
+  ]},
+];
+
+const cats=[...new Set(DATA.map(s=>s.cat))];
+const cf=document.getElementById('cat-filters');
+let activeCat=null;
+
+const all=document.createElement('button'); all.className='cat-btn active'; all.textContent='Tout';
+all.onclick=()=>{ activeCat=null; document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active')); all.classList.add('active'); filter(); };
+cf.appendChild(all);
+
+cats.forEach(c=>{
+  const b=document.createElement('button'); b.className='cat-btn'; b.textContent=c;
+  b.onclick=()=>{ activeCat=c; document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); filter(); };
+  cf.appendChild(b);
+});
+
+const content=document.getElementById('content');
+DATA.forEach(sec=>{
+  const div=document.createElement('div'); div.className=`cat-section`; div.dataset.cat=sec.cat;
+  div.innerHTML=`<div class="section-title">${sec.cat}</div><div class="cmd-grid"></div>`;
+  const grid=div.querySelector('.cmd-grid');
+  sec.items.forEach(item=>{
+    const card=document.createElement('div'); card.className='cmd-card'; card.dataset.search=(item.c+' '+item.d).toLowerCase();
+    card.innerHTML=`<div class="cmd-line">${item.c}</div><div class="cmd-desc">${item.d}</div>`;
+    card.onclick=()=>{ navigator.clipboard.writeText(item.c); const t=document.getElementById('toast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); };
+    grid.appendChild(card);
+  });
+  content.appendChild(div);
+});
+
+function filter(){
+  const q=document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.cat-section').forEach(sec=>{
+    const catMatch=!activeCat||sec.dataset.cat===activeCat;
+    let visible=false;
+    sec.querySelectorAll('.cmd-card').forEach(card=>{
+      const match=(!q||card.dataset.search.includes(q))&&catMatch;
+      card.classList.toggle('hidden',!match);
+      if(match) visible=true;
+    });
+    sec.classList.toggle('hidden',!visible);
+  });
+}
+</script>
+</body>
+</html>

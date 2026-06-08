@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!-- KQL / Lucene Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KQL / Lucene Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:800px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .cond-row{display:flex;gap:.4rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;}
+    .cond-row input{flex:1;min-width:100px;}
+    .cond-row select{flex:0 0 90px;}
+    .logic-row{display:flex;gap:.4rem;align-items:center;margin:.5rem 0;padding:.3rem 0;}
+    .logic-row select{flex:0 0 80px;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.9rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--accent);}
+    .tabs{display:flex;gap:.3rem;margin-bottom:1.25rem;}
+    .tab{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;cursor:pointer;transition:all var(--transition);}
+    .tab.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+    .presets{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+    .ref-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+    .ref-table td{padding:.3rem .5rem;border-bottom:1px solid var(--border);}
+    .ref-table td:first-child{font-family:var(--font-mono);color:var(--accent2);}
+    .ref-table td:last-child{color:var(--text-secondary);}
+    .time-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>KQL / Lucene Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-kql" onclick="setMode('kql',this)">KQL (Kibana)</button>
+    <button class="tab" id="tab-lucene" onclick="setMode('lucene',this)">Lucene</button>
+  </div>
+
+  <p class="section-title">Modèles</p>
+  <div class="presets" id="presets"></div>
+
+  <div class="layout">
+    <!-- Gauche : builder -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <div class="card">
+        <p class="section-title">Plage temporelle</p>
+        <div class="time-row">
+          <select class="select" id="time-field" onchange="build()">
+            <option value="@timestamp">@timestamp</option>
+            <option value="timestamp">timestamp</option>
+            <option value="event.created">event.created</option>
+          </select>
+          <select class="select" id="time-range" onchange="onTimeRange()">
+            <option value="">— Aucune —</option>
+            <option value="15m">15 dernières minutes</option>
+            <option value="1h" selected>Dernière heure</option>
+            <option value="24h">Dernières 24h</option>
+            <option value="7d">7 derniers jours</option>
+            <option value="30d">30 derniers jours</option>
+            <option value="custom">Personnalisée</option>
+          </select>
+        </div>
+        <div id="time-custom" style="display:none;margin-top:.6rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+            <div><label>Depuis</label><input class="input" id="time-from" type="datetime-local" oninput="build()"></div>
+            <div><label>Jusqu'à</label><input class="input" id="time-to" type="datetime-local" oninput="build()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Conditions</p>
+        <div id="conditions"></div>
+        <button class="btn btn--secondary btn--sm" onclick="addCond()">+ Condition</button>
+      </div>
+
+    </div>
+
+    <!-- Droite : output + ref -->
+    <div>
+      <p class="section-title">Requête générée</p>
+      <div class="output-box" style="margin-bottom:1.25rem;">
+        <div class="output-header">
+          <span id="mode-label">KQL</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyQuery()">Copier</button>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Référence syntaxe KQL</p>
+        <table class="ref-table">
+          <tr><td>field:value</td><td>Égalité exacte</td></tr>
+          <tr><td>field:"phrase complète"</td><td>Phrase exacte</td></tr>
+          <tr><td>field:val*</td><td>Wildcard</td></tr>
+          <tr><td>field >= 100</td><td>Comparaison numérique</td></tr>
+          <tr><td>field:[100 TO 200]</td><td>Plage inclusive</td></tr>
+          <tr><td>NOT field:val</td><td>Négation</td></tr>
+          <tr><td>field:(a OR b)</td><td>Alternatives sur un champ</td></tr>
+          <tr><td>field:*</td><td>Champ existe</td></tr>
+          <tr><td>_exists_:field</td><td>Lucene — champ existe</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let mode='kql';
+
+const PRESETS=[
+  {l:'Erreurs HTTP 5xx',  c:()=>{ addCondVal('http.response.status_code','>=','500'); }},
+  {l:'Logs ERROR',        c:()=>{ addCondVal('log.level','=','error'); }},
+  {l:'IP source spécifique',c:()=>{ addCondVal('source.ip','=','1.2.3.4'); }},
+  {l:'Hôte spécifique',   c:()=>{ addCondVal('host.name','=','srv-prod-01'); }},
+  {l:'User agent curl',   c:()=>{ addCondVal('user_agent.original','contains','curl'); }},
+];
+
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mode-label').textContent=m==='kql'?'KQL':'Lucene';
+  build();
+}
+
+function onTimeRange(){
+  const v=document.getElementById('time-range').value;
+  document.getElementById('time-custom').style.display=v==='custom'?'':'none';
+  build();
+}
+
+function addCond(field='',op='=',val='',logic='AND'){
+  const c=document.getElementById('conditions');
+  if(c.children.length>0){
+    const lr=document.createElement('div'); lr.className='logic-row';
+    lr.innerHTML=`<select class="select" style="flex:0 0 90px" onchange="build()"><option ${logic==='AND'?'selected':''}>AND</option><option ${logic==='OR'?'selected':''}>OR</option><option ${logic==='NOT'?'selected':''}>NOT</option></select><span style="font-size:.75rem;color:var(--text-muted)">opérateur logique</span>`;
+    c.appendChild(lr);
+  }
+  const row=document.createElement('div'); row.className='cond-row';
+  row.innerHTML=`<input class="input" placeholder="Champ (ex: log.level)" value="${field}" oninput="build()">
+    <select class="select" style="flex:0 0 110px" onchange="onOpChange(this)">
+      <option ${op==='='?'selected':''} value="=">=  (égal)</option>
+      <option ${op==='!='?'selected':''} value="!=">!= (différent)</option>
+      <option ${op==='>='?'selected':''} value=">=">&gt;= (supérieur)</option>
+      <option ${op==='<='?'selected':''} value="<=">&lt;= (inférieur)</option>
+      <option ${op==='contains'?'selected':''} value="contains">contient</option>
+      <option ${op==='wildcard'?'selected':''} value="wildcard">wildcard *</option>
+      <option ${op==='exists'?'selected':''} value="exists">existe</option>
+      <option ${op==='range'?'selected':''} value="range">plage [a TO b]</option>
+    </select>
+    <input class="input" placeholder="valeur" value="${val}" oninput="build()" ${op==='exists'?'style="display:none"':''}>
+    <input class="input" placeholder="à" style="display:${op==='range'?'':'none'}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="removeCond(this)">✕</button>`;
+  c.appendChild(row); build();
+}
+
+function addCondVal(f,op,v){ document.getElementById('conditions').innerHTML=''; addCond(f,op,v); }
+
+function onOpChange(sel){
+  const row=sel.closest('.cond-row');
+  const inputs=row.querySelectorAll('input');
+  const isExists=sel.value==='exists';
+  const isRange=sel.value==='range';
+  inputs[0].style.display=isExists?'none':'';
+  if(inputs[1]) inputs[1].style.display=isRange?'':'none';
+  build();
+}
+
+function removeCond(btn){
+  const row=btn.closest('.cond-row');
+  const prev=row.previousElementSibling;
+  if(prev&&prev.className==='logic-row') prev.remove();
+  else { const next=row.nextElementSibling; if(next&&next.className==='logic-row') next.remove(); }
+  row.remove(); build();
+}
+
+function buildCondExpr(field,op,val,val2){
+  if(!field) return null;
+  if(op==='exists') return mode==='kql'?`${field}:*`:`_exists_:${field}`;
+  if(op==='=')       return mode==='kql'?`${field}:${quoteIfNeeded(val)}`:`${field}:"${val}"`;
+  if(op==='!=')      return mode==='kql'?`NOT ${field}:${quoteIfNeeded(val)}`:`-${field}:"${val}"`;
+  if(op==='>=')      return mode==='kql'?`${field} >= ${val}`:`${field}:[${val} TO *]`;
+  if(op==='<=')      return mode==='kql'?`${field} <= ${val}`:`${field}:[* TO ${val}]`;
+  if(op==='contains')return mode==='kql'?`${field}:*${val}*`:`${field}:*${val}*`;
+  if(op==='wildcard')return `${field}:${val}`;
+  if(op==='range')   return `${field}:[${val} TO ${val2||'*'}]`;
+  return `${field}:${val}`;
+}
+
+function quoteIfNeeded(v){
+  return /\s/.test(v)?`"${v}"`:v;
+}
+
+function buildTimeFilter(){
+  const tf=document.getElementById('time-field').value;
+  const tr=document.getElementById('time-range').value;
+  if(!tr||tr==='custom'){
+    const from=document.getElementById('time-from')?.value;
+    const to=document.getElementById('time-to')?.value;
+    if(from&&to) return mode==='kql'?`${tf} >= "${from}" AND ${tf} <= "${to}"`:`${tf}:[${from} TO ${to}]`;
+    return null;
+  }
+  const map={'15m':'now-15m','1h':'now-1h','24h':'now-24h','7d':'now-7d','30d':'now-30d'};
+  return mode==='kql'?`${tf} >= "${map[tr]}"`:`${tf}:[${map[tr]} TO now]`;
+}
+
+function build(){
+  const c=document.getElementById('conditions');
+  const parts=[];
+  let pendingLogic=null;
+
+  for(const el of c.children){
+    if(el.className==='logic-row'){
+      pendingLogic=el.querySelector('select').value;
+    } else if(el.className==='cond-row'){
+      const inputs=[...el.querySelectorAll('input')];
+      const sel=el.querySelector('select');
+      const field=inputs[0]?.value;
+      const op=sel?.value||'=';
+      const val=inputs[1]?.value||'';
+      const val2=inputs[2]?.value||'';
+      const expr=buildCondExpr(field,op,val,val2);
+      if(expr){
+        if(pendingLogic==='NOT') parts.push(`NOT ${expr}`);
+        else if(pendingLogic) parts.push(`${pendingLogic} ${expr}`);
+        else parts.push(expr);
+      }
+      pendingLogic=null;
+    }
+  }
+
+  const timePart=buildTimeFilter();
+  let query='';
+  if(timePart&&parts.length) query=`(${timePart}) AND (${parts.join(' ')})`;
+  else if(timePart) query=timePart;
+  else query=parts.join(' ')||'*';
+
+  document.getElementById('output').textContent=query;
+}
+
+function copyQuery(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+const pe=document.getElementById('presets');
+PRESETS.forEach(p=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=p.l; b.onclick=()=>{ document.getElementById('conditions').innerHTML=''; p.c(); build(); }; pe.appendChild(b); });
+
+addCond('log.level','=','error');
+</script>
+</body>
+</html>
