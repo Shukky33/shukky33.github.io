@@ -11,25 +11,38 @@
     .tool-header h1{font-size:1.5rem;flex:1;}
     .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
     @media(max-width:850px){.layout{grid-template-columns:1fr;}}
-    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.4rem;}
+    .help{font-size:.78rem;color:var(--text-muted);margin-bottom:.6rem;line-height:1.5;}
+    .help strong{color:var(--text-secondary);}
     .url-row{display:flex;gap:.5rem;align-items:stretch;}
     .url-row select{flex:0 0 110px;}
     .url-row input{flex:1;}
     .kv-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem;}
     .kv-row{display:flex;gap:.4rem;align-items:center;}
     .kv-row input{flex:1;}
-    .kv-row button{flex:0 0 auto;}
     .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
     .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
     .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
     .output-pre{font-family:var(--font-mono);font-size:.875rem;padding:1rem;overflow-x:auto;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--text-primary);}
-    .opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;}
-    .opt-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;}
-    .opt-label input{width:16px;height:16px;accent-color:var(--accent);}
+    .opts-grid{display:flex;flex-direction:column;gap:.4rem;}
+    .opt-label{display:flex;align-items:flex-start;gap:.6rem;font-size:.85rem;cursor:pointer;padding:.3rem 0;}
+    .opt-label input{width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;margin-top:2px;}
+    .opt-label-text{display:flex;flex-direction:column;gap:.15rem;}
+    .opt-label-text strong{font-family:var(--font-mono);font-size:.82rem;color:var(--text-primary);}
+    .opt-label-text span{font-size:.75rem;color:var(--text-muted);}
     .tabs{display:flex;gap:.3rem;margin-bottom:.75rem;}
     .tab{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;cursor:pointer;transition:all var(--transition);}
     .tab.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
     .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+    .method-badge{display:inline-block;padding:.15rem .5rem;border-radius:3px;font-size:.7rem;font-weight:700;font-family:var(--font-mono);}
+    .method-row{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem;}
+    .method-btn{padding:.3rem .7rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-input);font-family:var(--font-mono);font-size:.78rem;cursor:pointer;transition:all var(--transition);}
+    .method-btn.active,.method-btn:hover{border-color:var(--accent);}
+    .method-btn[data-m="GET"].active{background:#1a3a2a;border-color:var(--success);color:var(--success);}
+    .method-btn[data-m="POST"].active{background:#1f2d4a;border-color:var(--accent);color:var(--accent);}
+    .method-btn[data-m="PUT"].active,.method-btn[data-m="PATCH"].active{background:#2d2009;border-color:var(--warning);color:var(--warning);}
+    .method-btn[data-m="DELETE"].active{background:#2d1010;border-color:var(--danger);color:var(--danger);}
+    .section-card{padding:1rem;margin-bottom:1rem;}
   </style>
 </head>
 <body>
@@ -37,47 +50,47 @@
   <header class="tool-header">
     <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
     <h1>curl Builder</h1>
-    <span class="badge badge--version">v1.0.0</span>
+    <span class="badge badge--version">v1.1.0</span>
   </header>
 
   <div class="layout">
     <!-- Gauche : formulaire -->
-    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+    <div style="display:flex;flex-direction:column;gap:1rem;">
 
-      <!-- Méthode + URL -->
-      <div>
-        <p class="section-title">URL</p>
-        <div class="url-row">
-          <select class="select" id="method" onchange="build()">
-            <option>GET</option><option>POST</option><option>PUT</option>
-            <option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option>
-          </select>
-          <input class="input" id="url" type="text" placeholder="https://api.exemple.com/endpoint" oninput="build()">
-        </div>
+      <!-- Méthode -->
+      <div class="card section-card">
+        <p class="section-title">Méthode HTTP</p>
+        <p class="help"><strong>GET</strong> = lire · <strong>POST</strong> = créer · <strong>PUT</strong> = remplacer · <strong>PATCH</strong> = modifier partiellement · <strong>DELETE</strong> = supprimer · <strong>HEAD</strong> = headers uniquement (sans body)</p>
+        <div class="method-row" id="method-row"></div>
+        <input class="input" id="url" type="text" placeholder="https://api.exemple.com/v1/endpoint" oninput="build()">
+        <p class="help" style="margin-top:.4rem">L'URL complète incluant le protocole. Ajoutez les query params directement : <code>?key=val&key2=val2</code></p>
       </div>
 
       <!-- Headers -->
-      <div>
-        <p class="section-title">Headers</p>
+      <div class="card section-card">
+        <p class="section-title">Headers (-H)</p>
+        <p class="help">Les headers transmettent des métadonnées avec la requête. <strong>Content-Type</strong> décrit le format du body. <strong>Accept</strong> précise le format attendu en retour. <strong>Authorization</strong> transporte le token d'auth.</p>
         <div class="kv-list" id="headers-list"></div>
-        <button class="btn btn--secondary btn--sm" onclick="addHeader()">+ Ajouter un header</button>
+        <button class="btn btn--secondary btn--sm" onclick="addHeader()">+ Header</button>
       </div>
 
       <!-- Auth -->
-      <div>
+      <div class="card section-card">
         <p class="section-title">Authentification</p>
+        <p class="help"><strong>Basic</strong> = base64(user:pass) — non chiffré, à utiliser uniquement en HTTPS. <strong>Bearer</strong> = token OAuth2/JWT dans <code>Authorization: Bearer &lt;token&gt;</code>. <strong>API Key</strong> = clé arbitraire dans un header personnalisé.</p>
         <select class="select" id="auth-type" onchange="onAuthType()">
           <option value="none">Aucune</option>
-          <option value="basic">Basic (user:pass)</option>
-          <option value="bearer">Bearer token</option>
-          <option value="apikey">API Key (header)</option>
+          <option value="basic">Basic (utilisateur:mot de passe)</option>
+          <option value="bearer">Bearer token (OAuth2 / JWT)</option>
+          <option value="apikey">API Key dans un header</option>
         </select>
         <div id="auth-fields" style="margin-top:.6rem"></div>
       </div>
 
       <!-- Body -->
-      <div id="body-section">
+      <div class="card section-card">
         <p class="section-title">Corps (body)</p>
+        <p class="help">Le body transporte les données à envoyer. Utilisé avec POST, PUT, PATCH. <strong>JSON</strong> ajoute automatiquement <code>Content-Type: application/json</code>. <strong>Form</strong> envoie les données comme un formulaire HTML.</p>
         <div class="tabs">
           <button class="tab active" onclick="setBodyType('none',this)">Aucun</button>
           <button class="tab" onclick="setBodyType('json',this)">JSON</button>
@@ -88,15 +101,45 @@
       </div>
 
       <!-- Options -->
-      <div>
+      <div class="card section-card">
         <p class="section-title">Options</p>
         <div class="opts-grid">
-          <label class="opt-label"><input type="checkbox" id="opt-k" onchange="build()"> -k (ignore SSL)</label>
-          <label class="opt-label"><input type="checkbox" id="opt-v" onchange="build()"> -v (verbose)</label>
-          <label class="opt-label"><input type="checkbox" id="opt-L" onchange="build()"> -L (suivre redirects)</label>
-          <label class="opt-label"><input type="checkbox" id="opt-s" onchange="build()"> -s (silencieux)</label>
-          <label class="opt-label"><input type="checkbox" id="opt-compressed" onchange="build()"> --compressed</label>
-          <label class="opt-label"><input type="checkbox" id="opt-include" onchange="build()"> -i (inclure headers réponse)</label>
+          <label class="opt-label"><input type="checkbox" id="opt-k" onchange="build()">
+            <span class="opt-label-text"><strong>-k / --insecure</strong><span>Ignorer les erreurs de certificat SSL/TLS. Utile pour les environnements de test avec certificats auto-signés. ⚠️ Ne jamais utiliser en production.</span></span>
+          </label>
+          <label class="opt-label"><input type="checkbox" id="opt-v" onchange="build()">
+            <span class="opt-label-text"><strong>-v / --verbose</strong><span>Affiche les headers envoyés/reçus, la négociation TLS et les détails de connexion. Indispensable pour déboguer.</span></span>
+          </label>
+          <label class="opt-label"><input type="checkbox" id="opt-L" onchange="build()">
+            <span class="opt-label-text"><strong>-L / --location</strong><span>Suit automatiquement les redirections HTTP (301, 302, 307). Désactivé par défaut.</span></span>
+          </label>
+          <label class="opt-label"><input type="checkbox" id="opt-s" onchange="build()">
+            <span class="opt-label-text"><strong>-s / --silent</strong><span>Supprime la barre de progression et les messages d'erreur. Utile dans les scripts pour ne garder que le body.</span></span>
+          </label>
+          <label class="opt-label"><input type="checkbox" id="opt-compressed" onchange="build()">
+            <span class="opt-label-text"><strong>--compressed</strong><span>Demande une réponse compressée (gzip/deflate) et la décompresse automatiquement. Réduit la bande passante.</span></span>
+          </label>
+          <label class="opt-label"><input type="checkbox" id="opt-include" onchange="build()">
+            <span class="opt-label-text"><strong>-i / --include</strong><span>Inclut les headers HTTP de la réponse dans la sortie standard. Utile pour inspecter le status code et les headers retournés.</span></span>
+          </label>
+          <label class="opt-label"><input type="checkbox" id="opt-o" onchange="build()">
+            <span class="opt-label-text"><strong>-o &lt;fichier&gt;</strong><span>Écrit la réponse dans un fichier plutôt que sur stdout. Pratique pour télécharger des fichiers.</span></span>
+          </label>
+          <div id="opt-o-file" style="display:none;padding-left:1.6rem;">
+            <input class="input" id="opt-o-path" placeholder="output.json" oninput="build()">
+          </div>
+          <label class="opt-label"><input type="checkbox" id="opt-max-time" onchange="toggleMaxTime()">
+            <span class="opt-label-text"><strong>--max-time &lt;secondes&gt;</strong><span>Timeout global de la requête. Si dépassé, curl abandonne et retourne une erreur.</span></span>
+          </label>
+          <div id="opt-max-time-val" style="display:none;padding-left:1.6rem;">
+            <input class="input" id="opt-timeout" type="number" value="30" min="1" placeholder="30" oninput="build()">
+          </div>
+          <label class="opt-label"><input type="checkbox" id="opt-retry" onchange="toggleRetry()">
+            <span class="opt-label-text"><strong>--retry &lt;n&gt;</strong><span>Nombre de tentatives automatiques en cas d'échec transitoire (timeout, 5xx). Attente exponentielle entre chaque essai.</span></span>
+          </label>
+          <div id="opt-retry-val" style="display:none;padding-left:1.6rem;">
+            <input class="input" id="opt-retry-n" type="number" value="3" min="1" placeholder="3" oninput="build()">
+          </div>
         </div>
       </div>
     </div>
@@ -104,133 +147,112 @@
     <!-- Droite : output -->
     <div>
       <p class="section-title">Commande générée</p>
-      <div class="output-box">
+      <div class="output-box" style="position:sticky;top:1rem;">
         <div class="output-header">
           <span>curl</span>
           <button class="btn btn--sm btn--secondary" onclick="copyCmd()">Copier</button>
         </div>
         <pre class="output-pre" id="output"></pre>
       </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <p class="section-title">Codes de retour curl</p>
+        <table style="width:100%;border-collapse:collapse;font-size:.78rem;">
+          <tr><td style="padding:.25rem .5rem;font-family:var(--font-mono);color:var(--success);">0</td><td style="padding:.25rem .5rem;color:var(--text-secondary);">Succès</td></tr>
+          <tr><td style="padding:.25rem .5rem;font-family:var(--font-mono);color:var(--warning);">6</td><td style="padding:.25rem .5rem;color:var(--text-secondary);">Hôte introuvable (DNS)</td></tr>
+          <tr><td style="padding:.25rem .5rem;font-family:var(--font-mono);color:var(--warning);">7</td><td style="padding:.25rem .5rem;color:var(--text-secondary);">Connexion refusée</td></tr>
+          <tr><td style="padding:.25rem .5rem;font-family:var(--font-mono);color:var(--warning);">22</td><td style="padding:.25rem .5rem;color:var(--text-secondary);">Erreur HTTP (4xx/5xx) — utilisez -f pour ça</td></tr>
+          <tr><td style="padding:.25rem .5rem;font-family:var(--font-mono);color:var(--warning);">28</td><td style="padding:.25rem .5rem;color:var(--text-secondary);">Timeout dépassé</td></tr>
+          <tr><td style="padding:.25rem .5rem;font-family:var(--font-mono);color:var(--danger);">60</td><td style="padding:.25rem .5rem;color:var(--text-secondary);">Certificat SSL invalide → utilisez -k en test</td></tr>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-let bodyType = 'none';
+const METHODS=['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS'];
+let bodyType='none';
+let activeMethod='GET';
+
+// Method buttons
+const mr=document.getElementById('method-row');
+METHODS.forEach(m=>{
+  const b=document.createElement('button'); b.className='method-btn'+(m==='GET'?' active':'');
+  b.dataset.m=m; b.textContent=m;
+  b.onclick=()=>{ activeMethod=m; document.querySelectorAll('.method-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); build(); };
+  mr.appendChild(b);
+});
 
 function addHeader(k='',v='') {
-  const list = document.getElementById('headers-list');
-  const row  = document.createElement('div');
-  row.className = 'kv-row';
-  row.innerHTML = `<input class="input" placeholder="Header" value="${k}" oninput="build()">
+  const list=document.getElementById('headers-list');
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="Header (ex: Accept)" value="${k}" oninput="build()" list="header-names">
     <input class="input" placeholder="Valeur" value="${v}" oninput="build()">
     <button class="btn btn--ghost btn--sm" onclick="this.parentElement.remove();build()">✕</button>`;
-  list.appendChild(row);
-  build();
+  list.appendChild(row); build();
 }
 
 function onAuthType() {
-  const t = document.getElementById('auth-type').value;
-  const f = document.getElementById('auth-fields');
-  if (t==='basic')   f.innerHTML = `<div class="auth-grid"><input class="input" id="auth-user" placeholder="Utilisateur" oninput="build()"><input class="input" id="auth-pass" placeholder="Mot de passe" type="password" oninput="build()"></div>`;
-  else if (t==='bearer') f.innerHTML = `<input class="input" id="auth-token" placeholder="Token JWT / OAuth" oninput="build()">`;
-  else if (t==='apikey') f.innerHTML = `<div class="auth-grid"><input class="input" id="auth-key-name" placeholder="Nom du header" value="X-API-Key" oninput="build()"><input class="input" id="auth-key-val" placeholder="Valeur" oninput="build()"></div>`;
-  else f.innerHTML = '';
+  const t=document.getElementById('auth-type').value;
+  const f=document.getElementById('auth-fields');
+  if(t==='basic') f.innerHTML=`<div class="auth-grid"><input class="input" id="auth-user" placeholder="Utilisateur" oninput="build()"><input class="input" id="auth-pass" placeholder="Mot de passe" type="password" oninput="build()"></div><p class="help" style="margin-top:.4rem">Transmis en <code>Authorization: Basic base64(user:pass)</code>. ⚠️ HTTPS obligatoire.</p>`;
+  else if(t==='bearer') f.innerHTML=`<input class="input" id="auth-token" placeholder="Votre token JWT ou OAuth2" oninput="build()"><p class="help" style="margin-top:.4rem">Injecté dans <code>Authorization: Bearer &lt;token&gt;</code>. Obtenu après login (POST /auth/login).</p>`;
+  else if(t==='apikey') f.innerHTML=`<div class="auth-grid"><input class="input" id="auth-key-name" placeholder="Nom du header" value="X-API-Key" oninput="build()"><input class="input" id="auth-key-val" placeholder="Valeur de la clé" oninput="build()"></div><p class="help" style="margin-top:.4rem">Certaines APIs utilisent <code>api-key</code>, <code>X-Auth-Token</code> ou d'autres noms. Vérifiez la doc de l'API.</p>`;
+  else f.innerHTML='';
   build();
 }
 
-function setBodyType(t, btn) {
-  bodyType = t;
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const bi = document.getElementById('body-input');
-  if (t==='json') bi.innerHTML = `<textarea class="input" id="body-content" rows="6" placeholder='{"key":"value"}' oninput="build()" spellcheck="false" style="font-family:var(--font-mono);font-size:.85rem"></textarea>`;
-  else if (t==='form') {
-    bi.innerHTML = `<div class="kv-list" id="form-list"></div><button class="btn btn--secondary btn--sm" onclick="addFormField()">+ Champ</button>`;
+function setBodyType(t,btn) {
+  bodyType=t;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  const bi=document.getElementById('body-input');
+  if(t==='json') bi.innerHTML=`<textarea class="input" id="body-content" rows="6" placeholder='{\n  "key": "value"\n}' oninput="build()" spellcheck="false" style="font-family:var(--font-mono);font-size:.82rem"></textarea><p class="help" style="margin-top:.4rem">Ajoute automatiquement <code>Content-Type: application/json</code>. Le JSON doit être valide.</p>`;
+  else if(t==='form'){
+    bi.innerHTML=`<div class="kv-list" id="form-list"></div><button class="btn btn--secondary btn--sm" onclick="addFormField()">+ Champ</button><p class="help" style="margin-top:.5rem">Équivalent à un formulaire HTML. Ajoute <code>Content-Type: application/x-www-form-urlencoded</code>. Les valeurs sont encodées automatiquement.</p>`;
     addFormField();
   }
-  else if (t==='raw') bi.innerHTML = `<textarea class="input" id="body-content" rows="6" placeholder="Contenu brut" oninput="build()" style="font-family:var(--font-mono);font-size:.85rem"></textarea>`;
+  else if(t==='raw') bi.innerHTML=`<textarea class="input" id="body-content" rows="5" placeholder="Contenu brut (XML, texte...)" oninput="build()" style="font-family:var(--font-mono);font-size:.82rem"></textarea><p class="help" style="margin-top:.4rem">Ajoutez manuellement un header <code>Content-Type</code> approprié (text/xml, text/plain...).</p>`;
   else bi.innerHTML='';
   build();
 }
 
-function addFormField() {
-  const list = document.getElementById('form-list');
-  const row = document.createElement('div'); row.className='kv-row';
-  row.innerHTML=`<input class="input" placeholder="nom" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.parentElement.remove();build()">✕</button>`;
-  list.appendChild(row); build();
-}
+function addFormField(){ const l=document.getElementById('form-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="nom" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.parentElement.remove();build()">✕</button>`; l.appendChild(r); build(); }
+
+function toggleMaxTime(){ document.getElementById('opt-max-time-val').style.display=document.getElementById('opt-max-time').checked?'':'none'; build(); }
+function toggleRetry(){ document.getElementById('opt-retry-val').style.display=document.getElementById('opt-retry').checked?'':'none'; build(); }
+function toggleOptO(){ document.getElementById('opt-o-file').style.display=document.getElementById('opt-o').checked?'':'none'; build(); }
+document.getElementById('opt-o').onchange=toggleOptO;
 
 function esc(s){ return s.replace(/'/g,"'\\''"); }
 
-function build() {
-  const method  = document.getElementById('method').value;
-  const url     = document.getElementById('url').value || 'https://api.exemple.com';
-  const authT   = document.getElementById('auth-type').value;
-  const parts   = ['curl'];
-
-  // Options
-  if (document.getElementById('opt-s')?.checked)          parts.push('-s');
-  if (document.getElementById('opt-v')?.checked)          parts.push('-v');
-  if (document.getElementById('opt-i')?.checked)          {}
-  if (document.getElementById('opt-include')?.checked)    parts.push('-i');
-  if (document.getElementById('opt-k')?.checked)          parts.push('-k');
-  if (document.getElementById('opt-L')?.checked)          parts.push('-L');
-  if (document.getElementById('opt-compressed')?.checked) parts.push('--compressed');
-
-  // Méthode
-  if (method !== 'GET') parts.push(`-X ${method}`);
-
-  // Auth
-  if (authT==='basic') {
-    const u=document.getElementById('auth-user')?.value||'user', p=document.getElementById('auth-pass')?.value||'pass';
-    parts.push(`-u '${esc(u)}:${esc(p)}'`);
-  } else if (authT==='bearer') {
-    const t=document.getElementById('auth-token')?.value||'TOKEN';
-    parts.push(`-H 'Authorization: Bearer ${esc(t)}'`);
-  } else if (authT==='apikey') {
-    const n=document.getElementById('auth-key-name')?.value||'X-API-Key', v=document.getElementById('auth-key-val')?.value||'KEY';
-    parts.push(`-H '${esc(n)}: ${esc(v)}'`);
-  }
-
-  // Headers
-  document.querySelectorAll('#headers-list .kv-row').forEach(r=>{
-    const [k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
-    if(k) parts.push(`-H '${esc(k)}: ${esc(v)}'`);
-  });
-
-  // Body
-  if (bodyType==='json') {
-    const body = document.getElementById('body-content')?.value||'{}';
-    parts.push(`-H 'Content-Type: application/json'`);
-    parts.push(`-d '${esc(body)}'`);
-  } else if (bodyType==='form') {
-    const pairs=[];
-    document.querySelectorAll('#form-list .kv-row').forEach(r=>{
-      const [k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
-      if(k) pairs.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
-    });
-    if(pairs.length) parts.push(`-d '${pairs.join('&')}'`);
-  } else if (bodyType==='raw') {
-    const body = document.getElementById('body-content')?.value||'';
-    if(body) parts.push(`-d '${esc(body)}'`);
-  }
-
-  // URL
+function build(){
+  const url=document.getElementById('url').value||'https://api.exemple.com/endpoint';
+  const authT=document.getElementById('auth-type').value;
+  const parts=['curl'];
+  if(document.getElementById('opt-s')?.checked)         parts.push('-s');
+  if(document.getElementById('opt-v')?.checked)         parts.push('-v');
+  if(document.getElementById('opt-include')?.checked)   parts.push('-i');
+  if(document.getElementById('opt-k')?.checked)         parts.push('-k');
+  if(document.getElementById('opt-L')?.checked)         parts.push('-L');
+  if(document.getElementById('opt-compressed')?.checked)parts.push('--compressed');
+  if(document.getElementById('opt-o')?.checked){ const p=document.getElementById('opt-o-path')?.value||'output.json'; parts.push(`-o '${esc(p)}'`); }
+  if(document.getElementById('opt-max-time')?.checked){ const t=document.getElementById('opt-timeout')?.value||'30'; parts.push(`--max-time ${t}`); }
+  if(document.getElementById('opt-retry')?.checked){ const n=document.getElementById('opt-retry-n')?.value||'3'; parts.push(`--retry ${n} --retry-delay 2`); }
+  if(activeMethod!=='GET') parts.push(`-X ${activeMethod}`);
+  if(authT==='basic'){ const u=document.getElementById('auth-user')?.value||'user',p=document.getElementById('auth-pass')?.value||'pass'; parts.push(`-u '${esc(u)}:${esc(p)}'`); }
+  else if(authT==='bearer'){ const t=document.getElementById('auth-token')?.value||'TOKEN'; parts.push(`-H 'Authorization: Bearer ${esc(t)}'`); }
+  else if(authT==='apikey'){ const n=document.getElementById('auth-key-name')?.value||'X-API-Key',v=document.getElementById('auth-key-val')?.value||'KEY'; parts.push(`-H '${esc(n)}: ${esc(v)}'`); }
+  document.querySelectorAll('#headers-list .kv-row').forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k) parts.push(`-H '${esc(k)}: ${esc(v)}'`); });
+  if(bodyType==='json'){ const body=document.getElementById('body-content')?.value||'{}'; parts.push(`-H 'Content-Type: application/json'`); parts.push(`-d '${esc(body)}'`); }
+  else if(bodyType==='form'){ const pairs=[]; document.querySelectorAll('#form-list .kv-row').forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k) pairs.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`); }); if(pairs.length) parts.push(`-d '${pairs.join('&')}'`); }
+  else if(bodyType==='raw'){ const body=document.getElementById('body-content')?.value||''; if(body) parts.push(`-d '${esc(body)}'`); }
   parts.push(`'${esc(url)}'`);
-
-  // Format multi-ligne
-  const cmd = parts.join(' \\\n  ');
-  document.getElementById('output').textContent = cmd;
+  document.getElementById('output').textContent=parts.join(' \\\n  ');
 }
 
-function copyCmd(){
-  navigator.clipboard.writeText(document.getElementById('output').textContent);
-  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
-  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
-}
+function copyCmd(){ navigator.clipboard.writeText(document.getElementById('output').textContent); const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary'); setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500); }
 
-// Init
 addHeader('Accept','application/json');
 build();
 </script>

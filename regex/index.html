@@ -11,30 +11,44 @@
     .tool-header h1{font-size:1.5rem;flex:1;}
     .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
     @media(max-width:800px){.layout{grid-template-columns:1fr;}}
-    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem;}
+
+    /* NL section */
+    .nl-section{margin-bottom:1.5rem;}
+    .nl-input-row{display:flex;gap:.5rem;align-items:center;}
+    .nl-input-row input{flex:1;}
+    .nl-suggestions{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.4rem;margin-top:.6rem;max-height:220px;overflow-y:auto;}
+    .nl-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);}
+    .nl-card:hover{border-color:var(--accent);background:var(--bg-card-hover);}
+    .nl-card strong{display:block;font-size:.82rem;color:var(--text-primary);margin-bottom:.15rem;}
+    .nl-card code{font-size:.72rem;color:var(--accent2);font-family:var(--font-mono);word-break:break-all;}
+
+    /* Regex input */
     .regex-input-row{display:flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;transition:border-color var(--transition);}
     .regex-input-row:focus-within{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(88,166,255,.15);}
     .regex-delim{padding:.55rem .5rem;color:var(--text-muted);font-family:var(--font-mono);font-size:1.1rem;user-select:none;}
-    .regex-field{flex:1;padding:.55rem .4rem;background:transparent;border:none;color:var(--text-primary);font-family:var(--font-mono);font-size:.95rem;outline:none;}
-    .flags-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem;}
-    .flag-btn{padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-family:var(--font-mono);font-size:.8rem;cursor:pointer;transition:all var(--transition);}
+    .regex-field{flex:1;padding:.55rem .3rem;background:transparent;border:none;color:var(--text-primary);font-family:var(--font-mono);font-size:.95rem;outline:none;}
+    .flags-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem;}
+    .flag-btn{padding:.2rem .55rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-family:var(--font-mono);font-size:.78rem;cursor:pointer;transition:all var(--transition);}
     .flag-btn.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
-    .quick-btns{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.75rem;}
-    .quick-btn{padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-secondary);font-size:.78rem;cursor:pointer;transition:all var(--transition);font-family:var(--font-mono);}
-    .quick-btn:hover{border-color:var(--accent);color:var(--text-primary);}
-    .test-textarea{width:100%;min-height:180px;resize:vertical;}
-    .highlight-area{min-height:180px;padding:.55rem .85rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:.875rem;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:var(--text-primary);overflow:auto;}
+    .error-msg{color:var(--danger);font-size:.82rem;margin-top:.4rem;font-family:var(--font-mono);}
+
+    /* Test area */
+    .test-textarea{min-height:160px;resize:vertical;font-family:var(--font-mono);font-size:.85rem;}
+    .highlight-area{min-height:160px;padding:.55rem .85rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:.85rem;line-height:1.7;white-space:pre-wrap;word-break:break-all;color:var(--text-primary);overflow:auto;}
     .highlight-area mark{background:rgba(57,208,216,.35);color:inherit;border-radius:2px;padding:0 1px;}
-    .highlight-area mark.match-first{background:rgba(88,166,255,.5);}
-    .stats-row{display:flex;gap:1rem;margin-top:.75rem;flex-wrap:wrap;}
-    .stat-pill{padding:.2rem .7rem;border-radius:999px;font-size:.78rem;background:var(--bg-input);border:1px solid var(--border);}
+    .highlight-area mark.first{background:rgba(88,166,255,.55);}
+    .stats-row{display:flex;gap:.75rem;margin-top:.6rem;flex-wrap:wrap;}
+    .stat-pill{padding:.2rem .65rem;border-radius:999px;font-size:.78rem;background:var(--bg-input);border:1px solid var(--border);}
     .stat-pill span{color:var(--accent);font-weight:700;}
-    .match-list{margin-top:.75rem;max-height:200px;overflow-y:auto;}
-    .match-item{font-family:var(--font-mono);font-size:.8rem;padding:.3rem .6rem;border-radius:var(--radius-sm);background:var(--bg-input);margin-bottom:.3rem;display:flex;gap:.75rem;align-items:center;}
+    .match-list{margin-top:.6rem;max-height:180px;overflow-y:auto;}
+    .match-item{font-family:var(--font-mono);font-size:.78rem;padding:.3rem .6rem;border-radius:var(--radius-sm);background:var(--bg-input);margin-bottom:.25rem;display:flex;gap:.75rem;align-items:center;}
     .match-idx{color:var(--text-muted);min-width:2rem;}
-    .match-val{color:var(--accent2);}
-    .match-pos{color:var(--text-muted);margin-left:auto;}
-    .error-msg{color:var(--danger);font-size:.85rem;margin-top:.5rem;font-family:var(--font-mono);}
+    .match-val{color:var(--accent2);flex:1;word-break:break-all;}
+    .match-pos{color:var(--text-muted);white-space:nowrap;}
+    .tabs{display:flex;gap:.3rem;margin-bottom:1rem;}
+    .tab{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;cursor:pointer;transition:all var(--transition);}
+    .tab.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
   </style>
 </head>
 <body>
@@ -42,123 +56,224 @@
   <header class="tool-header">
     <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
     <h1>Regex Tester</h1>
-    <span class="badge badge--version">v1.0.0</span>
+    <span class="badge badge--version">v1.1.0</span>
   </header>
 
-  <div class="layout">
-    <!-- Colonne gauche : expression -->
-    <div>
-      <p class="section-title">Expression régulière</p>
-      <div class="regex-input-row">
-        <span class="regex-delim">/</span>
-        <input class="regex-field" id="regex-input" type="text" placeholder="[a-z]+" oninput="run()" spellcheck="false" autocomplete="off">
-        <span class="regex-delim">/</span>
-      </div>
-      <div id="error-msg" class="error-msg"></div>
-
-      <div class="flags-row">
-        <span style="font-size:.75rem;color:var(--text-secondary);align-self:center;">Flags :</span>
-        <button class="flag-btn active" data-flag="g" onclick="toggleFlag(this)">g — global</button>
-        <button class="flag-btn" data-flag="i" onclick="toggleFlag(this)">i — insensible</button>
-        <button class="flag-btn" data-flag="m" onclick="toggleFlag(this)">m — multiline</button>
-        <button class="flag-btn" data-flag="s" onclick="toggleFlag(this)">s — dotAll</button>
-      </div>
-
-      <p class="section-title mt-lg">Raccourcis</p>
-      <div class="quick-btns" id="quick-btns"></div>
+  <!-- NL to Regex -->
+  <div class="card nl-section">
+    <p class="section-title">Décrire ce que je veux matcher (en français)</p>
+    <div class="nl-input-row">
+      <input class="input" id="nl-search" type="text" placeholder="ex: adresse email, numéro IPv4, date, mot de passe fort…" oninput="searchNL()">
+      <button class="btn btn--ghost btn--sm" onclick="document.getElementById('nl-search').value='';searchNL()">✕</button>
     </div>
-
-    <!-- Colonne droite : texte de test -->
-    <div>
-      <p class="section-title">Texte de test</p>
-      <textarea class="input test-textarea" id="test-input" placeholder="Entrez le texte à tester ici..." oninput="run()" spellcheck="false"></textarea>
-    </div>
+    <div class="nl-suggestions" id="nl-suggestions"></div>
   </div>
 
-  <!-- Résultats -->
-  <div class="mt-lg">
-    <p class="section-title">Correspondances</p>
-    <div class="stats-row">
-      <div class="stat-pill">Matchs : <span id="count-matches">0</span></div>
-      <div class="stat-pill">Groupes : <span id="count-groups">0</span></div>
+  <div class="layout">
+    <!-- Gauche : regex + flags -->
+    <div>
+      <div class="tabs">
+        <button class="tab active" id="tab-test" onclick="setTab('test',this)">Tester</button>
+        <button class="tab" id="tab-ref" onclick="setTab('ref',this)">Référence syntaxe</button>
+      </div>
+
+      <div id="panel-test">
+        <p class="section-title">Expression régulière</p>
+        <div class="regex-input-row">
+          <span class="regex-delim">/</span>
+          <input class="regex-field" id="regex-input" type="text" placeholder="[a-z]+" oninput="run()" spellcheck="false" autocomplete="off">
+          <span class="regex-delim">/</span>
+        </div>
+        <div id="error-msg" class="error-msg"></div>
+        <div class="flags-row">
+          <span style="font-size:.75rem;color:var(--text-secondary);align-self:center;">Flags :</span>
+          <button class="flag-btn active" data-flag="g" onclick="toggleFlag(this)">g — global</button>
+          <button class="flag-btn" data-flag="i" onclick="toggleFlag(this)">i — insensible casse</button>
+          <button class="flag-btn" data-flag="m" onclick="toggleFlag(this)">m — multiline (^/$ par ligne)</button>
+          <button class="flag-btn" data-flag="s" onclick="toggleFlag(this)">s — dot matche \n</button>
+        </div>
+
+        <p class="section-title mt-lg">Texte de test</p>
+        <textarea class="input test-textarea" id="test-input" oninput="run()" spellcheck="false" placeholder="Collez ici le texte à analyser…"></textarea>
+      </div>
+
+      <div id="panel-ref" style="display:none;">
+        <div id="ref-content"></div>
+      </div>
     </div>
-    <div class="highlight-area mt-md" id="highlight-area"></div>
-    <div class="match-list" id="match-list"></div>
+
+    <!-- Droite : résultats -->
+    <div>
+      <p class="section-title">Correspondances en surbrillance</p>
+      <div class="highlight-area" id="highlight-area"></div>
+      <div class="stats-row">
+        <div class="stat-pill">Matchs : <span id="count-matches">0</span></div>
+        <div class="stat-pill">Groupes capturants : <span id="count-groups">0</span></div>
+        <div class="stat-pill">Position : <span id="cursor-pos">—</span></div>
+      </div>
+      <div class="match-list" id="match-list"></div>
+    </div>
   </div>
 </div>
 
 <script>
-const QUICK = [
-  {l:'Email',       p:'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}'},
-  {l:'IPv4',        p:'\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b'},
-  {l:'IPv6 (abrégé)',p:'[0-9a-fA-F]{1,4}(:[0-9a-fA-F]{0,4}){2,7}'},
-  {l:'Hostname',    p:'(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}'},
-  {l:'URL',         p:'https?:\\/\\/[^\\s/$.?#].[^\\s]*'},
-  {l:'Date JJ/MM/AAAA',p:'\\b\\d{2}\\/\\d{2}\\/\\d{4}\\b'},
-  {l:'Heure HH:MM', p:'\\b(?:[01]\\d|2[0-3]):[0-5]\\d\\b'},
-  {l:'Nombre entier',p:'-?\\d+'},
-  {l:'Nombre décimal',p:'-?\\d+\\.\\d+'},
-  {l:'Mot',         p:'\\b\\w+\\b'},
-  {l:'Ligne non vide',p:'^.+$'},
-  {l:'UUID',        p:'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'},
+// ── Library NL → Regex ──────────────────────────────────────
+const NL_LIB = [
+  {d:'Adresse email',                   t:['email','mail','courriel','@','arobase'],         r:'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}'},
+  {d:'Adresse IPv4',                    t:['ip','ipv4','adresse ip','ip address'],           r:'\\b(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\b'},
+  {d:'Adresse IPv4 avec CIDR',          t:['cidr','réseau','subnet','masque','plage ip'],   r:'\\b(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\/(?:3[0-2]|[12]?\\d)\\b'},
+  {d:'Adresse IPv6',                    t:['ipv6','ip6'],                                   r:'(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}'},
+  {d:'Nom d\'hôte (hostname / FQDN)',   t:['hostname','fqdn','serveur','dns','domaine'],   r:'(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}'},
+  {d:'URL HTTP/HTTPS',                  t:['url','lien','http','https','web','site'],       r:'https?:\\/\\/(?:[-a-zA-Z0-9@:%._+~#=]{1,256})\\.([a-zA-Z0-9()]{1,6})\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)'},
+  {d:'Date JJ/MM/AAAA',                t:['date','jj/mm','française','dd/mm/yyyy'],       r:'(?:0[1-9]|[12]\\d|3[01])\\/(?:0[1-9]|1[0-2])\\/(?:19|20)\\d{2}'},
+  {d:'Date ISO 8601 (AAAA-MM-JJ)',     t:['date iso','yyyy-mm-dd','iso','aaaa-mm-jj'],    r:'\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])'},
+  {d:'Timestamp ISO complet',           t:['timestamp','datetime','iso 8601','log timestamp'], r:'\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:?\\d{2})?'},
+  {d:'Heure HH:MM',                     t:['heure','time','hh:mm'],                         r:'(?:[01]\\d|2[0-3]):[0-5]\\d'},
+  {d:'Heure HH:MM:SS',                  t:['heure secondes','hh:mm:ss'],                    r:'(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d'},
+  {d:'Numéro de téléphone français',    t:['téléphone','phone','mobile','portable','fixe'], r:'(?:(?:\\+|00)33|0)\\s*[1-9](?:[\\s.-]*\\d{2}){4}'},
+  {d:'Code postal français',            t:['code postal','cp','zip','postal'],              r:'(?:0[1-9]|[1-8]\\d|9[0-5])\\d{3}'},
+  {d:'UUID / GUID',                     t:['uuid','guid','identifiant unique'],             r:'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'},
+  {d:'Adresse MAC',                     t:['mac','mac address','ethernet','réseau'],        r:'(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}'},
+  {d:'Chemin Linux/Unix absolu',        t:['chemin linux','path','unix','fichier linux'],  r'\\/(?:[a-zA-Z0-9._-]+\\/)*[a-zA-Z0-9._-]*'},
+  {d:'Chemin Windows',                  t:['chemin windows','path windows','c:\\\\'],       r:'[A-Za-z]:\\\\(?:[^\\\\/:*?"<>|\\r\\n]+\\\\)*[^\\\\/:*?"<>|\\r\\n]*'},
+  {d:'Nombre entier positif',           t:['nombre','entier','chiffre','integer'],         r:'\\b\\d+\\b'},
+  {d:'Nombre entier signé (±)',         t:['nombre négatif','entier signé','signe moins'], r:'-?\\b\\d+\\b'},
+  {d:'Nombre décimal',                  t:['décimal','virgule','float','nombre à virgule'], r:'-?\\d+[.,]\\d+'},
+  {d:'Pourcentage',                     t:['pourcentage','pourcent','%'],                   r:'\\b\\d{1,3}(?:\\.\\d+)?\\s*%'},
+  {d:'Mot de passe fort (8+ cars)',     t:['mot de passe','password','mdp','sécurisé'],   r:'(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}'},
+  {d:'Balise HTML ouvrante',            t:['html','balise','tag xml','markup'],             r:'<([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*>'},
+  {d:'Ligne de commentaire (#)',        t:['commentaire','comment','#','shell comment'],   r:'^\\s*#.*$'},
+  {d:'Ligne vide',                      t:['ligne vide','vide','blank','empty'],            r:'^\\s*$'},
+  {d:'Clé SSH publique',               t:['ssh','clé ssh','authorized_keys','public key'], r:'(?:ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp256) [A-Za-z0-9+/]+=*'},
+  {d:'Token JWT (Bearer)',             t:['jwt','token','bearer','json web token'],        r:'eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*'},
+  {d:'Hash MD5',                        t:['md5','hash','empreinte','checksum'],            r:'\\b[0-9a-fA-F]{32}\\b'},
+  {d:'Hash SHA256',                     t:['sha256','sha','empreinte','checksum'],          r:'\\b[0-9a-fA-F]{64}\\b'},
+  {d:'Version sémantique (semver)',     t:['version','semver','x.y.z','numéro version'],  r:'\\bv?\\d+\\.\\d+\\.\\d+(?:-[a-zA-Z0-9.-]+)?\\b'},
+  {d:'sAMAccountName (Active Directory)',t:['samaccountname','ad','username','ldap'],      r:'[a-zA-Z][a-zA-Z0-9._-]{0,19}'},
+  {d:'Distinguished Name LDAP',         t:['dn','distinguished name','cn=','dc=','ldap'], r:'(?:(?:CN|OU|DC|O|L|ST|C)=[^,]+,?)+'},
+  {d:'Niveau de log (ERROR/WARN/INFO)', t:['log level','niveau log','error warn info debug','syslog'], r:'\\b(?:FATAL|ERROR|WARN(?:ING)?|INFO|DEBUG|TRACE)\\b'},
+  {d:'Numéro de port réseau',           t:['port','tcp','udp','numéro port'],              r:'\\b(?:[1-9]\\d{0,3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])\\b'},
+  {d:'IBAN bancaire',                   t:['iban','compte','bancaire','virement'],          r:'[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}(?:[A-Z0-9]?){0,16}'},
+  {d:'Ligne de log syslog',             t:['syslog','log','journal','système'],             r:'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2}\\s+\\S+\\s+\\S+'},
+  {d:'Adresse email dans un log',       t:['email log','mail log','from to log'],          r:'(?:from|to|user|email)[=: ]+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})'},
+  {d:'Mot (délimité par frontière)',    t:['mot','word','frontière','\\b'],                r:'\\b\\w+\\b'},
+  {d:'Ligne non vide',                  t:['ligne non vide','ligne avec contenu'],          r:'^.+$'},
 ];
 
-const qc = document.getElementById('quick-btns');
-QUICK.forEach(q => {
-  const b = document.createElement('button');
-  b.className = 'quick-btn';
-  b.textContent = q.l;
-  b.onclick = () => { document.getElementById('regex-input').value = q.p; run(); };
-  qc.appendChild(b);
+const REF_DATA=[
+  {cat:'Ancres',items:[
+    {e:'^',     d:'Début de ligne/chaîne'},
+    {e:'$',     d:'Fin de ligne/chaîne'},
+    {e:'\\b',   d:'Frontière de mot'},
+    {e:'\\B',   d:'Pas de frontière'},
+    {e:'\\A',   d:'Début de chaîne (absolu)'},
+    {e:'\\Z',   d:'Fin de chaîne (absolu)'},
+  ]},
+  {cat:'Classes de caractères',items:[
+    {e:'.',     d:'N\'importe quel caractère (sauf \\n sans flag s)'},
+    {e:'\\d',   d:'Chiffre [0-9]'},
+    {e:'\\D',   d:'Non-chiffre'},
+    {e:'\\w',   d:'Mot [a-zA-Z0-9_]'},
+    {e:'\\W',   d:'Non-mot'},
+    {e:'\\s',   d:'Espace, tab, newline'},
+    {e:'\\S',   d:'Non-espace'},
+    {e:'[abc]', d:'Un des caractères a, b ou c'},
+    {e:'[a-z]', d:'Minuscule a à z'},
+    {e:'[^abc]',d:'Ni a, ni b, ni c'},
+  ]},
+  {cat:'Quantificateurs',items:[
+    {e:'*',     d:'0 ou plus (greedy)'},
+    {e:'+',     d:'1 ou plus (greedy)'},
+    {e:'?',     d:'0 ou 1 (optionnel)'},
+    {e:'{n}',   d:'Exactement n fois'},
+    {e:'{n,}',  d:'Au moins n fois'},
+    {e:'{n,m}', d:'Entre n et m fois'},
+    {e:'*?',    d:'0 ou plus (lazy — minimal)'},
+    {e:'+?',    d:'1 ou plus (lazy)'},
+  ]},
+  {cat:'Groupes & Alternance',items:[
+    {e:'(abc)',  d:'Groupe capturant'},
+    {e:'(?:abc)',d:'Groupe non capturant'},
+    {e:'(?=x)',  d:'Lookahead positif (suivi de x)'},
+    {e:'(?!x)',  d:'Lookahead négatif (pas suivi de x)'},
+    {e:'(?<=x)', d:'Lookbehind positif (précédé de x)'},
+    {e:'(?<!x)', d:'Lookbehind négatif'},
+    {e:'a|b',   d:'Alternance (a OU b)'},
+    {e:'\\1',   d:'Référence arrière (groupe 1)'},
+  ]},
+];
+
+// Init suggestions (toutes au début)
+function renderSuggestions(list){
+  const c=document.getElementById('nl-suggestions');
+  c.innerHTML='';
+  list.slice(0,30).forEach(p=>{
+    const card=document.createElement('div'); card.className='nl-card';
+    card.innerHTML=`<strong>${p.d}</strong><code>${p.r}</code>`;
+    card.onclick=()=>{ document.getElementById('regex-input').value=p.r; run(); document.getElementById('nl-search').value=p.d; };
+    c.appendChild(card);
+  });
+}
+
+function searchNL(){
+  const q=document.getElementById('nl-search').value.toLowerCase().trim();
+  if(!q){ renderSuggestions(NL_LIB); return; }
+  const results=NL_LIB.filter(p=>{
+    const score=(p.d+' '+p.t.join(' ')).toLowerCase();
+    return q.split(' ').every(w=>score.includes(w));
+  });
+  renderSuggestions(results.length?results:NL_LIB.filter(p=>p.d.toLowerCase().includes(q.slice(0,3))));
+}
+
+// Ref tab
+const rc=document.getElementById('ref-content');
+REF_DATA.forEach(sec=>{
+  const div=document.createElement('div'); div.style.marginBottom='1rem';
+  div.innerHTML=`<p class="section-title">${sec.cat}</p>`;
+  const table=document.createElement('table'); table.style.cssText='width:100%;border-collapse:collapse;font-size:.82rem;';
+  sec.items.forEach(item=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="padding:.3rem .6rem;font-family:var(--font-mono);color:var(--accent2);white-space:nowrap;border-bottom:1px solid var(--border)">${item.e}</td><td style="padding:.3rem .6rem;color:var(--text-secondary);border-bottom:1px solid var(--border)">${item.d}</td>`;
+    tr.style.cursor='pointer';
+    tr.onclick=()=>{ const cur=document.getElementById('regex-input').value; document.getElementById('regex-input').value=cur+item.e; run(); setTab('test',document.getElementById('tab-test')); };
+    table.appendChild(tr);
+  });
+  div.appendChild(table);
+  rc.appendChild(div);
 });
 
-function getFlags() {
-  return [...document.querySelectorAll('.flag-btn.active')].map(b=>b.dataset.flag).join('');
-}
-function toggleFlag(btn) { btn.classList.toggle('active'); run(); }
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function setTab(t,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.getElementById('panel-test').style.display=t==='test'?'':'none';
+  document.getElementById('panel-ref').style.display=t==='ref'?'':'none';
 }
 
-function run() {
-  const pattern = document.getElementById('regex-input').value;
-  const text    = document.getElementById('test-input').value;
-  const errEl   = document.getElementById('error-msg');
-  errEl.textContent = '';
+function getFlags(){ return [...document.querySelectorAll('.flag-btn.active')].map(b=>b.dataset.flag).join(''); }
+function toggleFlag(btn){ btn.classList.toggle('active'); run(); }
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  if (!pattern) {
-    document.getElementById('highlight-area').textContent = text;
-    document.getElementById('match-list').innerHTML = '';
-    document.getElementById('count-matches').textContent = '0';
-    document.getElementById('count-groups').textContent  = '0';
-    return;
-  }
-
+function run(){
+  const pattern=document.getElementById('regex-input').value;
+  const text=document.getElementById('test-input').value;
+  const errEl=document.getElementById('error-msg');
+  errEl.textContent='';
+  if(!pattern){ document.getElementById('highlight-area').textContent=text; document.getElementById('match-list').innerHTML=''; document.getElementById('count-matches').textContent='0'; document.getElementById('count-groups').textContent='0'; return; }
   let rx;
-  try { rx = new RegExp(pattern, getFlags()); }
-  catch(e) { errEl.textContent = e.message; document.getElementById('highlight-area').textContent = text; return; }
-
-  const matches = [...text.matchAll(new RegExp(pattern, getFlags().includes('g') ? getFlags() : getFlags()+'g'))];
-  document.getElementById('count-matches').textContent = matches.length;
-  document.getElementById('count-groups').textContent  = matches[0] ? matches[0].length - 1 : 0;
-
-  // Highlight
-  let html = '', last = 0, idx = 0;
-  for (const m of matches) {
-    html += escHtml(text.slice(last, m.index));
-    html += `<mark class="${idx===0?'match-first':''}">${escHtml(m[0])}</mark>`;
-    last = m.index + m[0].length;
-    idx++;
-  }
-  html += escHtml(text.slice(last));
-  document.getElementById('highlight-area').innerHTML = html;
-
-  // Match list
-  document.getElementById('match-list').innerHTML = matches.slice(0,50).map((m,i)=>
-    `<div class="match-item"><span class="match-idx">#${i+1}</span><span class="match-val">${escHtml(m[0]||'ε')}</span>${m.length>1?`<span style="color:var(--text-muted);font-size:.75rem;">groupes: ${m.slice(1).map(g=>g??'—').join(', ')}</span>`:''}<span class="match-pos">@${m.index}</span></div>`
-  ).join('') + (matches.length>50?`<div style="color:var(--text-muted);font-size:.8rem;padding:.4rem">… et ${matches.length-50} autres</div>`:'');
+  try{ rx=new RegExp(pattern,getFlags().includes('g')?getFlags():getFlags()+'g'); }
+  catch(e){ errEl.textContent='⚠ '+e.message; document.getElementById('highlight-area').textContent=text; return; }
+  const matches=[...text.matchAll(new RegExp(pattern,getFlags().includes('g')?getFlags():getFlags()+'g'))];
+  document.getElementById('count-matches').textContent=matches.length;
+  document.getElementById('count-groups').textContent=matches[0]?matches[0].length-1:0;
+  let html='',last=0,idx=0;
+  for(const m of matches){ html+=escHtml(text.slice(last,m.index)); html+=`<mark class="${idx===0?'first':''}">${escHtml(m[0]||'ε')}</mark>`; last=m.index+m[0].length; idx++; }
+  html+=escHtml(text.slice(last));
+  document.getElementById('highlight-area').innerHTML=html;
+  document.getElementById('match-list').innerHTML=matches.slice(0,50).map((m,i)=>
+    `<div class="match-item"><span class="match-idx">#${i+1}</span><span class="match-val">${escHtml(m[0]||'ε')}</span>${m.length>1?`<span style="color:var(--text-muted);font-size:.72rem">→ ${m.slice(1).map(g=>g??'—').join(', ')}</span>`:''}<span class="match-pos">@${m.index}</span></div>`
+  ).join('') + (matches.length>50?`<div style="color:var(--text-muted);font-size:.78rem;padding:.3rem">… +${matches.length-50} autres</div>`:'');
 }
+
+renderSuggestions(NL_LIB);
 </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Ansible Playbook Builder — aucune donnée personnelle stockée -->
+<!-- Ansible Playbook Builder RHEL — aucune donnée personnelle stockée -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -11,21 +11,33 @@
     .tool-header h1{font-size:1.5rem;flex:1;}
     .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
     @media(max-width:850px){.layout{grid-template-columns:1fr;}}
-    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
-    .task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;margin-bottom:.6rem;}
-    .task-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;}
-    .task-num{font-size:.7rem;font-weight:700;background:var(--accent-dim);color:#fff;border-radius:999px;padding:.1rem .45rem;}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem;}
+    .rhel-bar{display:flex;align-items:center;gap:.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);padding:.6rem 1rem;margin-bottom:1.5rem;}
+    .rhel-bar span{font-size:.8rem;color:var(--text-secondary);}
+    .rhel-btn{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--transition);}
+    .rhel-btn.active{background:#cc0000;border-color:#cc0000;color:#fff;}
+    .recipe-cats{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem;}
+    .cat-btn{padding:.25rem .65rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.75rem;cursor:pointer;transition:all var(--transition);}
+    .cat-btn.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+    .recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.5rem;margin-bottom:1.5rem;max-height:280px;overflow-y:auto;}
+    .recipe-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);}
+    .recipe-card:hover{border-color:var(--accent);background:var(--bg-card-hover);}
+    .recipe-card strong{display:block;font-size:.8rem;color:var(--text-primary);margin-bottom:.15rem;}
+    .recipe-card span{font-size:.72rem;color:var(--text-muted);}
+    .task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:.85rem;margin-bottom:.6rem;}
+    .task-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;}
+    .task-num{font-size:.7rem;font-weight:700;background:var(--accent-dim);color:#fff;border-radius:999px;padding:.1rem .45rem;flex-shrink:0;}
     .task-title-input{flex:1;}
-    .task-params{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem;}
+    .task-params{display:flex;flex-direction:column;gap:.35rem;margin-top:.5rem;}
     .kv-row{display:flex;gap:.4rem;align-items:center;}
     .kv-row input{flex:1;}
     .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
     .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
     .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
-    .output-pre{font-family:var(--font-mono);font-size:.82rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:200px;color:var(--text-primary);}
+    .output-pre{font-family:var(--font-mono);font-size:.78rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:250px;color:var(--text-primary);}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
     .check-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;}
     .check-label input{width:16px;height:16px;accent-color:var(--accent);}
-    .templates{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
   </style>
 </head>
 <body>
@@ -33,28 +45,40 @@
   <header class="tool-header">
     <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
     <h1>Ansible Playbook Builder</h1>
-    <span class="badge badge--version">v1.0.0</span>
+    <span class="badge badge--version">v1.1.0</span>
   </header>
 
-  <p class="section-title">Templates</p>
-  <div class="templates" id="templates"></div>
+  <!-- RHEL version bar -->
+  <div class="rhel-bar">
+    <span>Cible :</span>
+    <button class="rhel-btn" data-v="7" onclick="setRhel(7,this)">RHEL 7</button>
+    <button class="rhel-btn active" data-v="8" onclick="setRhel(8,this)">RHEL 8</button>
+    <button class="rhel-btn" data-v="9" onclick="setRhel(9,this)">RHEL 9</button>
+    <span id="rhel-hint" style="margin-left:.5rem;font-size:.75rem;color:var(--accent)">dnf · systemd · Python 3.6+</span>
+  </div>
+
+  <!-- Recipe library -->
+  <p class="section-title">Bibliothèque de tâches (clic pour ajouter)</p>
+  <div class="recipe-cats" id="recipe-cats"></div>
+  <div class="recipe-grid" id="recipe-grid"></div>
 
   <div class="layout">
     <!-- Gauche : builder -->
-    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+    <div style="display:flex;flex-direction:column;gap:1rem;">
 
       <div class="card">
-        <p class="section-title">Play — informations générales</p>
-        <div style="display:flex;flex-direction:column;gap:.6rem;">
-          <div><label>Nom du play</label><input class="input" id="play-name" value="Mon play" oninput="build()"></div>
-          <div><label>Hôtes cibles</label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
-          <label class="check-label"><input type="checkbox" id="play-become" onchange="build()"> become: true (sudo)</label>
-          <div style="display:flex;gap:.5rem;align-items:center;">
-            <label style="margin:0;white-space:nowrap">gather_facts</label>
-            <select class="select" id="play-facts" onchange="build()" style="width:auto">
-              <option value="true">true</option>
-              <option value="false">false</option>
-            </select>
+        <p class="section-title">Play</p>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div><label>Nom</label><input class="input" id="play-name" value="Playbook RHEL" oninput="build()"></div>
+          <div><label>Hôtes</label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
+          <label class="check-label"><input type="checkbox" id="play-become" onchange="build()"> become: true</label>
+          <div class="two-col">
+            <div><label>gather_facts</label>
+              <select class="select" id="play-facts" onchange="build()"><option value="true">true</option><option value="false">false</option></select>
+            </div>
+            <div><label>strategy</label>
+              <select class="select" id="play-strategy" onchange="build()"><option value="">linear (défaut)</option><option value="free">free</option><option value="host_pinned">host_pinned</option></select>
+            </div>
           </div>
         </div>
       </div>
@@ -68,13 +92,13 @@
       <div class="card">
         <p class="section-title">Tâches</p>
         <div id="tasks-list"></div>
-        <button class="btn btn--secondary btn--sm mt-md" onclick="addTask()">+ Tâche</button>
+        <button class="btn btn--secondary btn--sm mt-md" onclick="addTask()">+ Tâche vide</button>
       </div>
     </div>
 
     <!-- Droite : output -->
     <div>
-      <p class="section-title">Playbook YAML généré</p>
+      <p class="section-title">Playbook YAML</p>
       <div class="output-box">
         <div class="output-header">
           <span>playbook.yml</span>
@@ -85,175 +109,190 @@
     </div>
   </div>
 </div>
+
 <script>
-const MODULES_DEFS={
-  yum:       [{k:'name',p:'httpd'},{k:'state',p:'present'}],
-  dnf:       [{k:'name',p:'nginx'},{k:'state',p:'latest'}],
-  apt:       [{k:'name',p:'nginx'},{k:'state',p:'present'},{k:'update_cache',p:'yes'}],
-  service:   [{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}],
-  systemd:   [{k:'name',p:'nginx'},{k:'state',p:'restarted'},{k:'daemon_reload',p:'yes'}],
-  copy:      [{k:'src',p:'files/app.conf'},{k:'dest',p:'/etc/app/app.conf'},{k:'mode',p:'0644'}],
-  template:  [{k:'src',p:'templates/app.j2'},{k:'dest',p:'/etc/app/app.conf'}],
-  file:      [{k:'path',p:'/var/app'},{k:'state',p:'directory'},{k:'mode',p:'0755'}],
-  user:      [{k:'name',p:'appuser'},{k:'state',p:'present'},{k:'groups',p:'wheel'},{k:'shell',p:'/bin/bash'}],
-  lineinfile:[{k:'path',p:'/etc/hosts'},{k:'line',p:'192.168.1.1 srv-prod'},{k:'state',p:'present'}],
-  debug:     [{k:'msg',p:'{{ variable }}'}],
-  shell:     [{k:'cmd',p:'echo hello'}],
-  command:   [{k:'cmd',p:'uptime'}],
-  firewalld: [{k:'service',p:'http'},{k:'state',p:'enabled'},{k:'permanent',p:'yes'}],
-  cron:      [{k:'name',p:'backup'},{k:'minute',p:'0'},{k:'hour',p:'2'},{k:'job',p:'/scripts/backup.sh'}],
-  git:       [{k:'repo',p:'https://github.com/org/repo.git'},{k:'dest',p:'/opt/app'},{k:'version',p:'main'}],
-  uri:       [{k:'url',p:'https://api.exemple.com'},{k:'method',p:'GET'}],
+let rhelVersion = 8;
+let taskCount = 0;
+
+const RHEL_HINTS = {7:'yum · Python 2.7 · EL7 · systemd', 8:'dnf · Python 3.6 · EL8 · systemd', 9:'dnf · Python 3.9 · EL9 · systemd'};
+function pkgMod(v){ return v<=7?'yum':'dnf'; }
+function setRhel(v,btn){ rhelVersion=v; document.querySelectorAll('.rhel-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('rhel-hint').textContent=RHEL_HINTS[v]; build(); }
+
+// Recipe library
+const RECIPES = {
+  'Paquets': [
+    {n:'Installer un paquet',          d:'dnf install',      t:(v)=>`Installer paquet`,      m:()=>pkgMod(rhelVersion), args:{name:'paquet', state:'present'}},
+    {n:'Installer groupe de paquets',  d:'@Development Tools',t:(v)=>`Installer groupe`,      m:()=>pkgMod(rhelVersion), args:{name:'"@Development Tools"', state:'present'}},
+    {n:'Mettre à jour tous les paquets',d:'dnf update',      t:()=>`Mise à jour système`,     m:()=>pkgMod(rhelVersion), args:{name:'*', state:'latest'}},
+    {n:'Supprimer un paquet',          d:'dnf remove',       t:()=>`Supprimer paquet`,        m:()=>pkgMod(rhelVersion), args:{name:'paquet', state:'absent'}},
+    {n:'Activer dépôt EPEL',           d:'RHEL 8/9',         t:()=>`Activer EPEL`,            m:()=>pkgMod(rhelVersion), args:{name:'epel-release', state:'present'}},
+    {n:'Nettoyer cache DNF/YUM',       d:'clean all',        t:()=>`Nettoyer cache paquets`,  m:()=>pkgMod(rhelVersion)+' clean', args:{command:'all'}},
+  ],
+  'Services': [
+    {n:'Démarrer et activer service',  d:'started+enabled',  t:()=>`Démarrer service`,    m:()=>'service', args:{name:'httpd', state:'started', enabled:'yes'}},
+    {n:'Arrêter et désactiver',        d:'stopped+disabled', t:()=>`Arrêter service`,     m:()=>'service', args:{name:'httpd', state:'stopped', enabled:'no'}},
+    {n:'Redémarrer service',           d:'restart',          t:()=>`Redémarrer service`,  m:()=>'service', args:{name:'httpd', state:'restarted'}},
+    {n:'Recharger config (reload)',    d:'reload',           t:()=>`Recharger service`,   m:()=>'service', args:{name:'httpd', state:'reloaded'}},
+    {n:'daemon_reload systemd',        d:'après unit install',t:()=>`Reload daemon systemd`,m:()=>'systemd',args:{daemon_reload:'yes'}},
+    {n:'Statut service (debug)',       d:'assert state',     t:()=>`Vérifier état service`,m:()=>'service_facts',args:{}},
+  ],
+  'Utilisateurs': [
+    {n:'Créer utilisateur système',    d:'useradd',          t:()=>`Créer utilisateur`,   m:()=>'user',  args:{name:'appuser', state:'present', system:'yes', shell:'/sbin/nologin'}},
+    {n:'Créer utilisateur applicatif', d:'avec home',        t:()=>`Créer user applicatif`,m:()=>'user', args:{name:'appuser', state:'present', home:'/home/appuser', shell:'/bin/bash', groups:'wheel'}},
+    {n:'Ajouter au groupe sudo',       d:'groupe wheel',     t:()=>`Ajouter groupe wheel`, m:()=>'user', args:{name:'appuser', groups:'wheel', append:'yes'}},
+    {n:'Clé SSH authorized_keys',      d:'déployer clé pub', t:()=>`Déployer clé SSH`,    m:()=>'authorized_key', args:{user:'appuser', state:'present', key:'"{{ lookup(\'file\', \'~/.ssh/id_rsa.pub\') }}"'}},
+    {n:'Supprimer utilisateur',        d:'userdel',          t:()=>`Supprimer utilisateur`,m:()=>'user', args:{name:'olduser', state:'absent', remove:'yes'}},
+    {n:'Configurer sudoers',           d:'fichier sudoers.d',t:()=>`Configurer sudo`,     m:()=>'copy',  args:{dest:'/etc/sudoers.d/appuser', content:'"appuser ALL=(ALL) NOPASSWD: ALL\\n"', mode:'0440', validate:'/usr/sbin/visudo -cf %s'}},
+  ],
+  'SELinux': [
+    {n:'SELinux enforcing',            d:'getenforce',       t:()=>`SELinux enforcing`,   m:()=>'selinux', args:{state:'enforcing', policy:'targeted'}},
+    {n:'SELinux permissive',           d:'pour debug',       t:()=>`SELinux permissif`,   m:()=>'selinux', args:{state:'permissive', policy:'targeted'}},
+    {n:'Restaurer contexte (restorecon)',d:'fichier ou dossier',t:()=>`Restaurer contexte SEL`,m:()=>'command', args:{cmd:'/usr/sbin/restorecon -Rv /var/www/html'}},
+    {n:'Activer booléen SELinux',      d:'setsebool',        t:()=>`Activer bool SELinux`,m:()=>'seboolean', args:{name:'httpd_can_network_connect', state:'yes', persistent:'yes'}},
+    {n:'Port SELinux (semanage)',       d:'http_port_t',      t:()=>`Ajouter port SELinux`,m:()=>'seport',    args:{ports:'8080', proto:'tcp', setype:'http_port_t', state:'present'}},
+    {n:'Contexte fichier (fcontext)',  d:'semanage fcontext',t:()=>`Contexte fichier SEL`,m:()=>'sefcontext', args:{target:'/opt/app(/.*)?', setype:'httpd_sys_content_t', state:'present'}},
+  ],
+  'Firewall': [
+    {n:'Ouvrir service (permanent)',   d:'firewall-cmd',     t:()=>`Ouvrir service firewalld`,m:()=>'firewalld', args:{service:'http', state:'enabled', permanent:'yes', immediate:'yes'}},
+    {n:'Ouvrir port TCP',             d:'port/tcp',         t:()=>`Ouvrir port TCP`,        m:()=>'firewalld', args:{port:'8080/tcp', state:'enabled', permanent:'yes', immediate:'yes'}},
+    {n:'Ajouter source IP',           d:'--add-source',     t:()=>`Autoriser IP source`,    m:()=>'firewalld', args:{source:'192.168.1.0/24', zone:'internal', state:'enabled', permanent:'yes'}},
+    {n:'Supprimer règle',             d:'remove',           t:()=>`Retirer règle firewall`, m:()=>'firewalld', args:{service:'http', state:'disabled', permanent:'yes'}},
+  ],
+  'Fichiers': [
+    {n:'Créer répertoire',            d:'mkdir -p',         t:()=>`Créer répertoire`,        m:()=>'file',       args:{path:'/opt/app', state:'directory', mode:'0755', owner:'appuser', group:'appuser'}},
+    {n:'Copier fichier',              d:'copy',             t:()=>`Copier fichier`,           m:()=>'copy',       args:{src:'files/app.conf', dest:'/etc/app/app.conf', mode:'0644', owner:'root', group:'root'}},
+    {n:'Déployer template Jinja2',    d:'template',         t:()=>`Déployer template`,        m:()=>'template',   args:{src:'templates/app.conf.j2', dest:'/etc/app/app.conf', mode:'0644'}},
+    {n:'Modifier une ligne',          d:'lineinfile',       t:()=>`Modifier ligne fichier`,   m:()=>'lineinfile', args:{path:'/etc/ssh/sshd_config', regexp:'^#?PermitRootLogin', line:'PermitRootLogin no', state:'present'}},
+    {n:'Bloc de config',              d:'blockinfile',      t:()=>`Ajouter bloc config`,      m:()=>'blockinfile',args:{path:'/etc/hosts', block:'"192.168.1.10 srv-app\\n192.168.1.11 srv-db"', state:'present'}},
+    {n:'Symlink',                     d:'state: link',      t:()=>`Créer lien symbolique`,    m:()=>'file',       args:{src:'/opt/app/current', dest:'/opt/app/latest', state:'link'}},
+    {n:'Supprimer fichier/dossier',   d:'absent',           t:()=>`Supprimer fichier`,        m:()=>'file',       args:{path:'/tmp/install', state:'absent'}},
+  ],
+  'Réseau': [
+    {n:'Configurer hostname',         d:'hostname',         t:()=>`Définir hostname`,         m:()=>'hostname',  args:{name:'srv-prod-01.domaine.local'}},
+    {n:'Ajouter entrée /etc/hosts',   d:'lineinfile',       t:()=>`Ajouter entrée hosts`,     m:()=>'lineinfile',args:{path:'/etc/hosts', line:'"192.168.1.10 srv-app srv-app.domaine.local"', state:'present'}},
+    {n:'Configurer DNS (resolv.conf)', d:'template',        t:()=>`Configurer DNS`,           m:()=>'copy',      args:{dest:'/etc/resolv.conf', content:'"nameserver 8.8.8.8\\nnameserver 8.8.4.4\\n"'}},
+    {n:'Interface réseau (nmcli)',    d:'NetworkManager',   t:()=>`Configurer interface réseau`,m:()=>'nmcli',  args:{conn_name:'eth0', type:'ethernet', ip4:'192.168.1.100/24', gw4:'192.168.1.1', state:'present'}},
+  ],
+  'Subscription RHEL': [
+    {n:'S\'enregistrer sur RHSM',     d:'subscription-manager', t:()=>`Enregistrer RHSM`,   m:()=>'redhat_subscription', args:{state:'present', username:'"{{ rhsm_user }}"', password:'"{{ rhsm_password }}"', auto_attach:'yes'}},
+    {n:'Activer dépôt RHSM',          d:'--enable-repo',    t:()=>`Activer dépôt RHSM`,     m:()=>'rhsm_repository', args:{name:'rhel-8-for-x86_64-appstream-rpms', state:'enabled'}},
+    {n:'Se désabonner',               d:'unregister',       t:()=>`Désabonner système`,       m:()=>'redhat_subscription', args:{state:'absent'}},
+    {n:'Enregistrer sur Satellite',   d:'via activation key',t:()=>`Enregistrer Satellite`,  m:()=>'redhat_subscription', args:{state:'present', activationkey:'"{{ activation_key }}"', org_id:'"{{ org_id }}"', server_hostname:'"satellite.domaine.local"'}},
+  ],
+  'Sécurité': [
+    {n:'Désactiver SSH root login',   d:'sshd_config',      t:()=>`Désactiver root SSH`,      m:()=>'lineinfile',args:{path:'/etc/ssh/sshd_config', regexp:'^#?PermitRootLogin', line:'PermitRootLogin no', state:'present'}, notify:'restart sshd'},
+    {n:'Timeout inactivité SSH',      d:'ClientAliveInterval',t:()=>`Timeout SSH`,            m:()=>'lineinfile',args:{path:'/etc/ssh/sshd_config', regexp:'^#?ClientAliveInterval', line:'ClientAliveInterval 300', state:'present'}, notify:'restart sshd'},
+    {n:'Configurer auditd',           d:'audit.rules',      t:()=>`Configurer auditd`,        m:()=>'template',  args:{src:'templates/audit.rules.j2', dest:'/etc/audit/rules.d/audit.rules'}, notify:'restart auditd'},
+    {n:'Désactiver services inutiles',d:'bluetooth, cups…', t:()=>`Désactiver services inutiles`,m:()=>'service', args:{name:'bluetooth', state:'stopped', enabled:'no'}},
+    {n:'Configurer limits',          d:'/etc/security/limits.conf',t:()=>`Configurer ulimits`,m:()=>'pam_limits',args:{domain:'*', limit_type:'soft', limit_item:'nofile', value:'65536'}},
+  ],
 };
 
-const TEMPLATES=[
-  {l:'Installation LAMP',  f:()=>loadTemplate('lamp')},
-  {l:'Déploiement app',    f:()=>loadTemplate('deploy')},
-  {l:'Hardening basique',  f:()=>loadTemplate('hardening')},
-];
+// Render categories + recipes
+let activeRecipeCat = Object.keys(RECIPES)[0];
+const catContainer = document.getElementById('recipe-cats');
+const recipeContainer = document.getElementById('recipe-grid');
 
-let taskCount=0;
+Object.keys(RECIPES).forEach(cat => {
+  const b = document.createElement('button'); b.className = 'cat-btn' + (cat === activeRecipeCat ? ' active' : ''); b.textContent = cat;
+  b.onclick = () => { activeRecipeCat = cat; document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); renderRecipes(); };
+  catContainer.appendChild(b);
+});
+
+function renderRecipes(){
+  recipeContainer.innerHTML = '';
+  (RECIPES[activeRecipeCat]||[]).forEach(r => {
+    const card = document.createElement('div'); card.className = 'recipe-card';
+    card.innerHTML = `<strong>${r.n}</strong><span>${r.d}</span>`;
+    card.onclick = () => addRecipeTask(r);
+    recipeContainer.appendChild(card);
+  });
+}
+
+function addRecipeTask(recipe){
+  const mod = recipe.m();
+  const params = Object.entries(recipe.args).map(([k,v]) => ({k,p:v}));
+  const notify = recipe.notify || '';
+  addTask(recipe.n, mod, params, notify);
+}
 
 function addVar(k='',v=''){
-  const list=document.getElementById('vars-list');
-  const row=document.createElement('div'); row.className='kv-row';
-  row.innerHTML=`<input class="input" placeholder="nom_var" value="${k}" oninput="build()"><input class="input" placeholder="valeur" value="${v}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  const list = document.getElementById('vars-list');
+  const row = document.createElement('div'); row.className = 'kv-row';
+  row.innerHTML = `<input class="input" placeholder="nom_variable" value="${k}" oninput="build()"><input class="input" placeholder="valeur" value="${v}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
   list.appendChild(row); build();
 }
 
-function addTask(name='',module='yum',params=null,notify='',when=''){
+function addTask(name='', module='dnf', params=[], notify='', when=''){
   taskCount++;
-  const list=document.getElementById('tasks-list');
-  const card=document.createElement('div'); card.className='task-card'; card.id=`task-${taskCount}`;
-  const defParams=params||MODULES_DEFS[module]||[];
-
-  const modOpts=Object.keys(MODULES_DEFS).map(m=>`<option value="${m}" ${m===module?'selected':''}>${m}</option>`).join('');
-  const paramsHtml=defParams.map(p=>`<div class="kv-row"><input class="input" value="${p.k}" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="${p.p}" value="${p.p}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
-
-  card.innerHTML=`<div class="task-header">
+  const list = document.getElementById('tasks-list');
+  const card = document.createElement('div'); card.className = 'task-card'; card.id = `task-${taskCount}`;
+  const modOpts = ['dnf','yum','service','systemd','copy','template','file','lineinfile','blockinfile','user','authorized_key','firewalld','selinux','seboolean','seport','sefcontext','command','shell','hostname','nmcli','rhsm_repository','redhat_subscription','pam_limits','debug'].map(m => `<option value="${m}" ${m===module?'selected':''}>${m}</option>`).join('');
+  const paramsHtml = (params.length ? params : [{k:'',p:''}]).map(p => `<div class="kv-row"><input class="input" value="${p.k}" style="flex:0 0 140px" oninput="build()"><input class="input" placeholder="${p.p}" value="${p.p}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
+  card.innerHTML = `<div class="task-header">
     <span class="task-num">${taskCount}</span>
     <input class="input task-title-input" placeholder="Nom de la tâche" value="${name||'Tâche '+taskCount}" oninput="build()">
     <button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();build()">✕</button>
   </div>
-  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;">
-    <label style="margin:0;flex:0 0 auto">Module</label>
-    <select class="select" onchange="onModuleChange(this)" style="width:auto">${modOpts}</select>
-    <button class="btn btn--ghost btn--sm" onclick="addTaskParam(this)">+ arg</button>
+  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;">
+    <label style="margin:0;font-size:.78rem;color:var(--text-muted)">Module :</label>
+    <select class="select" style="width:auto" onchange="build()"><optgroup label="Modules">${modOpts}</optgroup></select>
+    <button class="btn btn--ghost btn--sm" onclick="addTaskParam(this)">+ param</button>
   </div>
   <div class="task-params">${paramsHtml}</div>
   <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;">
-    <input class="input" placeholder="notify: handler_name" value="${notify}" style="flex:1" oninput="build()">
+    <input class="input" placeholder="notify: nom_handler" value="${notify}" style="flex:1" oninput="build()">
     <input class="input" placeholder="when: condition" value="${when}" style="flex:1" oninput="build()">
+    <input class="input" placeholder="loop: [...]" value="" style="flex:1" oninput="build()">
   </div>`;
   list.appendChild(card); build();
 }
 
-function onModuleChange(sel){
-  const card=sel.closest('.task-card');
-  const mod=sel.value;
-  const params=MODULES_DEFS[mod]||[];
-  const pp=card.querySelector('.task-params');
-  pp.innerHTML=params.map(p=>`<div class="kv-row"><input class="input" value="${p.k}" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="${p.p}" value="${p.p}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
-  build();
-}
-
-function addTaskParam(btn){
-  const pp=btn.closest('.task-card').querySelector('.task-params');
-  const row=document.createElement('div'); row.className='kv-row';
-  row.innerHTML=`<input class="input" placeholder="param" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
-  pp.appendChild(row); build();
-}
-
-function y(indent,key,val){ return ' '.repeat(indent)+(val===undefined?`${key}`:`${key}: ${val}`); }
+function addTaskParam(btn){ const pp=btn.closest('.task-card').querySelector('.task-params'); const row=document.createElement('div'); row.className='kv-row'; row.innerHTML=`<input class="input" placeholder="paramètre" style="flex:0 0 140px" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`; pp.appendChild(row); build(); }
 
 function build(){
-  const name=document.getElementById('play-name').value||'Mon play';
-  const hosts=document.getElementById('play-hosts').value||'all';
-  const become=document.getElementById('play-become').checked;
-  const facts=document.getElementById('play-facts').value;
+  const name = document.getElementById('play-name').value||'Playbook';
+  const hosts = document.getElementById('play-hosts').value||'all';
+  const become = document.getElementById('play-become').checked;
+  const facts = document.getElementById('play-facts').value;
+  const strategy = document.getElementById('play-strategy').value;
 
-  const lines=['---','- name: '+name,'  hosts: '+hosts];
+  const lines = ['---',`# Généré pour RHEL ${rhelVersion}`,`- name: ${name}`, `  hosts: ${hosts}`];
   if(become) lines.push('  become: true');
-  lines.push('  gather_facts: '+facts);
+  lines.push(`  gather_facts: ${facts}`);
+  if(strategy) lines.push(`  strategy: ${strategy}`);
 
-  // vars
-  const varRows=[...document.querySelectorAll('#vars-list .kv-row')];
-  if(varRows.length){
-    lines.push('  vars:');
-    varRows.forEach(r=>{
-      const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
-      if(k) lines.push(`    ${k}: ${v}`);
-    });
-  }
+  const varRows = [...document.querySelectorAll('#vars-list .kv-row')];
+  if(varRows.length){ lines.push('  vars:'); varRows.forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k) lines.push(`    ${k}: ${v}`); }); }
 
-  // tasks
-  const taskCards=[...document.querySelectorAll('.task-card')];
+  const taskCards = [...document.querySelectorAll('.task-card')];
   if(taskCards.length){
     lines.push('  tasks:');
-    taskCards.forEach(card=>{
-      const taskName=card.querySelector('.task-title-input').value||'Task';
-      const modSel=card.querySelector('select');
-      const mod=modSel?.value||'shell';
+    taskCards.forEach(card => {
+      const taskName = card.querySelector('.task-title-input').value||'Task';
+      const mod = card.querySelector('select')?.value||'shell';
       lines.push(`    - name: ${taskName}`);
       lines.push(`      ${mod}:`);
       card.querySelectorAll('.task-params .kv-row').forEach(r=>{
         const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
         if(k&&v) lines.push(`        ${k}: ${v}`);
       });
-      const[notifyEl,whenEl]=[...card.querySelectorAll('div:last-child input')];
-      const notify=notifyEl?.value;
-      const when=whenEl?.value;
+      const extras = [...card.querySelectorAll('div:last-child input')];
+      const notify = extras[0]?.value; const when = extras[1]?.value; const loop = extras[2]?.value;
       if(notify) lines.push(`      notify: ${notify}`);
       if(when)   lines.push(`      when: ${when}`);
+      if(loop)   lines.push(`      loop: ${loop}`);
     });
   }
 
-  document.getElementById('output').textContent=lines.join('\n');
+  document.getElementById('output').textContent = lines.join('\n');
 }
 
-function copyPlaybook(){
-  navigator.clipboard.writeText(document.getElementById('output').textContent);
-  const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
-  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
-}
+function copyPlaybook(){ navigator.clipboard.writeText(document.getElementById('output').textContent); const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary'); setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500); }
 
-function loadTemplate(tpl){
-  document.getElementById('tasks-list').innerHTML='';
-  document.getElementById('vars-list').innerHTML='';
-  taskCount=0;
-  if(tpl==='lamp'){
-    document.getElementById('play-name').value='Installation LAMP';
-    document.getElementById('play-hosts').value='web_servers';
-    document.getElementById('play-become').checked=true;
-    addTask('Installer Apache','yum',[{k:'name',p:'httpd'},{k:'state',p:'present'}],'restart httpd','');
-    addTask('Installer PHP','yum',[{k:'name',p:'php php-mysqlnd'},{k:'state',p:'present'}],'','');
-    addTask('Installer MariaDB','yum',[{k:'name',p:'mariadb-server'},{k:'state',p:'present'}],'','');
-    addTask('Démarrer Apache','service',[{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}],'','');
-  } else if(tpl==='deploy'){
-    document.getElementById('play-name').value='Déploiement application';
-    document.getElementById('play-hosts').value='app_servers');
-    document.getElementById('play-become').checked=true;
-    addVar('app_version','1.2.0');
-    addVar('app_dir','/opt/app');
-    addTask('Cloner le dépôt','git',[{k:'repo',p:'https://github.com/org/app.git'},{k:'dest',p:'{{ app_dir }}'},{k:'version',p:'{{ app_version }}'}],'','');
-    addTask('Installer les dépendances','yum',[{k:'name',p:'python3 python3-pip'},{k:'state',p:'present'}],'','');
-    addTask('Créer le service systemd','template',[{k:'src',p:'app.service.j2'},{k:'dest',p:'/etc/systemd/system/app.service'}],'restart app','');
-    addTask('Activer le service','systemd',[{k:'name',p:'app'},{k:'state',p:'started'},{k:'enabled',p:'yes'},{k:'daemon_reload',p:'yes'}],'','');
-  } else if(tpl==='hardening'){
-    document.getElementById('play-name').value='Hardening basique RHEL';
-    document.getElementById('play-hosts').value='all');
-    document.getElementById('play-become').checked=true;
-    addTask('Désactiver SSH root login','lineinfile',[{k:'path',p:'/etc/ssh/sshd_config'},{k:'line',p:'PermitRootLogin no'},{k:'state',p:'present'}],'restart sshd','');
-    addTask('Configurer firewalld','firewalld',[{k:'service',p:'ssh'},{k:'state',p:'enabled'},{k:'permanent',p:'yes'}],'','');
-    addTask('SELinux en mode enforcing','selinux',[{k:'state',p:'enforcing'}],'','');
-  }
-  build();
-}
-
-const te=document.getElementById('templates');
-TEMPLATES.forEach(t=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=t.l; b.onclick=t.f; te.appendChild(b); });
-
-addTask('Installer le paquet','yum');
+renderRecipes();
+addTask('Installer httpd', 'dnf', [{k:'name',p:'httpd'},{k:'state',p:'present'}],'restart httpd');
+addTask('Démarrer et activer httpd', 'service', [{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}]);
 </script>
 </body>
 </html>

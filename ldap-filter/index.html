@@ -11,27 +11,27 @@
     .tool-header h1{font-size:1.5rem;flex:1;}
     .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
     @media(max-width:800px){.layout{grid-template-columns:1fr;}}
-    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.6rem;}
-    .filter-node{border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;background:var(--bg-card);}
-    .filter-node+.filter-node{margin-top:.6rem;}
-    .node-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;}
-    .node-op-sel{flex:0 0 80px;}
-    .cond-row{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap;}
-    .cond-attr{flex:1;min-width:120px;}
-    .cond-op{flex:0 0 70px;}
-    .cond-val{flex:1;min-width:120px;}
-    .condition-list{margin-bottom:.5rem;}
-    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem;}
+    .cond-row{display:flex;gap:.4rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;}
+    .cond-row input{flex:1;min-width:100px;}
+    .cond-row select{flex:0 0 90px;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:1rem;}
     .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
     .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
-    .output-pre{font-family:var(--font-mono);font-size:.9rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--accent);}
+    .output-pre{font-family:var(--font-mono);font-size:.9rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:60px;color:var(--accent);}
+    .shell-pre{font-family:var(--font-mono);font-size:.8rem;padding:1rem;white-space:pre-wrap;word-break:break-all;color:var(--accent2);}
     .presets-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.5rem;}
     .preset-btn{text-align:left;padding:.6rem .85rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;color:var(--text-secondary);transition:all var(--transition);}
     .preset-btn:hover{border-color:var(--accent);color:var(--text-primary);}
-    .preset-btn strong{display:block;color:var(--text-primary);margin-bottom:.2rem;font-size:.85rem;}
+    .preset-btn strong{display:block;color:var(--text-primary);margin-bottom:.15rem;}
     .common-attrs{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem;}
     .attr-tag{padding:.15rem .5rem;border-radius:4px;font-size:.75rem;font-family:var(--font-mono);background:var(--bg-input);border:1px solid var(--border);cursor:pointer;color:var(--text-secondary);transition:all var(--transition);}
     .attr-tag:hover{border-color:var(--accent);color:var(--accent);}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+    .ref-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+    .ref-table td{padding:.3rem .5rem;border-bottom:1px solid var(--border);}
+    .ref-table td:first-child{font-family:var(--font-mono);color:var(--accent2);}
+    .help{font-size:.75rem;color:var(--text-muted);margin-top:.3rem;}
   </style>
 </head>
 <body>
@@ -39,55 +39,123 @@
   <header class="tool-header">
     <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
     <h1>LDAP Filter Generator</h1>
-    <span class="badge badge--version">v1.0.0</span>
+    <span class="badge badge--version">v1.1.0</span>
   </header>
 
-  <!-- Modèles rapides -->
   <p class="section-title">Modèles courants</p>
   <div class="presets-grid" id="presets"></div>
 
   <div class="layout">
     <!-- Gauche : builder -->
     <div>
-      <p class="section-title">Constructeur de filtre</p>
-
       <div class="card" style="margin-bottom:1rem;">
-        <p class="section-title">Opérateur racine</p>
+        <p class="section-title">Opérateur logique racine</p>
         <select class="select" id="root-op" onchange="build()" style="width:auto">
-          <option value="AND">AND — &amp;(…)</option>
-          <option value="OR">OR — |(…)</option>
-          <option value="NOT">NOT — !(…)</option>
-          <option value="SIMPLE">Condition simple</option>
+          <option value="AND">AND — &amp;(…) — toutes les conditions vraies</option>
+          <option value="OR">OR — |(…) — au moins une condition vraie</option>
+          <option value="NOT">NOT — !(…) — première condition niée</option>
+          <option value="SIMPLE">Condition simple (pas d'opérateur)</option>
         </select>
       </div>
 
-      <div id="conditions"></div>
-      <button class="btn btn--secondary btn--sm mt-md" onclick="addCond()">+ Condition</button>
+      <div class="card" style="margin-bottom:1rem;">
+        <p class="section-title">Conditions</p>
+        <div id="conditions"></div>
+        <button class="btn btn--secondary btn--sm mt-md" onclick="addCond()">+ Condition</button>
+        <p class="section-title" style="margin-top:1rem;">Attributs courants (clic pour insérer)</p>
+        <div class="common-attrs" id="attrs"></div>
+      </div>
 
-      <p class="section-title mt-lg">Attributs courants (clic pour insérer)</p>
-      <div class="common-attrs" id="attrs"></div>
+      <!-- ldapsearch config -->
+      <div class="card">
+        <p class="section-title">Configuration ldapsearch</p>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div class="two-col">
+            <div>
+              <label>Protocole</label>
+              <select class="select" id="ls-proto" onchange="buildShell()">
+                <option value="ldaps">ldaps:// (636 — chiffré)</option>
+                <option value="ldap">ldap:// (389 — non chiffré)</option>
+              </select>
+            </div>
+            <div>
+              <label>Serveur</label>
+              <input class="input" id="ls-host" placeholder="dc01.domaine.local" oninput="buildShell()">
+            </div>
+          </div>
+          <div class="two-col">
+            <div>
+              <label>Bind DN (-D)</label>
+              <input class="input" id="ls-binddn" placeholder="CN=svc-ldap,OU=Services,DC=dom,DC=local" oninput="buildShell()">
+              <p class="help">Compte de service utilisé pour la liaison</p>
+            </div>
+            <div>
+              <label>Authentification</label>
+              <select class="select" id="ls-auth" onchange="buildShell()">
+                <option value="-W">-W (demander le mot de passe)</option>
+                <option value="-x">-x (simple, anonyme)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>Base DN (-b)</label>
+            <input class="input" id="ls-base" placeholder="DC=domaine,DC=local" oninput="buildShell()">
+            <p class="help">Point de départ de la recherche dans l'arbre LDAP</p>
+          </div>
+          <div class="two-col">
+            <div>
+              <label>Étendue (-s)</label>
+              <select class="select" id="ls-scope" onchange="buildShell()">
+                <option value="sub">sub — récursif (défaut)</option>
+                <option value="one">one — un niveau</option>
+                <option value="base">base — objet seul</option>
+              </select>
+            </div>
+            <div>
+              <label>Limite résultats (-z)</label>
+              <input class="input" id="ls-sizelimit" type="number" placeholder="0 = illimité" oninput="buildShell()">
+            </div>
+          </div>
+          <div>
+            <label>Attributs à retourner (vide = tous)</label>
+            <input class="input" id="ls-attrs" placeholder="cn sAMAccountName mail memberOf" oninput="buildShell()">
+            <p class="help">Séparés par des espaces. <code>*</code> = tous les attrs normaux, <code>+</code> = attrs opérationnels</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Droite : output -->
+    <!-- Droite : outputs -->
     <div>
-      <p class="section-title">Filtre généré</p>
+      <p class="section-title">Filtre LDAP</p>
       <div class="output-box">
         <div class="output-header">
           <span>LDAP Filter</span>
-          <button class="btn btn--sm btn--secondary" onclick="copyFilter()">Copier</button>
+          <button class="btn btn--sm btn--secondary" onclick="copyText('output-filter')">Copier</button>
         </div>
-        <pre class="output-pre" id="output"></pre>
+        <pre class="output-pre" id="output-filter"></pre>
       </div>
 
-      <div class="card mt-lg">
+      <p class="section-title">Commande ldapsearch</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span>Shell</span>
+          <button class="btn btn--sm btn--secondary" onclick="copyText('output-shell')">Copier</button>
+        </div>
+        <pre class="shell-pre" id="output-shell"></pre>
+      </div>
+
+      <div class="card">
         <p class="section-title">Référence opérateurs</p>
-        <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
-          <tr><td style="padding:.3rem .5rem;font-family:var(--font-mono);color:var(--accent);">=</td><td style="padding:.3rem .5rem;color:var(--text-secondary);">Égalité exacte</td></tr>
-          <tr><td style="padding:.3rem .5rem;font-family:var(--font-mono);color:var(--accent);">~=</td><td style="padding:.3rem .5rem;color:var(--text-secondary);">Approximation</td></tr>
-          <tr><td style="padding:.3rem .5rem;font-family:var(--font-mono);color:var(--accent);">&gt;=</td><td style="padding:.3rem .5rem;color:var(--text-secondary);">Supérieur ou égal</td></tr>
-          <tr><td style="padding:.3rem .5rem;font-family:var(--font-mono);color:var(--accent);">&lt;=</td><td style="padding:.3rem .5rem;color:var(--text-secondary);">Inférieur ou égal</td></tr>
-          <tr><td style="padding:.3rem .5rem;font-family:var(--font-mono);color:var(--accent);">=*</td><td style="padding:.3rem .5rem;color:var(--text-secondary);">Présence (attribut existe)</td></tr>
-          <tr><td style="padding:.3rem .5rem;font-family:var(--font-mono);color:var(--accent);">=*val*</td><td style="padding:.3rem .5rem;color:var(--text-secondary);">Contient (wildcard)</td></tr>
+        <table class="ref-table">
+          <tr><td>=</td><td style="color:var(--text-secondary);">Égalité exacte</td></tr>
+          <tr><td>~=</td><td style="color:var(--text-secondary);">Approximation phonétique</td></tr>
+          <tr><td>&gt;=</td><td style="color:var(--text-secondary);">Supérieur ou égal</td></tr>
+          <tr><td>&lt;=</td><td style="color:var(--text-secondary);">Inférieur ou égal</td></tr>
+          <tr><td>=*</td><td style="color:var(--text-secondary);">Présence (attribut existe)</td></tr>
+          <tr><td>=*val*</td><td style="color:var(--text-secondary);">Contient (wildcard)</td></tr>
+          <tr><td>=val*</td><td style="color:var(--text-secondary);">Commence par</td></tr>
+          <tr><td>=*val</td><td style="color:var(--text-secondary);">Finit par</td></tr>
         </table>
       </div>
     </div>
@@ -95,73 +163,64 @@
 </div>
 
 <script>
-const COMMON_ATTRS = ['objectClass','sAMAccountName','userPrincipalName','cn','dn','mail','givenName',
-  'sn','displayName','memberOf','member','distinguishedName','userAccountControl',
-  'whenCreated','pwdLastSet','accountExpires','department','title','manager'];
+const COMMON_ATTRS=['objectClass','sAMAccountName','userPrincipalName','cn','dn','mail','givenName','sn','displayName','memberOf','member','distinguishedName','userAccountControl','whenCreated','pwdLastSet','accountExpires','department','title','manager','telephoneNumber','employeeID'];
 
-const PRESETS = [
-  {l:'Trouver un utilisateur',     d:'Par sAMAccountName',    f:'(&(objectClass=user)(sAMAccountName=COMPTE))'},
-  {l:'Utilisateurs actifs',        d:'Non désactivés (AD)',   f:'(&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))'},
-  {l:'Membres d\'un groupe',       d:'Appartenance directe',  f:'(&(objectClass=user)(memberOf=CN=NomGroupe,OU=Groupes,DC=domaine,DC=local))'},
-  {l:'Trouver un groupe',          d:'Par nom',               f:'(&(objectClass=group)(cn=NomGroupe))'},
-  {l:'Ordinateurs du domaine',     d:'Tous les computers',    f:'(objectClass=computer)'},
-  {l:'Comptes expirés',            d:'accountExpires dépassé',f:'(&(objectClass=user)(accountExpires<=TIMESTAMP))'},
+const PRESETS=[
+  {l:'Trouver un utilisateur par login', d:'sAMAccountName',     f:'(&(objectClass=user)(sAMAccountName=COMPTE))'},
+  {l:'Utilisateurs actifs (non désactivés)', d:'AD — UAC',       f:'(&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))'},
+  {l:'Membres directs d\'un groupe',     d:'memberOf',           f:'(&(objectClass=user)(memberOf=CN=NomGroupe,OU=Groupes,DC=domaine,DC=local))'},
+  {l:'Trouver un groupe',                d:'cn',                 f:'(&(objectClass=group)(cn=NomGroupe))'},
+  {l:'Tous les ordinateurs',             d:'objectClass=computer',f:'(objectClass=computer)'},
+  {l:'Comptes expirés',                  d:'accountExpires',      f:'(&(objectClass=user)(accountExpires<=TIMESTAMP_FT))'},
+  {l:'Utilisateurs sans email',          d:'Absence d\'attribut',f:'(&(objectClass=user)(!(mail=*)))'},
+  {l:'Groupes de sécurité',              d:'groupType',          f:'(&(objectClass=group)(groupType:1.2.840.113556.1.4.803:=2147483648))'},
 ];
 
-// Presets
-const pg = document.getElementById('presets');
+const pg=document.getElementById('presets');
 PRESETS.forEach(p=>{
   const b=document.createElement('button'); b.className='preset-btn';
   b.innerHTML=`<strong>${p.l}</strong>${p.d}`;
-  b.onclick=()=>loadRaw(p.f);
+  b.onclick=()=>{ document.getElementById('conditions').innerHTML=''; document.getElementById('output-filter').textContent=p.f; buildShell(); };
   pg.appendChild(b);
 });
 
-// Attrs
-const ac = document.getElementById('attrs');
+const ac=document.getElementById('attrs');
 COMMON_ATTRS.forEach(a=>{
   const t=document.createElement('span'); t.className='attr-tag'; t.textContent=a;
-  t.onclick=()=>{
-    const inputs=document.querySelectorAll('.cond-attr');
-    if(inputs.length){ inputs[inputs.length-1].value=a; build(); }
-  };
+  t.onclick=()=>{ const inputs=document.querySelectorAll('.cond-attr'); if(inputs.length){ inputs[inputs.length-1].value=a; build(); } };
   ac.appendChild(t);
 });
 
-function addCond(attr='',op='=',val='') {
-  const list=document.getElementById('conditions');
-  const row=document.createElement('div'); row.className='card filter-node';
-  row.innerHTML=`<div class="cond-row">
-    <input class="input cond-attr" placeholder="Attribut (ex: cn)" value="${attr}" oninput="build()">
-    <select class="select cond-op" onchange="onOpChange(this)">
-      <option ${op==='='?'selected':''}>= </option>
-      <option ${op==='~='?'selected':''}>~=</option>
-      <option ${op==='>='?'selected':''}>&gt;=</option>
-      <option ${op==='<='?'selected':''}>&lt;=</option>
+function addCond(attr='',op='=',val=''){
+  const c=document.getElementById('conditions');
+  const row=document.createElement('div'); row.className='cond-row';
+  row.innerHTML=`<input class="input cond-attr" placeholder="Attribut" value="${attr}" oninput="build()">
+    <select class="select cond-op" onchange="onOpChange(this)" style="flex:0 0 100px">
+      <option ${op==='='?'selected':''} value="=">=</option>
+      <option ${op==='~='?'selected':''} value="~=">~=</option>
+      <option ${op==='>='?'selected':''} value=">=">&gt;=</option>
+      <option ${op==='<='?'selected':''} value="<=">&lt;=</option>
       <option value="presence" ${op==='presence'?'selected':''}>présence</option>
-      <option value="wildcard" ${op==='wildcard'?'selected':''}>contient</option>
+      <option value="wildcard" ${op==='wildcard'?'selected':''}>contient *</option>
+      <option value="startswith" ${op==='startswith'?'selected':''}>commence par</option>
     </select>
     <input class="input cond-val" placeholder="valeur" value="${val}" oninput="build()" ${op==='presence'?'style="display:none"':''}>
-    <button class="btn btn--ghost btn--sm" onclick="this.closest('.filter-node').remove();build()">✕</button>
-  </div>`;
-  list.appendChild(row); build();
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.cond-row').remove();build()">✕</button>`;
+  c.appendChild(row); build();
 }
 
-function onOpChange(sel){
-  const valInput=sel.parentElement.querySelector('.cond-val');
-  valInput.style.display=sel.value==='presence'?'none':'';
-  build();
-}
+function onOpChange(sel){ const vi=sel.parentElement.querySelector('.cond-val'); vi.style.display=sel.value==='presence'?'none':''; build(); }
 
-function buildFilter() {
+function buildFilterExpr(){
   const op=document.getElementById('root-op').value;
   const conds=[...document.querySelectorAll('.cond-row')].map(r=>{
     const attr=r.querySelector('.cond-attr')?.value||'';
     const opSel=r.querySelector('.cond-op')?.value||'=';
     const val=r.querySelector('.cond-val')?.value||'';
     if(!attr) return null;
-    if(opSel==='presence') return `(${attr}=*)`;
-    if(opSel==='wildcard') return `(${attr}=*${val}*)`;
+    if(opSel==='presence')   return `(${attr}=*)`;
+    if(opSel==='wildcard')   return `(${attr}=*${val}*)`;
+    if(opSel==='startswith') return `(${attr}=${val}*)`;
     return `(${attr}${opSel}${val})`;
   }).filter(Boolean);
 
@@ -174,22 +233,43 @@ function buildFilter() {
 }
 
 function build(){
-  document.getElementById('output').textContent=buildFilter();
+  const f=buildFilterExpr();
+  document.getElementById('output-filter').textContent=f;
+  buildShell();
 }
 
-function copyFilter(){
-  navigator.clipboard.writeText(document.getElementById('output').textContent);
+function buildShell(){
+  const filter=document.getElementById('output-filter').textContent||'(objectClass=*)';
+  const proto=document.getElementById('ls-proto').value;
+  const host=document.getElementById('ls-host').value||'dc01.domaine.local';
+  const port=proto==='ldaps'?'636':'389';
+  const binddn=document.getElementById('ls-binddn').value;
+  const auth=document.getElementById('ls-auth').value;
+  const base=document.getElementById('ls-base').value||'DC=domaine,DC=local';
+  const scope=document.getElementById('ls-scope').value;
+  const sizelimit=document.getElementById('ls-sizelimit').value;
+  const attrs=document.getElementById('ls-attrs').value;
+
+  const parts=['ldapsearch'];
+  parts.push(`-H ${proto}://${host}:${port}`);
+  parts.push(`-x`);
+  if(binddn) parts.push(`-D "${binddn}"`);
+  if(auth==='-W') parts.push('-W');
+  parts.push(`-b "${base}"`);
+  if(scope!=='sub') parts.push(`-s ${scope}`);
+  if(sizelimit&&sizelimit!=='0') parts.push(`-z ${sizelimit}`);
+  parts.push(`"${filter}"`);
+  if(attrs) parts.push(attrs);
+
+  document.getElementById('output-shell').textContent=parts.join(' \\\n  ');
+}
+
+function copyText(id){
+  navigator.clipboard.writeText(document.getElementById(id).textContent);
   const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary');
   setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
 }
 
-function loadRaw(f){
-  // Clear and load preset as raw display
-  document.getElementById('conditions').innerHTML='';
-  document.getElementById('output').textContent=f;
-}
-
-// Init
 addCond('objectClass','=','user');
 addCond('sAMAccountName','=','');
 </script>

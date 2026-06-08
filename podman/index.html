@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<!-- Podman Builder — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Podman Builder — Portail</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
+    .tool-header h1{font-size:1.5rem;flex:1;}
+    .tabs{display:flex;gap:.3rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+    .tab{padding:.35rem .9rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.85rem;cursor:pointer;transition:all var(--transition);}
+    .tab.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:850px){.layout{grid-template-columns:1fr;}}
+    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+    .kv-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.4rem;}
+    .kv-row{display:flex;gap:.4rem;align-items:center;}
+    .kv-row input{flex:1;}
+    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
+    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .output-pre{font-family:var(--font-mono);font-size:.82rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:140px;color:var(--text-primary);}
+    .run-pre{font-family:var(--font-mono);font-size:.82rem;padding:1rem;white-space:pre-wrap;word-break:break-all;min-height:80px;color:var(--accent2);}
+    .templates{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+    .images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.5rem;margin-top:.6rem;}
+    .img-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);}
+    .img-card:hover{border-color:var(--accent);}
+    .img-card strong{display:block;font-family:var(--font-mono);font-size:.78rem;color:var(--accent2);}
+    .img-card span{font-size:.72rem;color:var(--text-muted);}
+    .check-label{display:flex;align-items:flex-start;gap:.5rem;font-size:.85rem;cursor:pointer;}
+    .check-label input{width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;margin-top:2px;}
+    .help{font-size:.75rem;color:var(--text-muted);margin:.2rem 0 .5rem;}
+    .run-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.4rem;}
+    .run-row{display:flex;gap:.4rem;align-items:center;}
+    .run-row input{flex:1;font-family:var(--font-mono);font-size:.85rem;}
+    .copy-row{display:flex;gap:.4rem;align-items:center;}
+    .copy-row input{flex:1;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>Podman Builder</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-build" onclick="setTab('build',this)">podman build (Containerfile)</button>
+    <button class="tab" id="tab-run" onclick="setTab('run',this)">podman run</button>
+    <button class="tab" id="tab-quadlet" onclick="setTab('quadlet',this)">Quadlet (systemd)</button>
+  </div>
+
+  <!-- ══ BUILD TAB ══════════════════════════════════════════ -->
+  <div id="panel-build">
+    <p class="section-title">Images de base courantes (clic pour sélectionner)</p>
+    <div class="images-grid" id="images-grid"></div>
+
+    <p class="section-title" style="margin-top:1.5rem;">Templates</p>
+    <div class="templates" id="build-templates"></div>
+
+    <div class="layout" style="margin-top:1rem;">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+
+        <div class="card">
+          <p class="section-title">Image de base (FROM)</p>
+          <div class="two-col">
+            <div><label>Image</label><input class="input" id="b-from" placeholder="registry.access.redhat.com/ubi9/ubi-minimal" oninput="buildCF()"></div>
+            <div><label>Alias (multi-stage)</label><input class="input" id="b-as" placeholder="builder" oninput="buildCF()"></div>
+          </div>
+          <label class="check-label" style="margin-top:.5rem;"><input type="checkbox" id="b-multistage" onchange="toggleMS()"> Multi-stage build</label>
+          <div id="ms-panel" style="display:none;margin-top:.5rem;">
+            <label>Image finale</label>
+            <input class="input" id="b-from2" placeholder="registry.access.redhat.com/ubi9/ubi-micro" oninput="buildCF()">
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">WORKDIR &amp; USER</p>
+          <div class="two-col">
+            <div><label>WORKDIR</label><input class="input" id="b-workdir" placeholder="/app" oninput="buildCF()"></div>
+            <div><label>USER</label><input class="input" id="b-user" placeholder="1001" oninput="buildCF()">
+              <p class="help">Podman rootless : utiliser un UID non-root (ex: 1001)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Variables d'environnement (ENV)</p>
+          <div class="kv-list" id="b-env-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addBEnv()">+ ENV</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Copie (COPY)</p>
+          <div class="kv-list" id="b-copy-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addBCopy()">+ COPY</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Commandes RUN</p>
+          <div class="run-list" id="b-run-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addBRun()">+ RUN</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Ports exposés</p>
+          <div class="kv-list" id="b-expose-list"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addBExpose()">+ EXPOSE</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Démarrage (CMD / ENTRYPOINT)</p>
+          <div class="two-col">
+            <div><label>Type</label>
+              <select class="select" id="b-cmd-type" onchange="buildCF()">
+                <option value="CMD_EXEC">CMD exec ["cmd","arg"]</option>
+                <option value="CMD">CMD shell cmd arg</option>
+                <option value="ENTRYPOINT">ENTRYPOINT ["cmd"]</option>
+              </select>
+            </div>
+            <div><label>Commande</label><input class="input" id="b-cmd" placeholder="/usr/bin/python3 app.py" oninput="buildCF()" style="font-family:var(--font-mono)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="section-title">Containerfile généré</p>
+        <div class="output-box" style="margin-bottom:1rem;">
+          <div class="output-header">
+            <span>Containerfile</span>
+            <button class="btn btn--sm btn--secondary" onclick="copyOut('b-output')">Copier</button>
+          </div>
+          <pre class="output-pre" id="b-output"></pre>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Commande podman build</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div class="two-col">
+              <div><label>Tag (-t)</label><input class="input" id="b-tag" placeholder="monapp:1.0" oninput="buildCmd()"></div>
+              <div><label>Contexte</label><input class="input" id="b-context" placeholder="." oninput="buildCmd()"></div>
+            </div>
+            <label class="check-label"><input type="checkbox" id="b-no-cache" onchange="buildCmd()">
+              <span>--no-cache (ne pas utiliser le cache des layers)</span>
+            </label>
+            <label class="check-label"><input type="checkbox" id="b-pull" onchange="buildCmd()">
+              <span>--pull (forcer le pull de l'image de base)</span>
+            </label>
+          </div>
+          <pre class="run-pre" id="build-cmd" style="margin-top:.75rem;"></pre>
+          <button class="btn btn--secondary btn--sm mt-sm" onclick="copyOut('build-cmd')">Copier la commande</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RUN TAB ════════════════════════════════════════════ -->
+  <div id="panel-run" style="display:none;">
+    <div class="layout">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+
+        <div class="card">
+          <p class="section-title">Image &amp; Nom</p>
+          <div class="two-col">
+            <div><label>Image:tag</label><input class="input" id="r-image" placeholder="httpd:2.4" oninput="buildRun()"></div>
+            <div><label>--name</label><input class="input" id="r-name" placeholder="mon-container" oninput="buildRun()"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Mode &amp; Politique</p>
+          <div class="two-col">
+            <div><label>Mode</label>
+              <select class="select" id="r-mode" onchange="buildRun()">
+                <option value="-d">-d (détaché / daemon)</option>
+                <option value="-it">-it (interactif)</option>
+                <option value="--rm">--rm (suppression auto)</option>
+              </select>
+            </div>
+            <div><label>Restart</label>
+              <select class="select" id="r-restart" onchange="buildRun()">
+                <option value="">—</option>
+                <option>no</option><option>always</option>
+                <option>on-failure</option><option>unless-stopped</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Ports (-p)</p>
+          <div class="kv-list" id="r-ports"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addRPort()">+ Port</button>
+          <p class="help">hôte:container — ex: 8080:80</p>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Volumes (-v)</p>
+          <div class="kv-list" id="r-vols"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addRVol()">+ Volume</button>
+          <p class="help">Podman rootless : <code>:Z</code> pour SELinux, <code>:U</code> pour mapper l'UID</p>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Variables d'environnement (-e)</p>
+          <div class="kv-list" id="r-env"></div>
+          <button class="btn btn--secondary btn--sm" onclick="addREnv()">+ Env</button>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Options avancées</p>
+          <div style="display:flex;flex-direction:column;gap:.4rem;">
+            <div class="two-col">
+              <div><label>Network</label>
+                <select class="select" id="r-net" onchange="buildRun()">
+                  <option value="">— défaut (bridge) —</option>
+                  <option>host</option><option>none</option><option>slirp4netns</option><option>pasta</option>
+                </select>
+              </div>
+              <div><label>User (-u)</label><input class="input" id="r-user" placeholder="1001:1001" oninput="buildRun()"></div>
+            </div>
+            <label class="check-label"><input type="checkbox" id="r-userns" onchange="buildRun()">
+              <span>--userns=keep-id (rootless : mapper UID hôte→container)</span>
+            </label>
+            <label class="check-label"><input type="checkbox" id="r-security-opt" onchange="buildRun()">
+              <span>--security-opt label=disable (désactiver SELinux pour ce container)</span>
+            </label>
+            <label class="check-label"><input type="checkbox" id="r-read-only" onchange="buildRun()">
+              <span>--read-only (filesystem en lecture seule)</span>
+            </label>
+            <label class="check-label"><input type="checkbox" id="r-privileged" onchange="buildRun()">
+              <span>--privileged ⚠️ (accès complet aux devices hôte)</span>
+            </label>
+            <div><label>Commande (override)</label><input class="input" id="r-cmd" placeholder="bash" oninput="buildRun()" style="font-family:var(--font-mono)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="section-title">Commande générée</p>
+        <div class="output-box">
+          <div class="output-header">
+            <span>podman run</span>
+            <button class="btn btn--sm btn--secondary" onclick="copyOut('r-output')">Copier</button>
+          </div>
+          <pre class="run-pre" id="r-output"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ QUADLET TAB ════════════════════════════════════════ -->
+  <div id="panel-quadlet" style="display:none;">
+    <div class="layout">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <p class="section-title">Configuration du container</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div><label>Nom du service</label><input class="input" id="q-name" placeholder="monapp" oninput="buildQuadlet()"></div>
+            <div><label>Image</label><input class="input" id="q-image" placeholder="registry.access.redhat.com/ubi9/httpd-24" oninput="buildQuadlet()"></div>
+            <div><label>Description</label><input class="input" id="q-desc" placeholder="Service HTTP applicatif" oninput="buildQuadlet()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <p class="section-title">Ports &amp; Volumes</p>
+          <div><label>PublishPort (hôte:container)</label><input class="input" id="q-port" placeholder="8080:8080" oninput="buildQuadlet()"></div>
+          <div style="margin-top:.5rem;"><label>Volume</label><input class="input" id="q-vol" placeholder="/opt/app:/app:Z" oninput="buildQuadlet()"></div>
+        </div>
+        <div class="card">
+          <p class="section-title">Variables &amp; Options</p>
+          <div><label>Environment</label><input class="input" id="q-env" placeholder="NODE_ENV=production" oninput="buildQuadlet()"></div>
+          <div style="margin-top:.5rem;"><label>Exec (override)</label><input class="input" id="q-exec" placeholder="" oninput="buildQuadlet()"></div>
+          <div style="margin-top:.5rem;">
+            <label class="check-label"><input type="checkbox" id="q-auto-update" onchange="buildQuadlet()">
+              <span>AutoUpdate=registry (mise à jour auto via podman-auto-update)</span>
+            </label>
+          </div>
+        </div>
+        <div class="card">
+          <p class="section-title">Installation systemd</p>
+          <div><label>WantedBy</label>
+            <select class="select" id="q-wanted" onchange="buildQuadlet()">
+              <option>default.target</option>
+              <option>multi-user.target</option>
+            </select>
+          </div>
+          <p class="help">Emplacement du fichier : <code>~/.config/containers/systemd/&lt;nom&gt;.container</code> (rootless) ou <code>/etc/containers/systemd/</code> (root)</p>
+        </div>
+      </div>
+      <div>
+        <p class="section-title">Fichier .container (Quadlet)</p>
+        <div class="output-box" style="margin-bottom:1rem;">
+          <div class="output-header">
+            <span id="quadlet-filename">monapp.container</span>
+            <button class="btn btn--sm btn--secondary" onclick="copyOut('q-output')">Copier</button>
+          </div>
+          <pre class="output-pre" id="q-output"></pre>
+        </div>
+        <div class="card">
+          <p class="section-title">Activation</p>
+          <pre class="run-pre" id="q-cmds" style="min-height:auto;"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTab(t,btn){ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); ['build','run','quadlet'].forEach(p=>document.getElementById('panel-'+p).style.display=p===t?'':'none'); }
+
+const IMAGES=[
+  {n:'registry.access.redhat.com/ubi9/ubi',         d:'UBI 9 — base RHEL 9'},
+  {n:'registry.access.redhat.com/ubi9/ubi-minimal',  d:'UBI 9 minimal (microdnf)'},
+  {n:'registry.access.redhat.com/ubi9/ubi-micro',    d:'UBI 9 micro (sans gestionnaire)'},
+  {n:'registry.access.redhat.com/ubi8/ubi',          d:'UBI 8 — base RHEL 8'},
+  {n:'registry.access.redhat.com/ubi9/httpd-24',     d:'RHEL 9 — Apache HTTP 2.4'},
+  {n:'registry.access.redhat.com/ubi8/httpd-24',     d:'RHEL 8 — Apache HTTP 2.4'},
+  {n:'registry.access.redhat.com/ubi9/python-311',   d:'RHEL 9 — Python 3.11'},
+  {n:'registry.access.redhat.com/ubi9/openjdk-21',   d:'RHEL 9 — OpenJDK 21'},
+  {n:'quay.io/centos/centos:stream9',                 d:'CentOS Stream 9'},
+  {n:'docker.io/library/nginx:alpine',                d:'Nginx Alpine (léger)'},
+  {n:'docker.io/library/postgres:16',                 d:'PostgreSQL 16'},
+  {n:'docker.io/library/mariadb:10.11',               d:'MariaDB 10.11'},
+  {n:'docker.io/library/redis:7-alpine',              d:'Redis 7 Alpine'},
+  {n:'docker.io/library/python:3.11-slim',            d:'Python 3.11 Debian slim'},
+  {n:'docker.io/library/node:20-alpine',              d:'Node.js 20 Alpine'},
+];
+
+const ig=document.getElementById('images-grid');
+IMAGES.forEach(img=>{
+  const c=document.createElement('div'); c.className='img-card';
+  c.innerHTML=`<strong>${img.n.split('/').pop()}</strong><span>${img.d}</span>`;
+  c.onclick=()=>{ document.getElementById('b-from').value=img.n; buildCF(); buildCmd(); };
+  ig.appendChild(c);
+});
+
+const TEMPLATES=[
+  {l:'App Python UBI9',  f:()=>loadBuildTpl('python')},
+  {l:'Apache HTTP (UBI)',f:()=>loadBuildTpl('httpd')},
+  {l:'Node.js Alpine',   f:()=>loadBuildTpl('node')},
+  {l:'Multi-stage Go',   f:()=>loadBuildTpl('go')},
+];
+const bt=document.getElementById('build-templates');
+TEMPLATES.forEach(t=>{ const b=document.createElement('button'); b.className='btn btn--secondary btn--sm'; b.textContent=t.l; b.onclick=()=>{ clearBuildForm(); t.f(); }; bt.appendChild(b); });
+
+function clearBuildForm(){ ['b-env-list','b-copy-list','b-run-list','b-expose-list'].forEach(id=>document.getElementById(id).innerHTML=''); document.getElementById('b-multistage').checked=false; document.getElementById('ms-panel').style.display='none'; }
+function vb(id){ return document.getElementById(id)?.value?.trim()||''; }
+
+function addBEnv(k='',v=''){ const l=document.getElementById('b-env-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="NOM" value="${k}" oninput="buildCF()"><input class="input" placeholder="valeur" value="${v}" oninput="buildCF()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildCF()">✕</button>`; l.appendChild(r); buildCF(); }
+function addBCopy(s='',d=''){ const l=document.getElementById('b-copy-list'); const r=document.createElement('div'); r.className='copy-row'; r.innerHTML=`<input class="input" placeholder="source" value="${s}" oninput="buildCF()"><span style="color:var(--text-muted)">→</span><input class="input" placeholder="destination" value="${d}" oninput="buildCF()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.copy-row').remove();buildCF()">✕</button>`; l.appendChild(r); buildCF(); }
+function addBRun(cmd=''){ const l=document.getElementById('b-run-list'); const r=document.createElement('div'); r.className='run-row'; r.innerHTML=`<input class="input" placeholder="microdnf install -y python3" value="${cmd}" oninput="buildCF()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.run-row').remove();buildCF()">✕</button>`; l.appendChild(r); buildCF(); }
+function addBExpose(p=''){ const l=document.getElementById('b-expose-list'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" type="number" placeholder="8080" value="${p}" oninput="buildCF()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildCF()">✕</button>`; l.appendChild(r); buildCF(); }
+
+function addRPort(h='',c=''){ const l=document.getElementById('r-ports'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="8080 (hôte)" value="${h}" oninput="buildRun()"><span style="color:var(--text-muted)">:</span><input class="input" placeholder="80 (container)" value="${c}" oninput="buildRun()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildRun()">✕</button>`; l.appendChild(r); buildRun(); }
+function addRVol(h='',c=''){ const l=document.getElementById('r-vols'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="/host/path" value="${h}" oninput="buildRun()"><span style="color:var(--text-muted)">:</span><input class="input" placeholder="/container/path:Z" value="${c}" oninput="buildRun()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildRun()">✕</button>`; l.appendChild(r); buildRun(); }
+function addREnv(k='',v=''){ const l=document.getElementById('r-env'); const r=document.createElement('div'); r.className='kv-row'; r.innerHTML=`<input class="input" placeholder="NOM" value="${k}" oninput="buildRun()"><input class="input" placeholder="valeur" value="${v}" oninput="buildRun()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();buildRun()">✕</button>`; l.appendChild(r); buildRun(); }
+
+function toggleMS(){ document.getElementById('ms-panel').style.display=document.getElementById('b-multistage').checked?'':'none'; buildCF(); }
+
+function buildCF(){
+  const from=vb('b-from')||'registry.access.redhat.com/ubi9/ubi-minimal';
+  const as=vb('b-as'); const multistage=document.getElementById('b-multistage').checked; const from2=vb('b-from2');
+  const workdir=vb('b-workdir'); const user=vb('b-user');
+  const cmdType=vb('b-cmd-type')||'CMD_EXEC'; const cmd=vb('b-cmd');
+  const lines=['# Containerfile — Podman compatible',`FROM ${from}${as?' AS '+as:''}`];
+  [...document.querySelectorAll('#b-env-list .kv-row')].forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k&&v) lines.push(`ENV ${k}=${v}`); });
+  if(workdir) lines.push(`WORKDIR ${workdir}`);
+  [...document.querySelectorAll('.copy-row')].forEach(r=>{ const[s,d]=[...r.querySelectorAll('input')].map(i=>i.value); if(s&&d) lines.push(`COPY ${s} ${d}`); });
+  const runs=[...document.querySelectorAll('#b-run-list .run-row input')].map(i=>i.value).filter(Boolean);
+  if(runs.length) lines.push('RUN '+runs.join(' \\\n    && '));
+  [...document.querySelectorAll('#b-expose-list .kv-row input')].map(i=>i.value).filter(Boolean).forEach(p=>lines.push(`EXPOSE ${p}`));
+  if(user) lines.push(`USER ${user}`);
+  if(cmd){
+    if(cmdType==='CMD') lines.push(`CMD ${cmd}`);
+    else if(cmdType==='CMD_EXEC'){ const p=cmd.trim().split(/\s+/); lines.push(`CMD ["${p.join('", "')}"]`); }
+    else{ const p=cmd.trim().split(/\s+/); lines.push(`ENTRYPOINT ["${p.join('", "')}"]`); }
+  }
+  if(multistage&&from2){ lines.push('','# ── Stage final ──────────────'); lines.push(`FROM ${from2}`); if(workdir) lines.push(`WORKDIR ${workdir}`); lines.push(`COPY --from=${as||'builder'} ${workdir||'/app'} ${workdir||'/app'}`); }
+  document.getElementById('b-output').textContent=lines.join('\n');
+  buildCmd();
+}
+
+function buildCmd(){
+  const tag=vb('b-tag')||'monapp:latest'; const ctx=vb('b-context')||'.';
+  const parts=['podman build']; if(document.getElementById('b-no-cache')?.checked) parts.push('--no-cache'); if(document.getElementById('b-pull')?.checked) parts.push('--pull');
+  parts.push(`-t ${tag}`,`-f Containerfile`,ctx);
+  document.getElementById('build-cmd').textContent=parts.join(' \\\n  ');
+}
+
+function buildRun(){
+  const image=vb('r-image')||'nginx:latest'; const name=vb('r-name');
+  const mode=document.getElementById('r-mode').value||'-d'; const restart=document.getElementById('r-restart').value;
+  const net=document.getElementById('r-net').value; const user=vb('r-user'); const cmd=vb('r-cmd');
+  const parts=['podman run',mode];
+  if(name) parts.push(`--name ${name}`);
+  if(restart) parts.push(`--restart ${restart}`);
+  if(net) parts.push(`--network ${net}`);
+  if(user) parts.push(`-u ${user}`);
+  if(document.getElementById('r-userns')?.checked) parts.push('--userns=keep-id');
+  if(document.getElementById('r-security-opt')?.checked) parts.push('--security-opt label=disable');
+  if(document.getElementById('r-read-only')?.checked) parts.push('--read-only');
+  if(document.getElementById('r-privileged')?.checked) parts.push('--privileged');
+  document.querySelectorAll('#r-ports .kv-row').forEach(r=>{ const[h,c]=[...r.querySelectorAll('input')].map(i=>i.value); if(h&&c) parts.push(`-p ${h}:${c}`); });
+  document.querySelectorAll('#r-vols .kv-row').forEach(r=>{ const[h,c]=[...r.querySelectorAll('input')].map(i=>i.value); if(h&&c) parts.push(`-v ${h}:${c}`); else if(h) parts.push(`-v ${h}`); });
+  document.querySelectorAll('#r-env .kv-row').forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k&&v) parts.push(`-e ${k}=${v}`); else if(k) parts.push(`-e ${k}`); });
+  parts.push(image); if(cmd) parts.push(cmd);
+  document.getElementById('r-output').textContent=parts.join(' \\\n  ');
+}
+
+function buildQuadlet(){
+  const name=vb('q-name')||'monapp'; const image=vb('q-image')||'registry.access.redhat.com/ubi9/httpd-24'; const desc=vb('q-desc')||'Container service';
+  const port=vb('q-port'); const vol=vb('q-vol'); const env=vb('q-env'); const exec=vb('q-exec');
+  const autoUpdate=document.getElementById('q-auto-update').checked; const wanted=document.getElementById('q-wanted').value;
+  document.getElementById('quadlet-filename').textContent=`${name}.container`;
+  const lines=['[Unit]',`Description=${desc}`,'','[Container]',`Image=${image}`];
+  if(port) lines.push(`PublishPort=${port}`);
+  if(vol) lines.push(`Volume=${vol}`);
+  if(env) lines.push(`Environment=${env}`);
+  if(exec) lines.push(`Exec=${exec}`);
+  if(autoUpdate) lines.push('AutoUpdate=registry');
+  lines.push('','[Service]','Restart=always','','[Install]',`WantedBy=${wanted}`);
+  document.getElementById('q-output').textContent=lines.join('\n');
+  document.getElementById('q-cmds').textContent=
+`# Copier dans le dossier systemd de l'utilisateur
+mkdir -p ~/.config/containers/systemd/
+cp ${name}.container ~/.config/containers/systemd/
+
+# Recharger systemd et démarrer
+systemctl --user daemon-reload
+systemctl --user enable --now ${name}
+
+# Statut
+systemctl --user status ${name}
+journalctl --user -u ${name} -f`;
+}
+
+function loadBuildTpl(t){
+  clearBuildForm();
+  if(t==='python'){
+    document.getElementById('b-from').value='registry.access.redhat.com/ubi9/ubi-minimal';
+    document.getElementById('b-workdir').value='/app'; document.getElementById('b-user').value='1001';
+    addBRun('microdnf install -y python3 python3-pip && microdnf clean all');
+    addBCopy('requirements.txt','./'); addBRun('pip3 install --no-cache-dir -r requirements.txt');
+    addBCopy('.','.');
+    addBEnv('PYTHONUNBUFFERED','1'); addBExpose('8080');
+    document.getElementById('b-cmd').value='/usr/bin/python3 app.py';
+    document.getElementById('b-cmd-type').value='CMD_EXEC';
+  } else if(t==='httpd'){
+    document.getElementById('b-from').value='registry.access.redhat.com/ubi9/httpd-24';
+    document.getElementById('b-workdir').value='/var/www/html';
+    addBCopy('./html/','/var/www/html/'); addBCopy('./conf/httpd.conf','/etc/httpd/conf/httpd.conf');
+    addBExpose('8080'); addBExpose('8443');
+  } else if(t==='node'){
+    document.getElementById('b-from').value='docker.io/library/node:20-alpine';
+    document.getElementById('b-workdir').value='/app'; document.getElementById('b-user').value='node');
+    addBEnv('NODE_ENV','production'); addBEnv('PORT','3000');
+    addBCopy('package*.json','./'); addBRun('npm ci --only=production');
+    addBCopy('.','.');
+    addBExpose('3000');
+    document.getElementById('b-cmd').value='node server.js';
+    document.getElementById('b-cmd-type').value='CMD_EXEC';
+  } else if(t==='go'){
+    document.getElementById('b-from').value='docker.io/library/golang:1.21-alpine';
+    document.getElementById('b-as').value='builder');
+    document.getElementById('b-workdir').value='/build';
+    addBCopy('go.mod','go.sum','./'); addBRun('go mod download');
+    addBCopy('.','.');
+    addBRun('go build -o /app/server .');
+    document.getElementById('b-multistage').checked=true;
+    document.getElementById('ms-panel').style.display='';
+    document.getElementById('b-from2').value='registry.access.redhat.com/ubi9/ubi-micro';
+    document.getElementById('b-user').value='65532';
+    addBExpose('8080');
+    document.getElementById('b-cmd').value='/app/server';
+    document.getElementById('b-cmd-type').value='ENTRYPOINT';
+  }
+  buildCF();
+}
+
+function copyOut(id){ navigator.clipboard.writeText(document.getElementById(id).textContent); const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary'); setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500); }
+
+// Init
+document.getElementById('b-from').value='registry.access.redhat.com/ubi9/ubi-minimal';
+document.getElementById('b-workdir').value='/app';
+buildCF();
+addRPort('8080','80');
+buildRun();
+buildQuadlet();
+</script>
+</body>
+</html>
