@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!-- Portail Personnel — aucune donnée personnelle stockée dans ce fichier -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portail Personnel</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Styles spécifiques à l'index ────────────────────────── */
+    .portal-header {
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .portal-header__eyebrow {
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    .portal-header h1 { margin-bottom: .4rem; }
+    .portal-header p   { font-size: 1rem; }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      padding-bottom: 4rem;
+    }
+
+    /* Tool card */
+    .tool-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .tool-card__meta {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+    .tool-card__icon {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+    .tool-card__body { flex: 1; }
+    .tool-card__body h2 { font-size: 1.1rem; margin-bottom: .3rem; }
+    .tool-card__body p  { font-size: .875rem; }
+
+    .tool-card__actions {
+      display: flex;
+      gap: .6rem;
+    }
+    .tool-card__actions .btn { flex: 1; justify-content: center; }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 2rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+    }
+    .empty-state__icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .empty-state h2 { color: var(--text-secondary); font-weight: 500; margin-bottom: .5rem; }
+    .empty-state p  { font-size: .875rem; }
+
+    /* Footer */
+    .portal-footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 0;
+      text-align: center;
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── En-tête ──────────────────────────────────────────── -->
+  <header class="portal-header">
+    <p class="portal-header__eyebrow">Portail d'outils</p>
+    <h1>Boîte à outils</h1>
+    <p>Outils personnels — 100 % client, aucune donnée envoyée.</p>
+  </header>
+
+  <!-- ── Grille d'outils ──────────────────────────────────── -->
+  <main>
+    <div class="tools-grid" id="tools-grid">
+
+      <!--
+        ╔══════════════════════════════════════════════════════╗
+        ║  MODÈLE — copier ce bloc pour ajouter un outil      ║
+        ║                                                      ║
+        ║  <div class="card tool-card">                       ║
+        ║    <div class="tool-card__meta">                    ║
+        ║      <span class="tool-card__icon">🔧</span>        ║
+        ║      <span class="badge badge--version">v1.0.0</span>║
+        ║      <!-- <span class="badge badge--new">Nouveau</span> -->
+        ║    </div>                                           ║
+        ║    <div class="tool-card__body">                    ║
+        ║      <h2>Nom de l'outil</h2>                        ║
+        ║      <p>Description courte de ce que fait l'outil.</p>║
+        ║    </div>                                           ║
+        ║    <div class="tool-card__actions">                 ║
+        ║      <a href="nom-outil/" class="btn btn--primary"> ║
+        ║        Ouvrir                                       ║
+        ║      </a>                                           ║
+        ║      <a href="nom-outil/index.html"                 ║
+        ║         download="nom-outil.html"                   ║
+        ║         class="btn btn--secondary">                 ║
+        ║        ↓ Télécharger                                ║
+        ║      </a>                                           ║
+        ║    </div>                                           ║
+        ║  </div>                                             ║
+        ╚══════════════════════════════════════════════════════╝
+      -->
+
+      <!-- État vide — à supprimer quand des outils sont ajoutés -->
+      <div class="empty-state">
+        <div class="empty-state__icon">🧰</div>
+        <h2>Aucun outil pour l'instant</h2>
+        <p>Les outils apparaîtront ici une fois ajoutés.</p>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- ── Pied de page ──────────────────────────────────────── -->
+<footer class="portal-footer">
+  <div class="container">
+    Portail personnel — open source, usage local &nbsp;·&nbsp;
+    <a href="https://github.com/shukky33/shukky33.github.io" target="_blank" rel="noopener">
+      GitHub
+    </a>
+  </div>
+</footer>
+
+</body>
+</html>
