@@ -121,7 +121,11 @@ label{font-size:.875rem;color:var(--text-secondary);display:block;margin-bottom:
         <p class="section-title">Play</p>
         <div style="display:flex;flex-direction:column;gap:.5rem">
           <div><label>Nom</label><input class="input" id="play-name" value="Playbook RHEL" oninput="build()"></div>
-          <div><label>Hôtes / groupe</label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
+          <div><label>Inventaire <code style="font-size:.8em">-i</code> (liste hôtes séparés par virgule)</label>
+            <input class="input" id="play-inv" placeholder="srv-web-01,srv-web-02,srv-db-01" oninput="build()">
+            <span style="font-size:.7rem;color:var(--text-muted);margin-top:.2rem;display:block">⚠ hôte unique : ajouter virgule finale → <code>srv-web-01,</code></span>
+          </div>
+          <div><label>Hôtes / groupe <span style="font-size:.75em;color:var(--text-muted)">(dans le play)</span></label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
           <div class="two-col">
             <label class="check-label"><input type="checkbox" id="play-become" onchange="build()"> become: true</label>
             <div><label>gather_facts</label>
@@ -623,7 +627,15 @@ function build(){
   const strategy=document.getElementById('play-strategy').value;
   const serial=document.getElementById('play-serial').value;
 
-  const lines=['---',`# Playbook généré — RHEL ${rhelVersion}`,`- name: "${name}"`,`  hosts: ${hosts}`];
+  const inv=(document.getElementById('play-inv')?.value||'').trim();
+  const lines=['---'];
+  if(inv){
+    lines.push(`# ansible-playbook -i "${inv}" playbook.yml`);
+    if(!inv.includes(',')) lines.push(`# /!\\ Hôte unique détecté — ajouter une virgule finale : -i "${inv},"`);
+  } else {
+    lines.push(`# ansible-playbook -i "srv1,srv2,srv3" playbook.yml   ← renseigner l'inventaire ci-dessus`);
+  }
+  lines.push(`# Playbook généré — RHEL ${rhelVersion}`,`- name: "${name}"`,`  hosts: ${hosts}`);
   if(become) lines.push('  become: true');
   lines.push(`  gather_facts: ${facts}`);
   if(strategy) lines.push(`  strategy: ${strategy}`);
