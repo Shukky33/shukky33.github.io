@@ -82,6 +82,10 @@ label{font-size:.875rem;color:var(--text-secondary);display:block;margin-bottom:
 .extras-row{display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap;align-items:center}
 .extras-row input{flex:1;min-width:90px}
 .ro-badge{font-size:.65rem;padding:.05rem .35rem;border-radius:999px;background:#1a3a2a;color:var(--success);border:1px solid var(--success);flex-shrink:0}
+.mail-task{border-left:3px solid #3b82f6;background:rgba(59,130,246,.06)}
+.mail-num{background:#1a2d4a!important;color:#3b82f6!important}
+.recipe-card.mail-r{border-left:3px solid #3b82f6}
+.recipe-card.csv-r{border-left:3px solid #d29922}
   </style>
 </head>
 <body>
@@ -269,6 +273,10 @@ const RECIPES_MOD = {
     {n:'Désactiver service inutile',   d:'bluetooth/cups…',    m:'service',   a:{name:'bluetooth',state:'stopped',enabled:'no'}},
     {n:'Sysctl — param noyau',         d:'sysctl.conf',        m:'sysctl',    a:{name:'net.ipv4.ip_forward',value:'1',state:'present',reload:'yes'}},
   ],
+  '📤 Export & Notif':[
+    {n:'Envoyer rapport par mail (HTML)',d:'smtp · gabarit HTML Jinja2',special:'mail'},
+    {n:'Exporter résultats en CSV',     d:'lineinfile · fetch CSV',    special:'csv'},
+  ],
 };
 
 // ── CONSULTATION (read-only) recipes ─────────────────
@@ -374,6 +382,10 @@ const RECIPES_CONS = {
     {n:'Dépôts RHSM activés',        d:'repos --list-enabled',m:'command',a:{cmd:'subscription-manager repos --list-enabled'},ro:true},
     {n:'Abonnements disponibles',    d:'list --available',    m:'command', a:{cmd:'subscription-manager list --available --all'},ro:true},
   ],
+  '📤 Export & Notif':[
+    {n:'Envoyer rapport par mail (HTML)',d:'smtp · gabarit HTML Jinja2',special:'mail'},
+    {n:'Exporter résultats en CSV',     d:'lineinfile · fetch CSV',    special:'csv'},
+  ],
 };
 
 // ── Category rendering ────────────────────────────────
@@ -401,8 +413,10 @@ function renderRecipes(){
   const data = recipeMode==='modification' ? RECIPES_MOD : RECIPES_CONS;
   (data[activeRecipeCat]||[]).forEach(r=>{
     const card=document.createElement('div');
-    card.className='recipe-card'+(r.ro?' ro':'');
-    const modDisplay = typeof r.m==='function'?r.m():r.m;
+    if(r.special==='mail') card.className='recipe-card mail-r';
+    else if(r.special==='csv') card.className='recipe-card csv-r';
+    else card.className='recipe-card'+(r.ro?' ro':'');
+    const modDisplay = r.special ? (r.special==='mail'?'mail':'csv/lineinfile') : (typeof r.m==='function'?r.m():r.m);
     card.innerHTML=`<strong>${r.n}</strong><span>${r.d} · <code>${modDisplay}</code></span>`;
     card.onclick=()=>addRecipeTask(r);
     recipeContainer.appendChild(card);
@@ -418,7 +432,112 @@ function addVar(k='',v=''){
   list.appendChild(row); build();
 }
 
+const MAIL_BODY_TPL = `<!DOCTYPE html>
+<html>
+<body>
+<table width="680" border="0" cellpadding="0" cellspacing="0" align="center">
+<tr>
+  <td bgcolor="#1e3a5f" style="padding:20px 24px 18px">
+    <p style="font-family:Arial,Helvetica,sans-serif;color:#ffffff;font-size:18px;font-weight:bold;margin:0">Rapport Ansible</p>
+    <p style="font-family:Arial,Helvetica,sans-serif;color:#90aac4;font-size:12px;margin:6px 0 0 0">{{ ansible_play_name | default('Playbook') }} &bull; {{ ansible_date_time.date | default('') }} {{ ansible_date_time.time | default('') }}</p>
+  </td>
+</tr>
+{% for host in play_hosts | default([inventory_hostname]) %}
+<tr>
+  <td bgcolor="#1d4ed8" style="padding:7px 24px">
+    <p style="font-family:Arial,Helvetica,sans-serif;color:#ffffff;font-size:13px;font-weight:bold;margin:0">Hote : {{ host }}</p>
+  </td>
+</tr>
+<tr>
+  <td bgcolor="#ffffff" style="padding:0">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr bgcolor="#f1f5f9">
+      <td style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:#374151;padding:7px 16px;border-bottom:1px solid #e2e8f0;width:220px">Tache</td>
+      <td style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:#374151;padding:7px 16px;border-bottom:1px solid #e2e8f0">Resultat</td>
+    </tr>
+    {# Dupliquer ce bloc <tr> pour chaque tache enregistree (variable register) : #}
+    {# Exemple :
+    <tr>
+      <td bgcolor="#fafafa" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;color:#374151;padding:8px 16px;border-bottom:1px solid #f0f0f0;vertical-align:top;width:220px">Statut services</td>
+      <td bgcolor="#ffffff" style="font-family:Consolas,monospace;font-size:11px;color:#4b5563;padding:8px 16px;border-bottom:1px solid #f0f0f0;white-space:pre-wrap;vertical-align:top">{{ hostvars[host]['services_r']['stdout'] | default('N/A') | truncate(800) }}</td>
+    </tr>
+    #}
+    </table>
+  </td>
+</tr>
+{% endfor %}
+<tr>
+  <td bgcolor="#f8fafc" style="padding:10px 24px;border-top:1px solid #dde3ec">
+    <p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#9ca3af;margin:0">Genere automatiquement par Ansible &mdash; {{ ansible_date_time.iso8601 | default('') }}</p>
+  </td>
+</tr>
+</table>
+</body>
+</html>`;
+
+function addMailTask(){
+  taskCount++;
+  const list=document.getElementById('tasks-list');
+  const card=document.createElement('div');
+  card.className='task-card mail-task';
+  card.id=`task-${taskCount}`;
+  card.dataset.tasktype='mail';
+  card.innerHTML=`<div class="task-header">
+    <span class="task-num mail-num">${taskCount} ✉</span>
+    <input class="input task-title-input" value="Envoyer rapport par mail (HTML)" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();renum();build()">✕</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.4rem">
+    <div><label style="font-size:.75rem;color:var(--text-muted)">Serveur SMTP</label>
+      <input class="input mail-param" data-key="host" value="smtp.example.com" oninput="build()"></div>
+    <div><label style="font-size:.75rem;color:var(--text-muted)">Port</label>
+      <input class="input mail-param" data-key="port" value="25" oninput="build()"></div>
+    <div><label style="font-size:.75rem;color:var(--text-muted)">De (from)</label>
+      <input class="input mail-param" data-key="from" value="ansible@example.com" oninput="build()"></div>
+    <div><label style="font-size:.75rem;color:var(--text-muted)">A (to)</label>
+      <input class="input mail-param" data-key="to" value="ops@example.com" oninput="build()"></div>
+  </div>
+  <div style="margin-bottom:.4rem"><label style="font-size:.75rem;color:var(--text-muted)">Sujet</label>
+    <input class="input mail-param" data-key="subject" value="Rapport Ansible RHEL — {{ play_hosts | join(', ') }}" oninput="build()"></div>
+  <details style="margin-bottom:.4rem">
+    <summary style="font-size:.75rem;color:var(--text-secondary);cursor:pointer;padding:.2rem 0">▶ Gabarit HTML (Jinja2 — sans CSS ni JS, adaptatif multi-hotes)</summary>
+    <textarea class="textarea mail-body" rows="7" oninput="build()" style="font-size:.7rem;margin-top:.4rem;font-family:var(--font-mono)">${escH(MAIL_BODY_TPL)}</textarea>
+  </details>
+  <div class="extras-row">
+    <span style="font-size:.72rem;color:var(--success)">✓ delegate_to: localhost &nbsp;&middot;&nbsp; run_once: true &nbsp;(generes automatiquement)</span>
+  </div>`;
+  list.appendChild(card);
+  build();
+}
+
+function addCsvTask(){
+  const csvPath='/tmp/rapport_ansible_{{ ansible_date_time.date | default("") }}.csv';
+  addTask(
+    'CSV — En-tete (ajouter: delegate_to: localhost, run_once: true)',
+    'lineinfile',
+    [{k:'path',p:csvPath},{k:'create',p:'yes'},{k:'insertbefore',p:'BOF'},{k:'line',p:'"Hote,Date,Heure,Tache,Resultat"'}],
+    '','','','',false,''
+  );
+  addTask(
+    'CSV — Ligne {{ inventory_hostname }}',
+    'lineinfile',
+    [
+      {k:'path',p:csvPath},
+      {k:'line',p:'"{{ inventory_hostname }}","{{ ansible_date_time.date | default(\'\') }}","{{ ansible_date_time.time | default(\'\') }}","ma_tache","{{ ma_variable_r.stdout | default(\'N/A\') | replace(\',\',\';\') | replace(\'\\n\',\' | \') | truncate(200) }}"'}
+    ],
+    '','','','',false,''
+  );
+  addTask(
+    'CSV — Recuperer fichier sur le controleur (fetch)',
+    'fetch',
+    [{k:'src',p:csvPath},{k:'dest',p:'./rapports/{{ inventory_hostname }}/'},{k:'flat',p:'yes'}],
+    '','','','',false,''
+  );
+}
+
 function addRecipeTask(recipe){
+  if(recipe.special==='mail'){ addMailTask(); return; }
+  if(recipe.special==='csv'){  addCsvTask();  return; }
   const mod = typeof recipe.m==='function' ? recipe.m() : recipe.m;
   const args = recipe.a || {};
   const params = Object.entries(args)
@@ -453,7 +572,7 @@ function addTask(name='', module='dnf', params=[], notify='', loop='', cmd='', r
   card.className='task-card'+(ro?' ro-task':'');
   card.id=`task-${taskCount}`;
 
-  const MODS=['debug','setup','service_facts','package_facts','ping','dnf','yum','service','systemd','copy','template','file','lineinfile','blockinfile','user','authorized_key','firewalld','selinux','seboolean','seport','sefcontext','command','shell','hostname','nmcli','rhsm_repository','redhat_subscription','pam_limits','sysctl','get_url','unarchive','uri','stat','slurp','find','getent'];
+  const MODS=['debug','setup','service_facts','package_facts','ping','dnf','yum','service','systemd','copy','template','file','lineinfile','blockinfile','user','authorized_key','firewalld','selinux','seboolean','seport','sefcontext','command','shell','hostname','nmcli','rhsm_repository','redhat_subscription','pam_limits','sysctl','get_url','unarchive','uri','stat','slurp','find','getent','fetch','mail'];
   const modOpts=MODS.map(m=>`<option value="${m}"${m===module?' selected':''}>${m}</option>`).join('');
   const paramsHtml=(params.length?params:[{k:'',p:''}]).map(p=>`<div class="kv-row"><input class="input" value="${escH(p.k)}" style="flex:0 0 130px" oninput="build()"><input class="input" value="${escH(p.p)}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
 
@@ -517,6 +636,25 @@ function build(){
   if(taskCards.length){
     lines.push('  tasks:');
     taskCards.forEach(card=>{
+      if(card.dataset.tasktype==='mail'){
+        const tname=card.querySelector('.task-title-input')?.value||'Envoyer rapport par mail';
+        const mp={};
+        card.querySelectorAll('.mail-param').forEach(i=>{mp[i.dataset.key]=i.value;});
+        const body=card.querySelector('.mail-body')?.value||'';
+        lines.push(`    - name: "${tname}"`);
+        lines.push(`      mail:`);
+        if(mp.host)    lines.push(`        host: "${mp.host}"`);
+        if(mp.port)    lines.push(`        port: ${mp.port||25}`);
+        if(mp.from)    lines.push(`        from: "${mp.from}"`);
+        if(mp.to){     lines.push(`        to:`); lines.push(`          - "${mp.to}"`); }
+        if(mp.subject) lines.push(`        subject: "${mp.subject}"`);
+        lines.push(`        subtype: html`);
+        lines.push(`        body: |`);
+        body.split('\n').forEach(l=>lines.push(`          ${l}`));
+        lines.push(`      delegate_to: localhost`);
+        lines.push(`      run_once: true`);
+        return;
+      }
       const taskName=(card.querySelector('.task-title-input')?.value||'Task').trim();
       const mod=card.querySelector('select')?.value||'shell';
       const cmdInput=card.querySelector('.cmd-input');

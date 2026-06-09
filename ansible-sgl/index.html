@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<!-- Ansible Builder HP ServiceGuard — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ansible Builder HP ServiceGuard — Portail</title>
+  <style>
+:root{--bg-base:#0d1117;--bg-card:#161b22;--bg-card-hover:#1c2330;--bg-input:#21262d;--border:#30363d;--border-focus:#4899d0;--accent:#4899d0;--accent-dim:#005eb8;--accent2:#39d0d8;--text-primary:#e6edf3;--text-secondary:#8b949e;--text-muted:#484f58;--success:#3fb950;--warning:#d29922;--danger:#f85149;--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--shadow-card:0 4px 24px rgba(0,0,0,.4);--shadow-btn:0 2px 8px rgba(0,94,184,.2);--font:'Segoe UI',system-ui,-apple-system,sans-serif;--font-mono:'Cascadia Code','Consolas',monospace;--transition:160ms ease}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);font-size:15px;line-height:1.6;color:var(--text-primary);background:var(--bg-base);min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+img,svg{display:block;max-width:100%}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.5px}h2{font-size:1.35rem;font-weight:600}h3{font-size:1.1rem;font-weight:600}
+p{color:var(--text-secondary)}
+code,pre{font-family:var(--font-mono);font-size:.875em;background:var(--bg-input);border-radius:var(--radius-sm)}code{padding:.15em .4em}pre{padding:1rem;overflow-x:auto;border:1px solid var(--border)}
+.container{width:100%;max-width:1200px;margin-inline:auto;padding-inline:1.5rem}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1.1rem;border:1px solid transparent;border-radius:var(--radius-sm);font-family:var(--font);font-size:.875rem;font-weight:500;cursor:pointer;transition:background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition);white-space:nowrap;text-decoration:none!important}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn--primary{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff;box-shadow:var(--shadow-btn)}.btn--primary:hover{background:var(--accent);border-color:var(--accent)}
+.btn--secondary{background:transparent;border-color:var(--border);color:var(--text-primary)}.btn--secondary:hover{background:var(--bg-input);border-color:var(--accent)}
+.btn--ghost{background:transparent;border-color:transparent;color:var(--text-secondary)}.btn--ghost:hover{color:var(--text-primary);background:var(--bg-input)}
+.btn--sm{padding:.35rem .75rem;font-size:.8rem}.btn--lg{padding:.7rem 1.5rem;font-size:1rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.5rem;box-shadow:var(--shadow-card);transition:border-color var(--transition),background var(--transition)}
+.card:hover{border-color:var(--accent);background:var(--bg-card-hover)}
+.badge{display:inline-block;padding:.15em .55em;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.02em}
+.input,.select,.textarea{width:100%;padding:.55rem .85rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:.9rem;transition:border-color var(--transition),box-shadow var(--transition)}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(0,94,184,.2)}
+.input::placeholder,.textarea::placeholder{color:var(--text-muted)}
+label{font-size:.875rem;color:var(--text-secondary);display:block;margin-bottom:.35rem}
+.divider{height:1px;background:var(--border);margin-block:1.5rem}
+.text-accent{color:var(--accent)}.text-muted{color:var(--text-muted)}.text-secondary{color:var(--text-secondary)}.text-success{color:var(--success)}.text-danger{color:var(--danger)}
+.mt-sm{margin-top:.5rem}.mt-md{margin-top:1rem}.mt-lg{margin-top:2rem}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg-base)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+::selection{background:rgba(0,94,184,.35)}
+/* Tool */
+.tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:1.5rem;flex-wrap:wrap}
+.tool-header h1{font-size:1.5rem;flex:1}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem}
+.rhel-bar{display:flex;align-items:center;gap:.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);padding:.6rem 1rem;margin-bottom:1rem;flex-wrap:wrap}
+.rhel-bar span{font-size:.8rem;color:var(--text-secondary)}
+.rhel-btn{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.rhel-btn.active{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}
+.sgl-notice{background:#0a1e33;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);padding:.45rem 1rem;margin-bottom:.85rem;font-size:.78rem;color:var(--accent);display:inline-flex;align-items:center;gap:.5rem}
+.recipe-cats{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+.cat-btn{padding:.25rem .65rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.75rem;cursor:pointer;transition:all var(--transition)}
+.cat-btn.active{background:var(--accent-dim);border-color:var(--accent);color:#fff}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem;margin-bottom:1.5rem;max-height:260px;overflow-y:auto}
+.recipe-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-left:3px solid var(--accent-dim);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition)}
+.recipe-card:hover{border-color:var(--accent);background:var(--bg-card)}
+.recipe-card strong{display:block;font-size:.82rem;color:var(--text-primary);margin-bottom:.15rem}
+.recipe-card span{font-size:.72rem;color:var(--text-muted)}
+.recipe-card.mail-r{border-left-color:#3b82f6}
+.recipe-card.csv-r{border-left-color:#d29922}
+.task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.85rem;margin-bottom:.5rem;transition:border-color var(--transition)}
+.ro-task{border-left:3px solid var(--accent-dim);background:rgba(0,94,184,.07)}
+.mail-task{border-left:3px solid #3b82f6;background:rgba(59,130,246,.06)}
+.task-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.task-num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:22px;padding:0 6px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;font-weight:700;color:var(--text-secondary);white-space:nowrap}
+.task-num.ro{background:#0a1e33;color:var(--accent);border-color:var(--accent-dim)}
+.task-num.mail-num{background:#1a2d4a;color:#3b82f6;border-color:#3b82f6}
+.task-title-input{flex:1;font-weight:600}
+.task-params{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.4rem}
+.kv-row{display:flex;gap:.4rem;align-items:center}
+.extras-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem;align-items:center}
+.extras-row .input{flex:1;min-width:120px;font-size:.82rem;padding:.4rem .7rem}
+.check-label{display:flex;align-items:center;gap:.3rem;font-size:.8rem;color:var(--text-secondary);white-space:nowrap;cursor:pointer}
+.output-pre{min-height:300px;white-space:pre;font-size:.82rem;max-height:70vh;overflow-y:auto}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+</style>
+</head>
+<body>
+<div class="container" style="padding-block:1.5rem">
+
+  <div class="tool-header">
+    <span style="font-size:2.2rem">⚙</span>
+    <div>
+      <h1>Ansible Builder <span class="text-accent">HP ServiceGuard</span></h1>
+      <p>Consultation cluster — santé, communication et état des packages SGL</p>
+    </div>
+    <span class="badge" style="background:#0a1e33;color:var(--accent);border:1px solid var(--accent-dim)">v1.0.0</span>
+    <a href="../" class="btn btn--secondary btn--sm">← Portail</a>
+    <button class="btn btn--ghost btn--sm" onclick="downloadTool()" title="Télécharger cet outil en standalone">↓</button>
+  </div>
+
+  <div class="rhel-bar">
+    <span>Cible RHEL :</span>
+    <button class="rhel-btn" data-v="7" onclick="setRhel(7,this)">RHEL 7</button>
+    <button class="rhel-btn active" data-v="8" onclick="setRhel(8,this)">RHEL 8</button>
+    <button class="rhel-btn" data-v="9" onclick="setRhel(9,this)">RHEL 9</button>
+    <span id="rhel-hint" style="margin-left:.5rem;font-size:.75rem;color:var(--accent)">dnf · Python 3.6 · EL8 · systemd</span>
+  </div>
+
+  <div class="sgl-notice">
+    👁 Mode consultation uniquement — toutes les tâches sont en lecture seule · <code>changed_when: false</code> automatique
+  </div>
+
+  <p class="section-title">Bibliothèque de vérifications — clic pour ajouter</p>
+  <div class="recipe-cats" id="recipe-cats"></div>
+  <div class="recipe-grid" id="recipe-grid"></div>
+
+  <div class="layout">
+    <div style="display:flex;flex-direction:column;gap:.85rem">
+
+      <div class="card">
+        <p class="section-title">Play</p>
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div><label>Nom</label><input class="input" id="play-name" value="Vérification HP ServiceGuard" oninput="build()"></div>
+          <div><label>Hôtes / groupe</label><input class="input" id="play-hosts" value="sgl_nodes" oninput="build()"></div>
+          <div class="two-col">
+            <label class="check-label"><input type="checkbox" id="play-become" checked onchange="build()"> become: true</label>
+            <div><label>gather_facts</label>
+              <select class="select" id="play-facts" onchange="build()"><option value="true">true</option><option value="false">false</option></select>
+            </div>
+          </div>
+          <div class="two-col">
+            <div><label>strategy</label>
+              <select class="select" id="play-strategy" onchange="build()"><option value="">linear (défaut)</option><option value="free">free</option><option value="host_pinned">host_pinned</option></select>
+            </div>
+            <div><label>serial</label>
+              <input class="input" id="play-serial" placeholder="ex: 1 ou 25%" oninput="build()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Variables (vars)</p>
+        <div id="vars-list" style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem"></div>
+        <button class="btn btn--ghost btn--sm" onclick="addVar()">+ variable</button>
+        <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-muted)">
+          Conseils : <code>node_a_ip</code>, <code>node_b_ip</code>, <code>quorum_ip</code>, <code>smtp_host</code>, <code>smtp_to</code>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <p class="section-title" style="margin:0">Tâches</p>
+          <button class="btn btn--ghost btn--sm" onclick="clearTasks()">Vider</button>
+        </div>
+        <div id="tasks-list"></div>
+        <button class="btn btn--secondary btn--sm mt-sm" onclick="addTask()">+ tâche manuelle</button>
+      </div>
+
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.85rem">
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <p class="section-title" style="margin:0">Playbook généré</p>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn--sm btn--secondary" onclick="copyPlaybook()">Copier</button>
+            <button class="btn btn--sm btn--ghost" onclick="clearTasks()">Vider</button>
+          </div>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let rhelVersion = 8;
+let taskCount = 0;
+let activeRecipeCat = null;
+
+const RHEL_HINTS = {
+  7:'yum · Python 2.7 · EL7 · systemd',
+  8:'dnf · Python 3.6 · EL8 · systemd',
+  9:'dnf · Python 3.9 · EL9 · systemd'
+};
+function setRhel(v,btn){
+  rhelVersion=v;
+  document.querySelectorAll('.rhel-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rhel-hint').textContent=RHEL_HINTS[v];
+  build();
+}
+
+// ── RECETTES DE CONSULTATION HP ServiceGuard ──────────────────────────────
+const RECIPES = {
+  'État Global': [
+    {n:'Vue cluster complète',            d:'cmviewcl',                 m:'command',a:{cmd:'cmviewcl'}},
+    {n:'Vue détaillée (verbose)',          d:'cmviewcl -v',              m:'command',a:{cmd:'cmviewcl -v'}},
+    {n:'Format ligne (scriptable)',        d:'cmviewcl -f line',         m:'command',a:{cmd:'cmviewcl -f line'}},
+    {n:'Lister tous les clusters',         d:'cmlistcl',                 m:'command',a:{cmd:'cmlistcl 2>/dev/null || echo "cmlistcl non disponible"'}},
+    {n:'Résumé statuts (grep)',            d:'STATUS|PACKAGE|NODE',      m:'shell',  a:{cmd:"cmviewcl 2>/dev/null | grep -E 'STATUS|PACKAGE|NODE|CLUSTER'"}},
+    {n:'Noeuds / packages en erreur',      d:'grep fail|down|halt',      m:'shell',  a:{cmd:"cmviewcl 2>/dev/null | grep -iE 'fail|down|halt|unknown'"}},
+    {n:'Infos système (setup)',            d:'gather_facts Ansible',     m:'setup',  a:{}},
+    {n:'Statut services (service_facts)',  d:'ansible_facts.services',   m:'service_facts',a:{}},
+  ],
+  'Noeuds & Membres': [
+    {n:'Statut noeud local',              d:'cmviewcl -n hostname',     m:'shell',  a:{cmd:'cmviewcl -n $(hostname -s) 2>/dev/null || cmviewcl -n $(hostname)'}},
+    {n:'Interroger noeud (cmquerynode)',  d:'cmquerynode',              m:'command',a:{cmd:'cmquerynode 2>/dev/null || echo "cmquerynode non disponible"'}},
+    {n:'Nom, FQDN et uname du noeud',    d:'hostname -f + uname',      m:'command',a:{cmd:'echo "Short: $(hostname -s)" && echo "FQDN: $(hostname -f)" && uname -n && uname -r'}},
+    {n:'Noeuds actifs cluster',           d:'grep running|active',      m:'shell',  a:{cmd:"cmviewcl 2>/dev/null | grep -iE 'running|active'"}},
+    {n:'Noeuds DOWN / standby',           d:'grep fail|down|standby',   m:'shell',  a:{cmd:"cmviewcl -v 2>/dev/null | grep -iE 'fail|down|halt|unknown|standby'"}},
+    {n:'Config noeud (cmgetconf)',        d:'NODE_NAME dans config',     m:'shell',  a:{cmd:"cmgetconf -v 2>/dev/null | grep -A10 'NODE_NAME'"}},
+    {n:'Interfaces réseau du noeud',      d:'ip link show',             m:'command',a:{cmd:'ip link show'}},
+    {n:'Adresses IP (dont virtuelles)',   d:'ip addr show',             m:'command',a:{cmd:'ip addr show'}},
+    {n:'Table de routage',               d:'ip route show',            m:'command',a:{cmd:'ip route show'}},
+  ],
+  'Packages SGL': [
+    {n:'Statut tous les packages',        d:'cmviewcl PACKAGE',         m:'shell',  a:{cmd:"cmviewcl 2>/dev/null | grep -A8 'PACKAGE'"}},
+    {n:'Packages en cours d\'exécution', d:'status: running',          m:'shell',  a:{cmd:"cmviewcl 2>/dev/null | grep -iB2 'running'"}},
+    {n:'Packages arrêtés / en échec',    d:'halted|failed|unknown',     m:'shell',  a:{cmd:"cmviewcl 2>/dev/null | grep -iE 'halted|failed|unknown'"}},
+    {n:'Config package (cmgetconf -p)',   d:'remplacer PKG_NAME',       m:'shell',  a:{cmd:'cmgetconf -p PKG_NAME 2>/dev/null || echo "Remplacer PKG_NAME par le nom du package"'}},
+    {n:'Config complète cluster',        d:'cmgetconf -v',              m:'shell',  a:{cmd:'cmgetconf -v 2>/dev/null'}},
+    {n:'Packages avec ressources',       d:'SUBNET|IP|FS|VG',          m:'shell',  a:{cmd:"cmgetconf -v 2>/dev/null | grep -E 'PACKAGE_NAME|SUBNET|IP_ADDRESS|FS_NAME|VG_NAME|DISK_GROUP'"}},
+    {n:'Répertoire configs SGL',         d:'ls /etc/cmcluster/',        m:'command',a:{cmd:'ls -laR /etc/cmcluster/ 2>/dev/null'}},
+    {n:'Lire config principale',         d:'cmcluster.conf (slurp)',    m:'slurp',  a:{src:'/etc/cmcluster/cmcluster.conf'}},
+    {n:'Scripts de contrôle packages',   d:'find .sh .conf',           m:'shell',  a:{cmd:'find /etc/cmcluster/ -name "*.sh" -o -name "*.conf" 2>/dev/null | sort'}},
+    {n:'Vérifier syntaxe config',        d:'cmcheckconf -c',           m:'shell',  a:{cmd:'cmcheckconf -c /etc/cmcluster/cmcluster.conf 2>/dev/null && echo "=== Config OK ===" || echo "=== ERREUR CONFIG ==="'}},
+  ],
+  'Réseau & Heartbeat': [
+    {n:'Liens heartbeat (verbose)',       d:'cmviewcl -v Network',      m:'shell',  a:{cmd:"cmviewcl -v 2>/dev/null | grep -A5 -iE 'Network|Heartbeat|LAN'"}},
+    {n:'Config heartbeat (cmgetconf)',    d:'HEARTBEAT_IP',             m:'shell',  a:{cmd:"cmgetconf -v 2>/dev/null | grep -iE 'HEARTBEAT_IP|STATIONARY_IP|NETWORK_INTERFACE|PRIMARY_IP'"}},
+    {n:'Sous-réseaux SGL',               d:'SUBNET|NETWORK config',    m:'shell',  a:{cmd:"cmgetconf -v 2>/dev/null | grep -iE 'SUBNET|NETWORK_POLLING|NETWORK_INTERFACE'"}},
+    {n:'IPs de service SGL (virtuelles)',d:'IP_ADDRESS config',        m:'shell',  a:{cmd:"cmgetconf -v 2>/dev/null | grep -iE 'IP_ADDRESS|SERVICE_IP'"}},
+    {n:'Ports SGL en écoute',            d:'ss port 598|11000|11001',  m:'shell',  a:{cmd:"ss -tlnp 2>/dev/null | grep -iE ':598|:11000|:11001|cmcld|cmmsgd'"}},
+    {n:'Connexions actives SGL',         d:'ss established ports SGL', m:'shell',  a:{cmd:"ss -tnp state established 2>/dev/null | grep -iE ':598|:11000|cmcld'"}},
+    {n:'Détail interfaces (ip -d link)', d:'ip -d link show',          m:'shell',  a:{cmd:'ip -d link show && echo "---" && ip -4 route show'}},
+    {n:'Config NetworkManager (nmcli)',  d:'nmcli device status',      m:'command',a:{cmd:'nmcli device status'}},
+    {n:'Test connectivité (ping Ansible)',d:'module Ansible ping',     m:'ping',   a:{}},
+    {n:'Test port TCP 598 (cmcld)',       d:'nc -zv NODE_B 598',       m:'shell',  a:{cmd:'nc -zv NODE_B_IP 598 2>&1 && echo "=== Port 598 OK ===" || echo "=== FAIL port 598 ==="'}},
+    {n:'Vérifier ARP noeud B',           d:'arping -c 5 NODE_B_IP',   m:'shell',  a:{cmd:'arping -I HEARTBEAT_IFACE -c 5 NODE_B_IP 2>/dev/null | tail -3'}},
+    {n:'MTU path discovery',             d:'ping -M do -s 1472',       m:'shell',  a:{cmd:'ping -M do -s 1472 -c 3 -q NODE_B_IP 2>&1 | tail -5'}},
+    {n:'Latence heartbeat (stats)',       d:'ping -c 50 -q',           m:'shell',  a:{cmd:'ping -i 0.2 -c 50 -q NODE_B_IP 2>&1 | tail -3'}},
+  ],
+  'Quorum & Verrouillage': [
+    {n:'Config quorum (cmgetconf)',       d:'QUORUM_SERVER|LOCK_DISK',  m:'shell',  a:{cmd:"cmgetconf -v 2>/dev/null | grep -iE 'QUORUM|LOCK_DISK|QUORUM_DISK|QUORUM_SERVER'"}},
+    {n:'Quorum détaillé (verbose)',       d:'cmviewcl -v quorum lock',  m:'shell',  a:{cmd:"cmviewcl -v 2>/dev/null | grep -iA5 'quorum\\|lock'"}},
+    {n:'Disques SCSI (lock disk)',        d:'ls /dev/disk/by-id scsi',  m:'shell',  a:{cmd:'ls -la /dev/disk/by-id/ 2>/dev/null | grep -i scsi | head -20'}},
+    {n:'Réservations SCSI (sg_persist)', d:'sg_persist --in -r /dev/sdX',m:'shell',a:{cmd:'for d in /dev/sd?; do echo "=== $d ==="; sg_persist --in -r "$d" 2>/dev/null | head -3; done'}},
+    {n:'Informations multipath',         d:'multipath -ll',            m:'command',a:{cmd:'multipath -ll 2>/dev/null | head -60'}},
+    {n:'Périphériques SCSI (lsscsi)',    d:'lsscsi -g',                m:'shell',  a:{cmd:'lsscsi -g 2>/dev/null || cat /proc/scsi/scsi 2>/dev/null | head -30'}},
+    {n:'Test quorum server (port 8888)', d:'nc -zv QUORUM_SERVER 8888',m:'shell',  a:{cmd:'nc -zv QUORUM_SERVER_IP 8888 2>&1 && echo "=== Quorum server OK ===" || echo "=== FAIL: quorum server inaccessible ==="'}},
+  ],
+  'Stockage & LVM': [
+    {n:'Physical volumes (pvs)',         d:'pvs --units h',            m:'command',a:{cmd:'pvs --units h 2>/dev/null'}},
+    {n:'Volume groups (vgs)',            d:'vgs --units h',            m:'command',a:{cmd:'vgs --units h 2>/dev/null'}},
+    {n:'Logical volumes (lvs)',          d:'lvs --units h',            m:'command',a:{cmd:'lvs --units h 2>/dev/null'}},
+    {n:'PV détaillé (pvdisplay)',        d:'pvdisplay',                m:'shell',  a:{cmd:'pvdisplay 2>/dev/null'}},
+    {n:'VG détaillé (vgdisplay)',        d:'vgdisplay',                m:'shell',  a:{cmd:'vgdisplay 2>/dev/null'}},
+    {n:'LV détaillé (lvdisplay)',        d:'lvdisplay',                m:'shell',  a:{cmd:'lvdisplay 2>/dev/null'}},
+    {n:'VG cluster LVM (vg_attr)',       d:'vgs -o +vg_attr cluster',  m:'shell',  a:{cmd:"vgs -o +vg_attr 2>/dev/null | grep -iE 'c|cluster' || echo 'Pas de VG en mode cluster'"}},
+    {n:'LV actifs sur ce noeud',         d:'lvs lv_active lv_attr',   m:'shell',  a:{cmd:'lvs -o lv_name,vg_name,lv_size,lv_active,lv_attr 2>/dev/null'}},
+    {n:'Volumes montés SGL',             d:'mount | grep lv|mapper',  m:'shell',  a:{cmd:"mount 2>/dev/null | grep -iE 'mapper|/dev/vg' | column -t"}},
+    {n:'Espace filesystems SGL',         d:'df -hT (sans tmpfs)',      m:'shell',  a:{cmd:"df -hT 2>/dev/null | grep -vE 'tmpfs|devtmpfs|overlay|udev' | sort -k6 -rh"}},
+    {n:'Snapshots LVM',                  d:'lvs snapshot_invalid',    m:'shell',  a:{cmd:'lvs -o lv_name,vg_name,lv_size,lv_snapshot_invalid,origin 2>/dev/null | grep -v "^$"'}},
+    {n:'Métadonnées PV (intégrité)',     d:'pvs mda_count mda_free',  m:'shell',  a:{cmd:'pvs -o +pv_mda_count,pv_mda_free 2>/dev/null'}},
+    {n:'Activation clusters VG',         d:'vgdisplay VG Status',     m:'shell',  a:{cmd:'vgdisplay 2>/dev/null | grep -iE "VG Name|Access|VG Status|Clustered|Read Access"'}},
+  ],
+  'Daemons SGL': [
+    {n:'Daemon cluster (cmcld)',          d:'systemctl status cmcld',  m:'command',a:{cmd:'systemctl status cmcld --no-pager 2>/dev/null'}},
+    {n:'Daemon messagerie (cmmsgd)',      d:'systemctl status cmmsgd', m:'command',a:{cmd:'systemctl status cmmsgd --no-pager 2>/dev/null'}},
+    {n:'Daemon DLM (distributed lock)',   d:'systemctl status dlm',   m:'shell',  a:{cmd:'systemctl status dlm --no-pager 2>/dev/null || echo "DLM non configuré sur ce noeud"'}},
+    {n:'Daemon clvmd / lvmlockd',         d:'clvmd ou lvmlockd',      m:'shell',  a:{cmd:'systemctl status clvmd --no-pager 2>/dev/null || systemctl status lvmlockd --no-pager 2>/dev/null || echo "clvmd/lvmlockd absent"'}},
+    {n:'Toutes unités SGL (systemctl)',   d:'list-units cm* dlm* lvm*',m:'shell',  a:{cmd:"systemctl list-units 'cm*' 'dlm*' 'clvmd*' 'lvm*' --no-pager 2>/dev/null"}},
+    {n:'Processus SGL actifs (ps)',       d:'grep cmcld cmmsgd dlm',  m:'shell',  a:{cmd:"ps aux 2>/dev/null | grep -iE '[c]mcl|[c]mmsg|[c]msched|[d]lm|[c]lvmd' | sort -k3 -rn"}},
+    {n:'PID daemon cmcld (pgrep)',        d:'pgrep -a cmcld',         m:'shell',  a:{cmd:'pgrep -a cmcld 2>/dev/null || echo "cmcld non trouvé dans les processus"'}},
+    {n:'Port 598 SGL (cmt)',              d:'ss sport = :598',        m:'shell',  a:{cmd:'ss -tlnp 2>/dev/null | grep :598 || echo "Port 598 non en écoute"'}},
+    {n:'Démarrages auto services SGL',    d:'list-unit-files cm* dlm',m:'shell',  a:{cmd:"systemctl list-unit-files 'cm*' 'dlm*' 'clvmd*' --no-pager 2>/dev/null | grep -iE 'enabled|disabled'"}},
+  ],
+  'Logs & Événements': [
+    {n:'Journal cmcld (50 lignes)',        d:'journalctl -u cmcld -n50', m:'command',a:{cmd:'journalctl -u cmcld -n 50 --no-pager 2>/dev/null'}},
+    {n:'Journal cmmsgd (50 lignes)',       d:'journalctl -u cmmsgd -n50',m:'command',a:{cmd:'journalctl -u cmmsgd -n 50 --no-pager 2>/dev/null'}},
+    {n:'Journal cmcld depuis boot',        d:'journalctl -u cmcld -b',  m:'shell',  a:{cmd:'journalctl -u cmcld -b --no-pager 2>/dev/null | tail -100'}},
+    {n:'Erreurs cluster (journalctl)',      d:'journalctl -p err cm',    m:'shell',  a:{cmd:"journalctl -p err -n 200 --no-pager 2>/dev/null | grep -iE 'cm[a-z]|cluster|serviceguard|dlm|clvm' | tail -50"}},
+    {n:'Log SGL (ancien syslog)',          d:'/var/adm/syslog/syslog.log',m:'shell', a:{cmd:'tail -200 /var/adm/syslog/syslog.log 2>/dev/null || echo "Fichier absent — utiliser journalctl"'}},
+    {n:'Erreurs dans logs SGL',            d:'grep fail|error|halt',    m:'shell',  a:{cmd:"grep -iE 'fail|error|halt|DOWN|CRITICAL' /var/adm/syslog/syslog.log 2>/dev/null | tail -50 || journalctl -p err -n 100 --no-pager 2>/dev/null | grep -iE 'cmcld|cmmsgd|serviceguard' | tail -30"}},
+    {n:'Dernier basculement (failover)',   d:'grep package running|halt',m:'shell',  a:{cmd:"grep -iE 'package.*running|package.*halted|failover|switchover' /var/adm/syslog/syslog.log 2>/dev/null | tail -30 || journalctl --no-pager -n 1000 2>/dev/null | grep -iE 'package.*running|halt|failover' | tail -30"}},
+    {n:'Alertes SELinux SGL',              d:'ausearch AVC cm*',        m:'shell',  a:{cmd:"ausearch -m avc -ts today 2>/dev/null | grep -iE 'cm[a-z]|serviceguard|dlm' | tail -30 || echo 'Pas d alerte AVC recente SGL'"}},
+    {n:'Événements kernel (dmesg)',        d:'scsi|dlm|cluster|fence',  m:'shell',  a:{cmd:"dmesg 2>/dev/null | grep -iE 'scsi|dlm|cluster|fence|stonith|corosync|heartbeat' | tail -50"}},
+    {n:'Audit connexions SSH',             d:'ausearch USER_LOGIN today',m:'shell',  a:{cmd:"ausearch -m USER_LOGIN -ts today 2>/dev/null | tail -30 || grep 'Accepted' /var/log/secure 2>/dev/null | tail -20"}},
+    {n:'Journal DLM (si actif)',           d:'journalctl -u dlm -n50',  m:'shell',  a:{cmd:'journalctl -u dlm -n 50 --no-pager 2>/dev/null || echo "DLM non actif"'}},
+    {n:'Journal clvmd / lvmlockd',         d:'journalctl clvmd -n50',   m:'shell',  a:{cmd:'journalctl -u clvmd -n 50 --no-pager 2>/dev/null || journalctl -u lvmlockd -n 50 --no-pager 2>/dev/null || echo "clvmd/lvmlockd non actif"'}},
+  ],
+  'Configuration': [
+    {n:'Config cluster complète',          d:'cmgetconf -v',            m:'shell',  a:{cmd:'cmgetconf -v 2>/dev/null'}},
+    {n:'Vérifier syntaxe config',          d:'cmcheckconf -c',          m:'shell',  a:{cmd:'cmcheckconf -c /etc/cmcluster/cmcluster.conf 2>/dev/null && echo "=== Config syntaxiquement correcte ===" || echo "=== ERREUR DE SYNTAXE CONFIG ==="'}},
+    {n:'Fichiers config SGL',              d:'ls -laR /etc/cmcluster/',  m:'command',a:{cmd:'ls -laR /etc/cmcluster/ 2>/dev/null'}},
+    {n:'Lire config principale',           d:'slurp cmcluster.conf',    m:'slurp',  a:{src:'/etc/cmcluster/cmcluster.conf'}},
+    {n:'Vérifier /etc/hosts',             d:'grep no comments',        m:'shell',  a:{cmd:"grep -v '^#' /etc/hosts 2>/dev/null | grep -v '^$' | column -t"}},
+    {n:'Version SGL installée',            d:'rpm -qi ServiceGuard',    m:'shell',  a:{cmd:"rpm -qi ServiceGuard 2>/dev/null || rpm -qa 2>/dev/null | grep -iE 'serviceguard|cmcld'"}},
+    {n:'Paquets SGL (rpm -qa)',            d:'grep serviceguard|cmcld', m:'shell',  a:{cmd:"rpm -qa 2>/dev/null | grep -iE 'serviceguard|cmcld|cmmsgd' | sort"}},
+    {n:'Sync temps (chrony)',              d:'chronyc tracking+sources', m:'shell',  a:{cmd:'chronyc tracking 2>/dev/null && echo "---" && chronyc sources -v 2>/dev/null | head -20'}},
+    {n:'Heure et fuseau (timedatectl)',    d:'timedatectl status',      m:'command',a:{cmd:'timedatectl status'}},
+    {n:'Date système + hwclock',           d:'date + hwclock',          m:'shell',  a:{cmd:'date "+%Y-%m-%d %H:%M:%S %Z" && hwclock --show 2>/dev/null'}},
+    {n:'Config NTP (chrony.conf)',         d:'cat /etc/chrony.conf',    m:'shell',  a:{cmd:"grep -v '^#' /etc/chrony.conf 2>/dev/null | grep -v '^$' | head -20"}},
+    {n:'Détail connexions nmcli',          d:'nmcli con show',          m:'command',a:{cmd:'nmcli con show 2>/dev/null'}},
+  ],
+  'Tests & Comm.': [
+    {n:'Test connectivité (ping Ansible)', d:'module Ansible ping',    m:'ping',   a:{}},
+    {n:'Résolution nom noeuds',            d:'getent hosts NODE',       m:'shell',  a:{cmd:'getent hosts NODE_A_IP && echo "---" && getent hosts NODE_B_IP'}},
+    {n:'Test SSH noeud B (port 22)',        d:'nc -zv NODE_B 22',       m:'shell',  a:{cmd:'nc -zv NODE_B_IP 22 2>&1 && echo "=== SSH OK ===" || echo "=== FAIL SSH ==="'}},
+    {n:'Test port SGL 598 (cmcld)',         d:'nc -zv NODE_B 598',      m:'shell',  a:{cmd:'nc -zv NODE_B_IP 598 2>&1 && echo "=== Port 598 OK ===" || echo "=== FAIL port 598 ==="'}},
+    {n:'Test quorum server (port 8888)',    d:'nc -zv QUORUM_IP 8888',  m:'shell',  a:{cmd:'nc -zv QUORUM_SERVER_IP 8888 2>&1 && echo "=== Quorum OK ===" || echo "=== FAIL quorum ==="'}},
+    {n:'Traceroute vers noeud B',           d:'traceroute -n -m 10',    m:'shell',  a:{cmd:'traceroute -n -m 10 NODE_B_IP 2>/dev/null | head -15'}},
+    {n:'Ping avec statistiques',            d:'ping -c 20 -q',          m:'shell',  a:{cmd:'ping -c 20 -q NODE_B_IP 2>&1 | tail -3'}},
+    {n:'Vérifier ARP (même LAN)',           d:'arping -c 5',            m:'shell',  a:{cmd:'arping -I HEARTBEAT_IFACE -c 5 NODE_B_IP 2>/dev/null | tail -3'}},
+    {n:'DNS cluster (dig)',                 d:'dig +short NODE_NAME',   m:'shell',  a:{cmd:'dig +short NODE_NAME 2>/dev/null || getent hosts NODE_NAME'}},
+    {n:'URL health check service SGL',     d:'GET http://VIP/health',  m:'uri',    a:{url:'http://CLUSTER_VIP/health',method:'GET'}},
+    {n:'Test port personnalisé',            d:'nc -zv HOST PORT',       m:'shell',  a:{cmd:'nc -zv TARGET_HOST TARGET_PORT 2>&1 && echo "OK" || echo "FAIL"'}},
+  ],
+  '📤 Export': [
+    {n:'Envoyer rapport par mail (HTML)',  d:'smtp · gabarit HTML',     special:'mail'},
+    {n:'Exporter résultats en CSV',        d:'lineinfile · fetch',      special:'csv'},
+  ],
+};
+
+// ── GABARIT MAIL HTML (Jinja2 + HTML table sans CSS ni JS) ────────────────
+const MAIL_BODY_TPL = `<!DOCTYPE html>
+<html>
+<body>
+<table width="680" border="0" cellpadding="0" cellspacing="0" align="center">
+<tr>
+  <td bgcolor="#0a1e33" style="padding:20px 24px 18px">
+    <p style="font-family:Arial,Helvetica,sans-serif;color:#ffffff;font-size:18px;font-weight:bold;margin:0">Rapport Ansible &mdash; HP ServiceGuard</p>
+    <p style="font-family:Arial,Helvetica,sans-serif;color:#7eacd0;font-size:12px;margin:6px 0 0 0">{{ ansible_play_name | default('Playbook') }} &bull; {{ ansible_date_time.date | default('') }} {{ ansible_date_time.time | default('') }}</p>
+  </td>
+</tr>
+{% for host in play_hosts | default([inventory_hostname]) %}
+<tr>
+  <td bgcolor="#005eb8" style="padding:7px 24px">
+    <p style="font-family:Arial,Helvetica,sans-serif;color:#ffffff;font-size:13px;font-weight:bold;margin:0">Noeud : {{ host }}</p>
+  </td>
+</tr>
+<tr>
+  <td bgcolor="#ffffff" style="padding:0">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr bgcolor="#f0f4f8">
+      <td style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:#374151;padding:7px 16px;border-bottom:1px solid #dde3ec;width:220px">Vérification</td>
+      <td style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:#374151;padding:7px 16px;border-bottom:1px solid #dde3ec">Résultat</td>
+    </tr>
+    {# Dupliquer ce bloc <tr> pour chaque tâche enregistrée (variable register) : #}
+    {# Exemple :
+    <tr>
+      <td bgcolor="#fafbfc" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;color:#374151;padding:8px 16px;border-bottom:1px solid #eef1f5;vertical-align:top;width:220px">Statut cluster cmviewcl</td>
+      <td bgcolor="#ffffff" style="font-family:Consolas,monospace;font-size:11px;color:#4b5563;padding:8px 16px;border-bottom:1px solid #eef1f5;white-space:pre-wrap;vertical-align:top">{{ hostvars[host]['cmviewcl_r']['stdout'] | default('N/A') | truncate(800) }}</td>
+    </tr>
+    #}
+    </table>
+  </td>
+</tr>
+{% endfor %}
+<tr>
+  <td bgcolor="#f8fafc" style="padding:10px 24px;border-top:1px solid #dde3ec">
+    <p style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#9ca3af;margin:0">Généré automatiquement par Ansible &mdash; {{ ansible_date_time.iso8601 | default('') }}</p>
+  </td>
+</tr>
+</table>
+</body>
+</html>`;
+
+// ── RENDU RECETTES ────────────────────────────────────────────────────────
+const catContainer = document.getElementById('recipe-cats');
+const recipeContainer = document.getElementById('recipe-grid');
+
+function renderCats(){
+  const cats = Object.keys(RECIPES);
+  catContainer.innerHTML = '';
+  if(!activeRecipeCat || !RECIPES[activeRecipeCat]) activeRecipeCat = cats[0];
+  cats.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'cat-btn' + (cat===activeRecipeCat ? ' active' : '');
+    b.textContent = cat;
+    b.onclick = () => { activeRecipeCat=cat; renderCats(); };
+    catContainer.appendChild(b);
+  });
+  renderRecipes();
+}
+
+function renderRecipes(){
+  recipeContainer.innerHTML='';
+  (RECIPES[activeRecipeCat]||[]).forEach(r=>{
+    const card=document.createElement('div');
+    if(r.special==='mail') card.className='recipe-card mail-r';
+    else if(r.special==='csv') card.className='recipe-card csv-r';
+    else card.className='recipe-card';
+    const modDisplay = r.special ? (r.special==='mail'?'mail':'csv/lineinfile') : (typeof r.m==='function'?r.m():r.m);
+    card.innerHTML=`<strong>${r.n}</strong><span>${r.d} · <code>${modDisplay}</code></span>`;
+    card.onclick=()=>addRecipeTask(r);
+    recipeContainer.appendChild(card);
+  });
+}
+
+function addRecipeTask(recipe){
+  if(recipe.special==='mail'){ addMailTask(); return; }
+  if(recipe.special==='csv'){  addCsvTask();  return; }
+
+  const mod = typeof recipe.m==='function' ? recipe.m() : recipe.m;
+  const args = recipe.a || {};
+  const params = Object.entries(args)
+    .map(([k,v])=>({k,p:typeof v==='function'?v():v}))
+    .filter(p=>p.k!=='cmd');
+  const cmdVal = typeof args.cmd==='function' ? args.cmd() : (args.cmd||'');
+  const varName = recipe.n.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/_{2,}/g,'_').replace(/^_|_$/g,'').slice(0,25)+'_r';
+  const needsRegister = ['command','shell','stat','slurp','find','getent','uri'].includes(mod);
+
+  addTask(recipe.n, mod, params, '', recipe.loop||'', cmdVal, needsRegister?varName:'', true, recipe.when||'');
+
+  if(needsRegister){
+    let debugVar;
+    if(mod==='stat')  debugVar=`${varName}.stat`;
+    else if(mod==='slurp') debugVar=`${varName}.content | b64decode`;
+    else              debugVar=`${varName}.stdout_lines`;
+    addTask(`  Debug › ${recipe.n}`, 'debug', [{k:'var',p:debugVar}],'','','','',false,'');
+  } else if(mod==='setup'){
+    addTask('  Debug › Infos OS','debug',[{k:'var',p:'ansible_distribution+" "+ansible_distribution_version'}],'','','','',false,'');
+  } else if(mod==='service_facts'){
+    addTask('  Debug › Services SGL','debug',[{k:'var',p:'ansible_facts.services.keys()|list|sort'}],'','','','',false,'');
+  } else if(mod==='ping'){
+    addTask('  Debug › Ping','debug',[{k:'msg',p:'"Noeud {{ inventory_hostname }} accessible"'}],'','','','',false,'');
+  }
+}
+
+// ── TÂCHE MAIL SPÉCIALE ───────────────────────────────────────────────────
+function addMailTask(){
+  taskCount++;
+  const list=document.getElementById('tasks-list');
+  const card=document.createElement('div');
+  card.className='task-card mail-task';
+  card.id=`task-${taskCount}`;
+  card.dataset.tasktype='mail';
+  card.innerHTML=`<div class="task-header">
+    <span class="task-num mail-num">${taskCount} ✉</span>
+    <input class="input task-title-input" value="Envoyer rapport par mail (HTML)" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();renum();build()">✕</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.4rem">
+    <div><label style="font-size:.75rem;color:var(--text-muted)">Serveur SMTP</label>
+      <input class="input mail-param" data-key="host" value="smtp.example.com" oninput="build()"></div>
+    <div><label style="font-size:.75rem;color:var(--text-muted)">Port</label>
+      <input class="input mail-param" data-key="port" value="25" oninput="build()"></div>
+    <div><label style="font-size:.75rem;color:var(--text-muted)">De (from)</label>
+      <input class="input mail-param" data-key="from" value="ansible@example.com" oninput="build()"></div>
+    <div><label style="font-size:.75rem;color:var(--text-muted)">À (to)</label>
+      <input class="input mail-param" data-key="to" value="ops@example.com" oninput="build()"></div>
+  </div>
+  <div style="margin-bottom:.4rem"><label style="font-size:.75rem;color:var(--text-muted)">Sujet</label>
+    <input class="input mail-param" data-key="subject" value="Rapport SGL — {{ play_hosts | join(', ') }}" oninput="build()"></div>
+  <details style="margin-bottom:.4rem">
+    <summary style="font-size:.75rem;color:var(--text-secondary);cursor:pointer;padding:.2rem 0">▶ Gabarit HTML (Jinja2 — sans CSS ni JS)</summary>
+    <textarea class="textarea mail-body" rows="7" oninput="build()" style="font-size:.7rem;margin-top:.4rem;font-family:var(--font-mono)">${escH(MAIL_BODY_TPL)}</textarea>
+  </details>
+  <div class="extras-row">
+    <span style="font-size:.72rem;color:var(--success)">✓ delegate_to: localhost &nbsp;·&nbsp; run_once: true &nbsp;(générés automatiquement)</span>
+  </div>`;
+  list.appendChild(card);
+  build();
+}
+
+// ── TÂCHES CSV (3 cartes normales) ────────────────────────────────────────
+function addCsvTask(){
+  const csvPath='/tmp/rapport_sgl_{{ ansible_date_time.date | default("") }}.csv';
+  addTask(
+    'CSV — En-tête (delegate_to: localhost, run_once: true)',
+    'lineinfile',
+    [{k:'path',p:csvPath},{k:'create',p:'yes'},{k:'insertbefore',p:'BOF'},{k:'line',p:'"Hote,Date,Heure,Verification,Resultat"'}],
+    '','','','',false,''
+  );
+  addTask(
+    'CSV — Ligne {{ inventory_hostname }}',
+    'lineinfile',
+    [
+      {k:'path',p:csvPath},
+      {k:'line',p:'"{{ inventory_hostname }}","{{ ansible_date_time.date | default(\'\') }}","{{ ansible_date_time.time | default(\'\') }}","ma_verification","{{ ma_variable_r.stdout | default(\'N/A\') | replace(\',\',\';\') | replace(\'\\n\',\' | \') | truncate(200) }}"'}
+    ],
+    '','','','',false,''
+  );
+  addTask(
+    'CSV — Récupérer fichier (fetch)',
+    'fetch',
+    [{k:'src',p:csvPath},{k:'dest',p:'./rapports/{{ inventory_hostname }}/'},{k:'flat',p:'yes'}],
+    '','','','',false,''
+  );
+}
+
+// ── GESTION TÂCHES ────────────────────────────────────────────────────────
+function addVar(k='',v=''){
+  const list=document.getElementById('vars-list');
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="nom_variable" value="${k}" style="flex:0 0 130px" oninput="build()">
+    <input class="input" placeholder="valeur" value="${v}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  list.appendChild(row); build();
+}
+
+function addTask(name='', module='command', params=[], notify='', loop='', cmd='', register='', ro=false, when=''){
+  taskCount++;
+  const list=document.getElementById('tasks-list');
+  const card=document.createElement('div');
+  card.className='task-card'+(ro?' ro-task':'');
+  card.id=`task-${taskCount}`;
+
+  const MODS=['debug','setup','service_facts','package_facts','ping','command','shell','stat','slurp','find','getent','uri','fetch','lineinfile','mail'];
+  const modOpts=MODS.map(m=>`<option value="${m}"${m===module?' selected':''}>${m}</option>`).join('');
+  const paramsHtml=(params.length?params:[{k:'',p:''}]).map(p=>`<div class="kv-row"><input class="input" value="${escH(p.k)}" style="flex:0 0 130px" oninput="build()"><input class="input" value="${escH(p.p)}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
+
+  card.innerHTML=`<div class="task-header">
+    <span class="task-num${ro?' ro':''}">${taskCount}${ro?' 👁':''}</span>
+    <input class="input task-title-input" placeholder="Nom de la tâche" value="${escH(name||'Tâche '+taskCount)}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();renum();build()">✕</button>
+  </div>
+  <div style="display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap">
+    <label style="margin:0;font-size:.78rem;color:var(--text-muted)">Module:</label>
+    <select class="select" style="width:auto;min-width:120px" onchange="build()">${modOpts}</select>
+    ${cmd?`<input class="input cmd-input" placeholder="commande" value="${escH(cmd)}" style="flex:1;min-width:140px" oninput="build()">`:'<button class="btn btn--ghost btn--sm" onclick="addTaskParam(this)">+ param</button>'}
+  </div>
+  ${!cmd?`<div class="task-params">${paramsHtml}</div>`:''}
+  <div class="extras-row">
+    <input class="input" placeholder="notify: handler" value="${escH(notify)}" oninput="build()">
+    <input class="input" placeholder="when: condition" value="${escH(when)}" oninput="build()">
+    <input class="input" placeholder="register: var" value="${escH(register)}" oninput="build()">
+    <input class="input" placeholder="loop: [...]" value="${escH(loop)}" oninput="build()">
+    <label class="check-label" title="changed_when: false"><input type="checkbox" class="cwf" ${ro?'checked':''} onchange="build()"> cwf</label>
+  </div>`;
+  list.appendChild(card);
+  build();
+}
+
+function addTaskParam(btn){
+  const pp=btn.closest('.task-card').querySelector('.task-params');
+  if(!pp) return;
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="paramètre" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  pp.appendChild(row); build();
+}
+
+function renum(){
+  document.querySelectorAll('.task-num').forEach((el,i)=>{
+    const isRo=el.classList.contains('ro');
+    const isMail=el.classList.contains('mail-num');
+    el.textContent=(i+1)+(isRo?' 👁':isMail?' ✉':'');
+  });
+}
+
+function escH(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── GÉNÉRATION YAML ───────────────────────────────────────────────────────
+function build(){
+  const name=document.getElementById('play-name').value||'Vérification SGL';
+  const hosts=document.getElementById('play-hosts').value||'sgl_nodes';
+  const become=document.getElementById('play-become').checked;
+  const facts=document.getElementById('play-facts').value;
+  const strategy=document.getElementById('play-strategy').value;
+  const serial=document.getElementById('play-serial').value;
+
+  const lines=['---',`# Playbook généré — HP ServiceGuard / RHEL ${rhelVersion}`,`- name: "${name}"`,`  hosts: ${hosts}`];
+  if(become) lines.push('  become: true');
+  lines.push(`  gather_facts: ${facts}`);
+  if(strategy) lines.push(`  strategy: ${strategy}`);
+  if(serial)   lines.push(`  serial: ${serial}`);
+
+  const varRows=[...document.querySelectorAll('#vars-list .kv-row')];
+  if(varRows.length){ lines.push('  vars:'); varRows.forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k) lines.push(`    ${k}: ${v||'""'}`); }); }
+
+  const taskCards=[...document.querySelectorAll('.task-card')];
+  if(taskCards.length){
+    lines.push('  tasks:');
+    taskCards.forEach(card=>{
+
+      // Tâche mail spéciale
+      if(card.dataset.tasktype==='mail'){
+        const tname=card.querySelector('.task-title-input')?.value||'Envoyer rapport par mail';
+        const mp={};
+        card.querySelectorAll('.mail-param').forEach(i=>{mp[i.dataset.key]=i.value;});
+        const body=card.querySelector('.mail-body')?.value||'';
+        lines.push(`    - name: "${tname}"`);
+        lines.push(`      mail:`);
+        if(mp.host)    lines.push(`        host: "${mp.host}"`);
+        if(mp.port)    lines.push(`        port: ${mp.port||25}`);
+        if(mp.from)    lines.push(`        from: "${mp.from}"`);
+        if(mp.to)      { lines.push(`        to:`); lines.push(`          - "${mp.to}"`); }
+        if(mp.subject) lines.push(`        subject: "${mp.subject}"`);
+        lines.push(`        subtype: html`);
+        lines.push(`        body: |`);
+        body.split('\n').forEach(l=>lines.push(`          ${l}`));
+        lines.push(`      delegate_to: localhost`);
+        lines.push(`      run_once: true`);
+        return;
+      }
+
+      // Tâche normale
+      const taskName=(card.querySelector('.task-title-input')?.value||'Task').trim();
+      const mod=card.querySelector('select')?.value||'shell';
+      const cmdInput=card.querySelector('.cmd-input');
+      const cmd=cmdInput?.value||'';
+      const extras=[...card.querySelectorAll('.extras-row input:not([type="checkbox"])')];
+      const notify=extras[0]?.value||'';
+      const when=extras[1]?.value||'';
+      const reg=extras[2]?.value||'';
+      const loop=extras[3]?.value||'';
+      const cwf=card.querySelector('.cwf')?.checked;
+
+      lines.push(`    - name: "${taskName}"`);
+      if(cmd){
+        lines.push(`      ${mod}: ${cmd}`);
+      } else {
+        const kvs=[...card.querySelectorAll('.task-params .kv-row')];
+        const pairs=kvs.map(r=>[...r.querySelectorAll('input')].map(i=>i.value)).filter(([k])=>k);
+        lines.push(`      ${mod}:`);
+        if(!['ping','setup','service_facts','package_facts'].includes(mod)){
+          pairs.forEach(([k,v])=>lines.push(`        ${k}: ${v}`));
+        }
+      }
+      if(reg)    lines.push(`      register: ${reg}`);
+      if(cwf)    lines.push(`      changed_when: false`);
+      if(notify) lines.push(`      notify: ${notify}`);
+      if(when)   lines.push(`      when: ${when}`);
+      if(loop)   lines.push(`      loop: ${loop}`);
+    });
+  }
+
+  document.getElementById('output').textContent=lines.join('\n');
+}
+
+function copyPlaybook(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié!'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
+
+function clearTasks(){ document.getElementById('tasks-list').innerHTML=''; taskCount=0; build(); }
+
+function downloadTool(){
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='ansible-sgl.html'; a.click();
+}
+
+// Init
+addVar('node_a_ip','192.168.1.10');
+addVar('node_b_ip','192.168.1.11');
+addVar('quorum_server_ip','192.168.1.12');
+renderCats();
+addTask('Vérifier connectivité Ansible','ping',[]);
+addTask('Vue cluster complète','command',[],'',' ','cmviewcl','cmviewcl_r',true,'');
+addTask('  Debug › cmviewcl','debug',[{k:'var',p:'cmviewcl_r.stdout_lines'}],'','','','',false,'');
+build();
+</script>
+</body>
+</html>
