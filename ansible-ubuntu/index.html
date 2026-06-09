@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<!-- Ansible Playbook Builder Ubuntu — aucune donnée personnelle stockée -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ansible Playbook Builder Ubuntu — Portail</title>
+  <style>
+/* Portail Personnel — Charte graphique — aucune donnée personnelle */
+:root{--bg-base:#0d1117;--bg-card:#161b22;--bg-card-hover:#1c2330;--bg-input:#21262d;--border:#30363d;--border-focus:#58a6ff;--accent:#58a6ff;--accent-dim:#1f6feb;--accent2:#39d0d8;--text-primary:#e6edf3;--text-secondary:#8b949e;--text-muted:#484f58;--success:#3fb950;--warning:#d29922;--danger:#f85149;--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--shadow-card:0 4px 24px rgba(0,0,0,.4);--shadow-btn:0 2px 8px rgba(88,166,255,.15);--font:'Segoe UI',system-ui,-apple-system,sans-serif;--font-mono:'Cascadia Code','Consolas',monospace;--transition:160ms ease}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);font-size:15px;line-height:1.6;color:var(--text-primary);background:var(--bg-base);min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.5px}h2{font-size:1.35rem;font-weight:600}
+p{color:var(--text-secondary)}
+code,pre{font-family:var(--font-mono);font-size:.875em;background:var(--bg-input);border-radius:var(--radius-sm)}code{padding:.15em .4em}pre{padding:1rem;overflow-x:auto;border:1px solid var(--border)}
+.container{width:100%;max-width:1200px;margin-inline:auto;padding-inline:1.5rem}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1.1rem;border:1px solid transparent;border-radius:var(--radius-sm);font-family:var(--font);font-size:.875rem;font-weight:500;cursor:pointer;transition:background var(--transition),border-color var(--transition);white-space:nowrap;text-decoration:none!important}
+.btn--primary{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}.btn--primary:hover{background:var(--accent);border-color:var(--accent)}
+.btn--secondary{background:transparent;border-color:var(--border);color:var(--text-primary)}.btn--secondary:hover{background:var(--bg-input);border-color:var(--accent)}
+.btn--ghost{background:transparent;border-color:transparent;color:var(--text-secondary)}.btn--ghost:hover{color:var(--text-primary);background:var(--bg-input)}
+.btn--sm{padding:.35rem .75rem;font-size:.8rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.5rem;box-shadow:var(--shadow-card);transition:border-color var(--transition),background var(--transition)}
+.card:hover{border-color:var(--accent);background:var(--bg-card-hover)}
+.badge{display:inline-block;padding:.15em .55em;border-radius:999px;font-size:.72rem;font-weight:600}
+.badge--version{background:var(--bg-input);color:var(--accent);border:1px solid var(--border)}.badge--new{background:#1a3a2a;color:var(--success)}
+.input,.select,.textarea{width:100%;padding:.55rem .85rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:.9rem;transition:border-color var(--transition),box-shadow var(--transition)}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(88,166,255,.15)}
+.input::placeholder,.textarea::placeholder{color:var(--text-muted)}
+label{font-size:.875rem;color:var(--text-secondary);display:block;margin-bottom:.35rem}
+.mt-sm{margin-top:.5rem}.mt-md{margin-top:1rem}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg-base)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+::selection{background:rgba(88,166,255,.3)}
+
+/* Tool styles */
+.tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.tool-header h1{font-size:1.5rem;flex:1}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem}
+.ubuntu-bar{display:flex;align-items:center;gap:.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);padding:.6rem 1rem;margin-bottom:1rem;flex-wrap:wrap}
+.ubuntu-bar span{font-size:.8rem;color:var(--text-secondary)}
+.ver-btn{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.ver-btn.active{background:#e95420;border-color:#e95420;color:#fff}
+.mode-bar{display:flex;gap:.5rem;margin-bottom:.75rem}
+.mode-btn{padding:.35rem .9rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.mode-btn.active-mod{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}
+.mode-btn.active-cons{background:#1a3a2a;border-color:var(--success);color:var(--success)}
+.recipe-cats{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+.cat-btn{padding:.25rem .65rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.75rem;cursor:pointer;transition:all var(--transition)}
+.cat-btn.active{background:var(--accent-dim);border-color:var(--accent);color:#fff}
+.cat-btn.cons-active{background:#1a3a2a;border-color:var(--success);color:var(--success)}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem;margin-bottom:1.5rem;max-height:260px;overflow-y:auto}
+.recipe-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition)}
+.recipe-card:hover{border-color:var(--accent)}
+.recipe-card.ro{border-left:3px solid var(--success)}.recipe-card.ro:hover{border-color:var(--success)}
+.recipe-card strong{display:block;font-size:.78rem;color:var(--text-primary);margin-bottom:.12rem}
+.recipe-card span{font-size:.7rem;color:var(--text-muted)}
+.task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:.75rem;margin-bottom:.5rem}
+.task-card.ro-task{border-left:3px solid var(--success)}
+.task-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
+.task-num{font-size:.68rem;font-weight:700;background:var(--accent-dim);color:#fff;border-radius:999px;padding:.1rem .4rem;flex-shrink:0}
+.task-num.ro{background:#1a4a2a}
+.task-title-input{flex:1}
+.task-params{display:flex;flex-direction:column;gap:.3rem;margin-top:.4rem}
+.kv-row{display:flex;gap:.4rem;align-items:center}
+.kv-row input{flex:1}
+.output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.output-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input)}
+.output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.output-pre{font-family:var(--font-mono);font-size:.76rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:350px;color:var(--text-primary)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.check-label{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;color:var(--text-secondary)}
+.check-label input{width:15px;height:15px;accent-color:var(--accent)}
+.extras-row{display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap;align-items:center}
+.extras-row input{flex:1;min-width:90px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="tool-header">
+    <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
+    <h1>Ansible Playbook Builder Ubuntu</h1>
+    <span class="badge badge--version">v1.0.0</span>
+  </header>
+
+  <div class="ubuntu-bar">
+    <span>Cible :</span>
+    <button class="ver-btn" data-v="20" onclick="setVer(20,this)">Ubuntu 20.04 LTS</button>
+    <button class="ver-btn active" data-v="22" onclick="setVer(22,this)">Ubuntu 22.04 LTS</button>
+    <button class="ver-btn" data-v="24" onclick="setVer(24,this)">Ubuntu 24.04 LTS</button>
+    <span id="ver-hint" style="margin-left:.5rem;font-size:.75rem;color:var(--accent)">apt · Python 3.10 · Jammy · systemd</span>
+  </div>
+
+  <div class="mode-bar">
+    <button class="mode-btn active-mod" id="btn-mod" onclick="setMode('modification',this)">⚙ Modification</button>
+    <button class="mode-btn" id="btn-cons" onclick="setMode('consultation',this)">👁 Consultation (lecture seule)</button>
+  </div>
+
+  <p class="section-title">Bibliothèque de tâches — clic pour ajouter</p>
+  <div class="recipe-cats" id="recipe-cats"></div>
+  <div class="recipe-grid" id="recipe-grid"></div>
+
+  <div class="layout">
+    <div style="display:flex;flex-direction:column;gap:.85rem">
+
+      <div class="card">
+        <p class="section-title">Play</p>
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div><label>Nom</label><input class="input" id="play-name" value="Playbook Ubuntu" oninput="build()"></div>
+          <div><label>Hôtes / groupe</label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
+          <div class="two-col">
+            <label class="check-label"><input type="checkbox" id="play-become" checked onchange="build()"> become: true</label>
+            <div><label>gather_facts</label>
+              <select class="select" id="play-facts" onchange="build()"><option value="true">true</option><option value="false">false</option></select>
+            </div>
+          </div>
+          <div class="two-col">
+            <div><label>strategy</label>
+              <select class="select" id="play-strategy" onchange="build()"><option value="">linear</option><option value="free">free</option></select>
+            </div>
+            <div><label>serial</label>
+              <input class="input" id="play-serial" placeholder="ex: 1 ou 25%" oninput="build()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Variables (vars)</p>
+        <div class="task-params" id="vars-list"></div>
+        <button class="btn btn--secondary btn--sm mt-sm" onclick="addVar()">+ Variable</button>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Tâches <span style="font-size:.7rem;color:var(--text-muted);font-weight:400;text-transform:none">(vert = lecture seule)</span></p>
+        <div id="tasks-list"></div>
+        <div style="display:flex;gap:.5rem;margin-top:.75rem">
+          <button class="btn btn--secondary btn--sm" onclick="addTask()">+ Tâche modification</button>
+          <button class="btn btn--sm" style="border:1px solid var(--success);color:var(--success);background:transparent" onclick="addTask('','command',[],'' ,'','',true)">+ Tâche consultation</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="section-title">Playbook YAML généré</p>
+      <div class="output-box">
+        <div class="output-header">
+          <span>playbook.yml</span>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn--sm btn--secondary" onclick="copyPlaybook()">Copier</button>
+            <button class="btn btn--sm btn--ghost" onclick="clearTasks()">Vider</button>
+          </div>
+        </div>
+        <pre class="output-pre" id="output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let ubuntuVer = 22;
+let recipeMode = 'modification';
+let taskCount = 0;
+const VER_HINTS = {
+  20:'apt · Python 3.8 · Focal · systemd',
+  22:'apt · Python 3.10 · Jammy · systemd',
+  24:'apt · Python 3.12 · Noble · systemd'
+};
+function setVer(v,btn){ ubuntuVer=v; document.querySelectorAll('.ver-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('ver-hint').textContent=VER_HINTS[v]; build(); }
+function setMode(mode,btn){ recipeMode=mode; document.getElementById('btn-mod').className='mode-btn'+(mode==='modification'?' active-mod':''); document.getElementById('btn-cons').className='mode-btn'+(mode==='consultation'?' active-cons':''); activeRecipeCat=null; renderCats(); }
+
+const RECIPES_MOD = {
+  'Paquets apt':[
+    {n:'Installer un paquet',           d:'apt present',       m:'apt', a:{name:'nginx',state:'present',update_cache:'yes'}},
+    {n:'Installer plusieurs paquets',   d:'loop',              m:'apt', a:{name:'"{{ item }}"',state:'present'}, loop:'[nginx, curl, wget, git]'},
+    {n:'Mettre à jour tous les paquets',d:'apt upgrade',       m:'apt', a:{upgrade:'full',update_cache:'yes'}},
+    {n:'Supprimer un paquet',           d:'apt remove',        m:'apt', a:{name:'nginx',state:'absent',purge:'yes',autoremove:'yes'}},
+    {n:'Mise à jour cache (apt update)',d:'update_cache',      m:'apt', a:{update_cache:'yes',cache_valid_time:'3600'}},
+    {n:'Ajouter clé GPG dépôt',        d:'apt_key',           m:'apt_key', a:{url:'https://packages.example.com/key.gpg',state:'present'}},
+    {n:'Ajouter dépôt apt',            d:'apt_repository',    m:'apt_repository', a:{repo:'"deb https://packages.example.com/apt focal main"',state:'present',filename:'example'}},
+    {n:'Installer snap',               d:'snap install',      m:'snap', a:{name:'code',classic:'yes',state:'present'}},
+    {n:'Supprimer snap',               d:'snap remove',       m:'snap', a:{name:'code',state:'absent'}},
+  ],
+  'Services':[
+    {n:'Démarrer + activer',           d:'started+enabled',   m:'service',  a:{name:'nginx',state:'started',enabled:'yes'}},
+    {n:'Arrêter + désactiver',         d:'stopped+disabled',  m:'service',  a:{name:'nginx',state:'stopped',enabled:'no'}},
+    {n:'Redémarrer service',           d:'restarted',         m:'service',  a:{name:'nginx',state:'restarted'}},
+    {n:'Recharger config',             d:'reloaded',          m:'service',  a:{name:'nginx',state:'reloaded'}},
+    {n:'daemon_reload systemd',        d:'après unit install', m:'systemd', a:{daemon_reload:'yes'}},
+  ],
+  'Utilisateurs':[
+    {n:'Créer utilisateur système',    d:'system + nologin',  m:'user', a:{name:'appuser',state:'present',system:'yes',shell:'/usr/sbin/nologin',create_home:'no'}},
+    {n:'Créer utilisateur applicatif', d:'avec home + sudo',  m:'user', a:{name:'appuser',state:'present',home:'/home/appuser',shell:'/bin/bash',groups:'sudo',append:'yes'}},
+    {n:'Déployer clé SSH',             d:'authorized_keys',   m:'authorized_key', a:{user:'appuser',state:'present',key:'"{{ lookup(\'file\',\'~/.ssh/id_rsa.pub\') }}"'}},
+    {n:'Supprimer utilisateur',        d:'userdel -r',        m:'user', a:{name:'olduser',state:'absent',remove:'yes'}},
+    {n:'Configurer sudoers (nopass)',  d:'sudoers.d',         m:'copy', a:{dest:'/etc/sudoers.d/appuser',content:'"appuser ALL=(ALL) NOPASSWD: ALL\\n"',mode:'0440',validate:'/usr/sbin/visudo -cf %s'}},
+  ],
+  'Firewall UFW':[
+    {n:'Activer UFW',                  d:'ufw enable',        m:'ufw', a:{state:'enabled'}},
+    {n:'Autoriser port SSH',           d:'allow ssh',         m:'ufw', a:{rule:'allow',name:'OpenSSH'}},
+    {n:'Autoriser port TCP',           d:'allow port/tcp',    m:'ufw', a:{rule:'allow',port:'80',proto:'tcp'}},
+    {n:'Autoriser IP source',          d:'from ip to port',   m:'ufw', a:{rule:'allow',from_ip:'192.168.1.0/24',to_port:'22',proto:'tcp'}},
+    {n:'Refuser port',                 d:'deny port',         m:'ufw', a:{rule:'deny',port:'23',proto:'tcp'}},
+    {n:'Désactiver UFW',               d:'ufw disable',       m:'ufw', a:{state:'disabled'}},
+  ],
+  'AppArmor':[
+    {n:'Profil en mode enforcing',     d:'apparmor enforce',  m:'apparmor', a:{name:'/usr/bin/nginx',state:'enforced'}},
+    {n:'Profil en mode complain',      d:'debug mode',        m:'apparmor', a:{name:'/usr/bin/nginx',state:'complain'}},
+    {n:'Désactiver profil',            d:'apparmor disable',  m:'apparmor', a:{name:'/usr/bin/nginx',state:'absent'}},
+  ],
+  'Fichiers':[
+    {n:'Créer répertoire',             d:'mkdir -p + droits', m:'file',       a:{path:'/opt/app',state:'directory',mode:'0755',owner:'appuser',group:'appuser'}},
+    {n:'Copier fichier',               d:'copy local→remote', m:'copy',       a:{src:'files/app.conf',dest:'/etc/app/app.conf',mode:'0644',owner:'root',group:'root'}},
+    {n:'Déployer template Jinja2',     d:'.j2 → remote',     m:'template',   a:{src:'templates/nginx.conf.j2',dest:'/etc/nginx/sites-available/app',mode:'0644'}},
+    {n:'Modifier une ligne',           d:'lineinfile',        m:'lineinfile', a:{path:'/etc/ssh/sshd_config',regexp:'^#?PermitRootLogin',line:'PermitRootLogin no',state:'present'}},
+    {n:'Ajouter bloc config',          d:'blockinfile',       m:'blockinfile',a:{path:'/etc/hosts',block:'"192.168.1.10 srv-app"',state:'present'}},
+    {n:'Supprimer fichier/dossier',    d:'state: absent',     m:'file',       a:{path:'/tmp/install',state:'absent'}},
+    {n:'Activer site Nginx (symlink)', d:'sites-enabled',     m:'file',       a:{src:'/etc/nginx/sites-available/app',dest:'/etc/nginx/sites-enabled/app',state:'link'}},
+    {n:'Télécharger fichier',          d:'get_url',           m:'get_url',    a:{url:'https://example.com/file.deb',dest:'/tmp/file.deb',mode:'0644'}},
+    {n:'Installer paquet .deb',        d:'dpkg install',      m:'apt',        a:{deb:'/tmp/file.deb'}},
+  ],
+  'Configuration système':[
+    {n:'Configurer hostname',          d:'hostnamectl',       m:'hostname',   a:{name:'srv-prod-01.domaine.local'}},
+    {n:'Sysctl — param noyau',         d:'sysctl.conf',       m:'sysctl',     a:{name:'net.ipv4.ip_forward',value:'1',state:'present',reload:'yes'}},
+    {n:'Réseau (netplan via template)',d:'netplan apply',     m:'template',   a:{src:'templates/netplan.yaml.j2',dest:'/etc/netplan/01-config.yaml',mode:'0600'}},
+    {n:'Interface réseau (nmcli)',     d:'NetworkManager',    m:'nmcli',      a:{conn_name:'eth0',type:'ethernet',ip4:'192.168.1.100/24',gw4:'192.168.1.1',state:'present'}},
+    {n:'Limites système (ulimits)',    d:'pam_limits',        m:'pam_limits', a:{domain:'*',limit_type:'soft',limit_item:'nofile',value:'65536'}},
+    {n:'Configuration locale (locale)',d:'locale_gen',        m:'locale_gen', a:{name:'fr_FR.UTF-8',state:'present'}},
+    {n:'Fuseau horaire',               d:'timezone',          m:'timezone',   a:{name:'Europe/Paris'}},
+  ],
+  'Sécurité':[
+    {n:'Désactiver SSH root login',    d:'PermitRootLogin no',m:'lineinfile', a:{path:'/etc/ssh/sshd_config',regexp:'^#?PermitRootLogin',line:'PermitRootLogin no',state:'present'},notify:'restart sshd'},
+    {n:'Timeout SSH inactif',          d:'ClientAliveInterval',m:'lineinfile',a:{path:'/etc/ssh/sshd_config',regexp:'^#?ClientAliveInterval',line:'ClientAliveInterval 300',state:'present'},notify:'restart sshd'},
+    {n:'Désactiver accès root direct', d:'passwd -l root',   m:'command',    a:{cmd:'passwd -l root'}},
+    {n:'Mettre à jour uniquement sécu',d:'security upgrades', m:'apt',       a:{upgrade:'dist',update_cache:'yes',only_upgrade:'yes'}},
+    {n:'Configurer fail2ban',          d:'installation',      m:'apt',       a:{name:'fail2ban',state:'present'}},
+  ],
+};
+
+const RECIPES_CONS = {
+  'Diagnostic OS':[
+    {n:'Infos système (setup)',           d:'gather_facts',      m:'setup',   a:{},ro:true},
+    {n:'Version Ubuntu (lsb_release)',   d:'lsb_release -a',    m:'command', a:{cmd:'lsb_release -a'},ro:true},
+    {n:'Version kernel',                 d:'uname -r',          m:'command', a:{cmd:'uname -r'},ro:true},
+    {n:'Uptime et charge',               d:'uptime',            m:'command', a:{cmd:'uptime'},ro:true},
+    {n:'Espace disque (df -h)',          d:'df -h',             m:'command', a:{cmd:'df -h'},ro:true},
+    {n:'Mémoire (free -h)',             d:'free -h',            m:'command', a:{cmd:'free -h'},ro:true},
+    {n:'Infos CPU (lscpu)',             d:'lscpu',              m:'command', a:{cmd:'lscpu'},ro:true},
+    {n:'Périphériques blocs (lsblk)',   d:'lsblk',             m:'command', a:{cmd:'lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT'},ro:true},
+    {n:'Date et fuseau horaire',         d:'timedatectl',       m:'command', a:{cmd:'timedatectl status'},ro:true},
+    {n:'Hostname',                       d:'hostnamectl',       m:'command', a:{cmd:'hostnamectl status'},ro:true},
+  ],
+  'Paquets (lecture)':[
+    {n:'Paquets installés (pkg_facts)',  d:'package_facts',     m:'package_facts',a:{},ro:true},
+    {n:'Lister paquets (dpkg -l)',       d:'dpkg -l',           m:'command', a:{cmd:'dpkg -l | grep -v "^rc" | head -50'},ro:true},
+    {n:'Version d\'un paquet',          d:'dpkg -l paquet',    m:'command', a:{cmd:'dpkg -l nginx'},ro:true},
+    {n:'Fichiers d\'un paquet (dpkg)',  d:'dpkg -L paquet',    m:'command', a:{cmd:'dpkg -L nginx'},ro:true},
+    {n:'Chercher paquet installé',      d:'dpkg -l | grep',    m:'shell',   a:{cmd:'dpkg -l | grep -i nginx'},ro:true},
+    {n:'Mises à jour disponibles',      d:'apt list --upgradable',m:'command',a:{cmd:'apt list --upgradable 2>/dev/null'},ro:true},
+    {n:'Paquets en attente (apt)',      d:'apt-get -s upgrade', m:'command', a:{cmd:'apt-get -s upgrade 2>/dev/null | grep "^Inst"'},ro:true},
+    {n:'Sources dépôts',               d:'/etc/apt/sources.list',m:'command',a:{cmd:'cat /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null'},ro:true},
+    {n:'Snaps installés',              d:'snap list',          m:'command', a:{cmd:'snap list 2>/dev/null'},ro:true},
+    {n:'Paquet propriétaire fichier',  d:'dpkg -S /path',      m:'command', a:{cmd:'dpkg -S /usr/sbin/nginx 2>/dev/null'},ro:true},
+  ],
+  'Services & Processus':[
+    {n:'Tous les services (service_facts)',d:'ansible_facts',  m:'service_facts',a:{},ro:true},
+    {n:'Services actifs (systemctl)',    d:'--state=active',   m:'command', a:{cmd:'systemctl list-units --type=service --state=active --no-pager'},ro:true},
+    {n:'Services en échec',             d:'--state=failed',   m:'command', a:{cmd:'systemctl list-units --type=service --state=failed --no-pager'},ro:true},
+    {n:'Status d\'un service',          d:'systemctl status', m:'command', a:{cmd:'systemctl status nginx --no-pager'},ro:true},
+    {n:'Processus actifs (ps)',         d:'ps aux top20',     m:'shell',   a:{cmd:'ps aux --sort=-%cpu | head -20'},ro:true},
+    {n:'Top 10 processus mémoire',      d:'ps --sort=-%mem',  m:'shell',   a:{cmd:'ps aux --sort=-%mem | head -11'},ro:true},
+  ],
+  'Réseau (lecture)':[
+    {n:'Interfaces réseau (ip addr)',   d:'ip addr show',     m:'command', a:{cmd:'ip addr show'},ro:true},
+    {n:'Table de routage',             d:'ip route show',    m:'command', a:{cmd:'ip route show'},ro:true},
+    {n:'Ports en écoute (ss -tlnp)',   d:'ss -tlnp',         m:'command', a:{cmd:'ss -tlnp'},ro:true},
+    {n:'Test connectivité (ping)',      d:'module ping',      m:'ping',    a:{},ro:true},
+    {n:'Test endpoint HTTP',           d:'uri GET',          m:'uri',     a:{url:'http://localhost/',method:'GET'},ro:true},
+    {n:'Règles UFW',                   d:'ufw status verbose',m:'command',a:{cmd:'ufw status verbose'},ro:true},
+    {n:'Config netplan',               d:'netplan get',      m:'command', a:{cmd:'netplan get all 2>/dev/null || cat /etc/netplan/*.yaml'},ro:true},
+  ],
+  'Sécurité (lecture)':[
+    {n:'Statut AppArmor',              d:'aa-status',        m:'command', a:{cmd:'aa-status 2>/dev/null || apparmor_status 2>/dev/null'},ro:true},
+    {n:'Profils AppArmor chargés',     d:'aa-status --brief',m:'command', a:{cmd:'aa-status --brief 2>/dev/null'},ro:true},
+    {n:'Connexions SSH récentes',      d:'/var/log/auth.log',m:'shell',   a:{cmd:'grep "Accepted" /var/log/auth.log 2>/dev/null | tail -20'},ro:true},
+    {n:'Tentatives SSH refusées',      d:'auth.log Failed',  m:'shell',   a:{cmd:'grep "Failed password" /var/log/auth.log 2>/dev/null | tail -20'},ro:true},
+    {n:'Comptes sudo',                 d:'sudo group',       m:'command', a:{cmd:'getent group sudo'},ro:true},
+  ],
+  'Utilisateurs (lecture)':[
+    {n:'Infos utilisateur (id)',       d:'id username',      m:'command', a:{cmd:'id appuser'},ro:true},
+    {n:'NSS passwd (getent)',          d:'getent passwd',    m:'getent',  a:{database:'passwd',key:'appuser'},ro:true},
+    {n:'NSS groupe (getent)',          d:'getent group',     m:'getent',  a:{database:'group',key:'sudo'},ro:true},
+    {n:'Sessions actives (who)',        d:'who',             m:'command', a:{cmd:'who'},ro:true},
+    {n:'Historique connexions (last)', d:'last -n 20',       m:'command', a:{cmd:'last -n 20'},ro:true},
+  ],
+  'Logs':[
+    {n:'Journaux récents',             d:'journalctl -n 50', m:'command', a:{cmd:'journalctl -n 50 --no-pager'},ro:true},
+    {n:'Logs d\'un service',          d:'journalctl -u',    m:'command', a:{cmd:'journalctl -u nginx --no-pager -n 50'},ro:true},
+    {n:'Erreurs critiques',           d:'journalctl -p err', m:'command', a:{cmd:'journalctl -p err -n 50 --no-pager'},ro:true},
+    {n:'Logs auth Ubuntu',            d:'/var/log/auth.log', m:'shell',  a:{cmd:'tail -50 /var/log/auth.log'},ro:true},
+    {n:'Logs syslog',                 d:'/var/log/syslog',  m:'shell',   a:{cmd:'tail -50 /var/log/syslog'},ro:true},
+  ],
+  'Stockage & Fichiers':[
+    {n:'Existence fichier (stat)',     d:'stat module',      m:'stat',    a:{path:'/etc/nginx/nginx.conf'},ro:true},
+    {n:'Lire fichier (slurp)',         d:'base64 decode',    m:'slurp',  a:{src:'/etc/hostname'},ro:true},
+    {n:'Espace dossier (du)',          d:'du -sh',           m:'command', a:{cmd:'du -sh /var/log/ /var/www/ /opt/'},ro:true},
+    {n:'Fichiers volumineux >100 Mo', d:'find -size +100M',  m:'shell',  a:{cmd:'find / -xdev -type f -size +100M 2>/dev/null | sort -rh | head -20'},ro:true},
+  ],
+};
+
+let activeRecipeCat = null;
+const catContainer = document.getElementById('recipe-cats');
+const recipeContainer = document.getElementById('recipe-grid');
+
+function renderCats(){
+  const data = recipeMode==='modification' ? RECIPES_MOD : RECIPES_CONS;
+  const cats = Object.keys(data);
+  catContainer.innerHTML = '';
+  if(!activeRecipeCat || !data[activeRecipeCat]) activeRecipeCat = cats[0];
+  cats.forEach(cat => {
+    const b=document.createElement('button');
+    b.className='cat-btn'+(cat===activeRecipeCat?(recipeMode==='consultation'?' cons-active':' active'):'');
+    b.textContent=cat;
+    b.onclick=()=>{activeRecipeCat=cat;renderCats();};
+    catContainer.appendChild(b);
+  });
+  renderRecipes();
+}
+
+function renderRecipes(){
+  recipeContainer.innerHTML='';
+  const data = recipeMode==='modification' ? RECIPES_MOD : RECIPES_CONS;
+  (data[activeRecipeCat]||[]).forEach(r=>{
+    const card=document.createElement('div');
+    card.className='recipe-card'+(r.ro?' ro':'');
+    const modDisplay=r.m;
+    card.innerHTML=`<strong>${r.n}</strong><span>${r.d} · <code>${modDisplay}</code></span>`;
+    card.onclick=()=>addRecipeTask(r);
+    recipeContainer.appendChild(card);
+  });
+}
+
+function addVar(k='',v=''){
+  const list=document.getElementById('vars-list');
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="nom_variable" value="${k}" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="valeur" value="${v}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  list.appendChild(row); build();
+}
+
+function addRecipeTask(recipe){
+  const mod=recipe.m;
+  const args=recipe.a||{};
+  const params=Object.entries(args).map(([k,v])=>({k,p:v})).filter(p=>p.k!=='cmd');
+  const cmdVal=args.cmd||'';
+  const roFlag=!!recipe.ro;
+  const varName=recipe.n.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/_{2,}/g,'_').replace(/^_|_$/g,'').slice(0,25)+'_r';
+  const needsRegister=roFlag&&['command','shell','stat','slurp','find','getent','uri'].includes(mod);
+
+  addTask(recipe.n,mod,params,recipe.notify||'',recipe.loop||'',cmdVal,needsRegister?varName:'',roFlag,recipe.when||'');
+
+  if(roFlag&&needsRegister){
+    let debugVar;
+    if(mod==='stat') debugVar=`${varName}.stat`;
+    else if(mod==='slurp') debugVar=`${varName}.content | b64decode`;
+    else debugVar=`${varName}.stdout_lines`;
+    addTask(`  Debug › ${recipe.n}`,'debug',[{k:'var',p:debugVar}],'','','','',false,'');
+  } else if(roFlag){
+    if(mod==='setup') addTask('  Debug › Infos OS','debug',[{k:'var',p:'ansible_distribution+" "+ansible_distribution_version'}],'','','','',false,'');
+    else if(mod==='service_facts') addTask('  Debug › Services','debug',[{k:'var',p:'ansible_facts.services.keys()|list|sort'}],'','','','',false,'');
+    else if(mod==='package_facts') addTask('  Debug › Paquets','debug',[{k:'var',p:'ansible_facts.packages.keys()|list|sort'}],'','','','',false,'');
+    else if(mod==='ping') addTask('  Debug › Ping','debug',[{k:'msg',p:'"Hôte {{ inventory_hostname }} accessible"'}],'','','','',false,'');
+  }
+}
+
+function addTask(name='',module='apt',params=[],notify='',loop='',cmd='',register='',ro=false,when=''){
+  taskCount++;
+  const list=document.getElementById('tasks-list');
+  const card=document.createElement('div');
+  card.className='task-card'+(ro?' ro-task':'');
+  card.id=`task-${taskCount}`;
+  const MODS=['debug','setup','service_facts','package_facts','ping','apt','apt_key','apt_repository','snap','service','systemd','copy','template','file','lineinfile','blockinfile','user','authorized_key','ufw','apparmor','nmcli','hostname','sysctl','locale_gen','timezone','pam_limits','get_url','command','shell','stat','slurp','find','getent','uri'];
+  const modOpts=MODS.map(m=>`<option value="${m}"${m===module?' selected':''}>${m}</option>`).join('');
+  const paramsHtml=(params.length?params:[{k:'',p:''}]).map(p=>`<div class="kv-row"><input class="input" value="${escH(p.k)}" style="flex:0 0 130px" oninput="build()"><input class="input" value="${escH(p.p)}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
+  card.innerHTML=`<div class="task-header"><span class="task-num${ro?' ro':''}">${taskCount}${ro?' 👁':''}</span><input class="input task-title-input" placeholder="Nom" value="${escH(name||'Tâche '+taskCount)}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();build()">✕</button></div>
+  <div style="display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap;"><label style="margin:0;font-size:.78rem;color:var(--text-muted)">Module:</label><select class="select" style="width:auto;min-width:120px" onchange="build()">${modOpts}</select>${cmd?`<input class="input cmd-input" placeholder="commande" value="${escH(cmd)}" style="flex:1;min-width:140px" oninput="build()">`:'<button class="btn btn--ghost btn--sm" onclick="addTaskParam(this)">+ param</button>'}</div>
+  ${!cmd?`<div class="task-params">${paramsHtml}</div>`:''}
+  <div class="extras-row"><input class="input" placeholder="notify: handler" value="${escH(notify)}" oninput="build()"><input class="input" placeholder="when: condition" value="${escH(when)}" oninput="build()"><input class="input" placeholder="register: var" value="${escH(register)}" oninput="build()"><input class="input" placeholder="loop: [...]" value="${escH(loop)}" oninput="build()"><label class="check-label" title="changed_when: false"><input type="checkbox" class="cwf" ${ro?'checked':''} onchange="build()"> cwf</label></div>`;
+  list.appendChild(card); build();
+}
+
+function addTaskParam(btn){ const pp=btn.closest('.task-card').querySelector('.task-params'); if(!pp)return; const row=document.createElement('div'); row.className='kv-row'; row.innerHTML=`<input class="input" placeholder="paramètre" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`; pp.appendChild(row); build(); }
+
+function escH(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function build(){
+  const name=document.getElementById('play-name').value||'Playbook';
+  const hosts=document.getElementById('play-hosts').value||'all';
+  const become=document.getElementById('play-become').checked;
+  const facts=document.getElementById('play-facts').value;
+  const strategy=document.getElementById('play-strategy').value;
+  const serial=document.getElementById('play-serial').value;
+  const lines=['---',`# Playbook Ubuntu ${ubuntuVer}.04 LTS`,`- name: "${name}"`,`  hosts: ${hosts}`];
+  if(become) lines.push('  become: true');
+  lines.push(`  gather_facts: ${facts}`);
+  if(strategy) lines.push(`  strategy: ${strategy}`);
+  if(serial) lines.push(`  serial: ${serial}`);
+  const varRows=[...document.querySelectorAll('#vars-list .kv-row')];
+  if(varRows.length){ lines.push('  vars:'); varRows.forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k) lines.push(`    ${k}: ${v||'""'}`); }); }
+  const taskCards=[...document.querySelectorAll('.task-card')];
+  if(taskCards.length){
+    lines.push('  tasks:');
+    taskCards.forEach(card=>{
+      const taskName=(card.querySelector('.task-title-input')?.value||'Task').trim();
+      const mod=card.querySelector('select')?.value||'shell';
+      const cmdInput=card.querySelector('.cmd-input');
+      const cmd=cmdInput?.value||'';
+      const extras=[...card.querySelectorAll('.extras-row input:not([type="checkbox"])')];
+      const notify=extras[0]?.value||''; const when=extras[1]?.value||''; const reg=extras[2]?.value||''; const loop=extras[3]?.value||'';
+      const cwf=card.querySelector('.cwf')?.checked;
+      lines.push(`    - name: "${taskName}"`);
+      if(cmd){ lines.push(`      ${mod}: ${cmd}`); }
+      else {
+        const kvs=[...card.querySelectorAll('.task-params .kv-row')];
+        const pairs=kvs.map(r=>[...r.querySelectorAll('input')].map(i=>i.value)).filter(([k])=>k);
+        lines.push(`      ${mod}:`);
+        pairs.forEach(([k,v])=>lines.push(`        ${k}: ${v}`));
+      }
+      if(reg) lines.push(`      register: ${reg}`);
+      if(cwf) lines.push(`      changed_when: false`);
+      if(notify) lines.push(`      notify: ${notify}`);
+      if(when) lines.push(`      when: ${when}`);
+      if(loop) lines.push(`      loop: ${loop}`);
+    });
+  }
+  document.getElementById('output').textContent=lines.join('\n');
+}
+
+function copyPlaybook(){ navigator.clipboard.writeText(document.getElementById('output').textContent); const b=event.target; b.textContent='Copié!'; b.classList.add('btn--primary'); setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500); }
+function clearTasks(){ document.getElementById('tasks-list').innerHTML=''; taskCount=0; build(); }
+
+renderCats();
+addTask('Mettre à jour cache apt','apt',[{k:'update_cache',p:'yes'},{k:'cache_valid_time',p:'3600'}]);
+addTask('Installer nginx','apt',[{k:'name',p:'nginx'},{k:'state',p:'present'}],'restart nginx');
+addTask('Démarrer et activer nginx','service',[{k:'name',p:'nginx'},{k:'state',p:'started'},{k:'enabled',p:'yes'}]);
+build();
+</script>
+</body>
+</html>

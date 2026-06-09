@@ -1,83 +1,135 @@
 <!DOCTYPE html>
-<!-- Ansible Playbook Builder RHEL — aucune donnée personnelle stockée -->
+<!-- Ansible Playbook Builder RHEL 6/7/8/9 — aucune donnée personnelle stockée -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ansible Playbook Builder — Portail</title>
-  <link rel="stylesheet" href="../style.css" />
+  <title>Ansible Playbook Builder RHEL — Portail</title>
   <style>
-    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
-    .tool-header h1{font-size:1.5rem;flex:1;}
-    .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
-    @media(max-width:850px){.layout{grid-template-columns:1fr;}}
-    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem;}
-    .rhel-bar{display:flex;align-items:center;gap:.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);padding:.6rem 1rem;margin-bottom:1.5rem;}
-    .rhel-bar span{font-size:.8rem;color:var(--text-secondary);}
-    .rhel-btn{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--transition);}
-    .rhel-btn.active{background:#cc0000;border-color:#cc0000;color:#fff;}
-    .recipe-cats{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem;}
-    .cat-btn{padding:.25rem .65rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.75rem;cursor:pointer;transition:all var(--transition);}
-    .cat-btn.active{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
-    .recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.5rem;margin-bottom:1.5rem;max-height:280px;overflow-y:auto;}
-    .recipe-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);}
-    .recipe-card:hover{border-color:var(--accent);background:var(--bg-card-hover);}
-    .recipe-card strong{display:block;font-size:.8rem;color:var(--text-primary);margin-bottom:.15rem;}
-    .recipe-card span{font-size:.72rem;color:var(--text-muted);}
-    .task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:.85rem;margin-bottom:.6rem;}
-    .task-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;}
-    .task-num{font-size:.7rem;font-weight:700;background:var(--accent-dim);color:#fff;border-radius:999px;padding:.1rem .45rem;flex-shrink:0;}
-    .task-title-input{flex:1;}
-    .task-params{display:flex;flex-direction:column;gap:.35rem;margin-top:.5rem;}
-    .kv-row{display:flex;gap:.4rem;align-items:center;}
-    .kv-row input{flex:1;}
-    .output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
-    .output-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input);}
-    .output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
-    .output-pre{font-family:var(--font-mono);font-size:.78rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:250px;color:var(--text-primary);}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
-    .check-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;}
-    .check-label input{width:16px;height:16px;accent-color:var(--accent);}
+/* Portail Personnel — Charte graphique — aucune donnée personnelle */
+:root{--bg-base:#0d1117;--bg-card:#161b22;--bg-card-hover:#1c2330;--bg-input:#21262d;--border:#30363d;--border-focus:#58a6ff;--accent:#58a6ff;--accent-dim:#1f6feb;--accent2:#39d0d8;--text-primary:#e6edf3;--text-secondary:#8b949e;--text-muted:#484f58;--success:#3fb950;--warning:#d29922;--danger:#f85149;--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--shadow-card:0 4px 24px rgba(0,0,0,.4);--shadow-btn:0 2px 8px rgba(88,166,255,.15);--font:'Segoe UI',system-ui,-apple-system,sans-serif;--font-mono:'Cascadia Code','Consolas',monospace;--transition:160ms ease}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);font-size:15px;line-height:1.6;color:var(--text-primary);background:var(--bg-base);min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+img,svg{display:block;max-width:100%}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.5px}h2{font-size:1.35rem;font-weight:600}h3{font-size:1.1rem;font-weight:600}
+p{color:var(--text-secondary)}
+code,pre{font-family:var(--font-mono);font-size:.875em;background:var(--bg-input);border-radius:var(--radius-sm)}code{padding:.15em .4em}pre{padding:1rem;overflow-x:auto;border:1px solid var(--border)}
+.container{width:100%;max-width:1200px;margin-inline:auto;padding-inline:1.5rem}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1.1rem;border:1px solid transparent;border-radius:var(--radius-sm);font-family:var(--font);font-size:.875rem;font-weight:500;cursor:pointer;transition:background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition);white-space:nowrap;text-decoration:none!important}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn--primary{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff;box-shadow:var(--shadow-btn)}.btn--primary:hover{background:var(--accent);border-color:var(--accent)}
+.btn--secondary{background:transparent;border-color:var(--border);color:var(--text-primary)}.btn--secondary:hover{background:var(--bg-input);border-color:var(--accent)}
+.btn--ghost{background:transparent;border-color:transparent;color:var(--text-secondary)}.btn--ghost:hover{color:var(--text-primary);background:var(--bg-input)}
+.btn--sm{padding:.35rem .75rem;font-size:.8rem}.btn--lg{padding:.7rem 1.5rem;font-size:1rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.5rem;box-shadow:var(--shadow-card);transition:border-color var(--transition),background var(--transition)}
+.card:hover{border-color:var(--accent);background:var(--bg-card-hover)}
+.badge{display:inline-block;padding:.15em .55em;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.02em}
+.badge--version{background:var(--bg-input);color:var(--accent);border:1px solid var(--border)}.badge--new{background:#1a3a2a;color:var(--success)}.badge--beta{background:#2d2009;color:var(--warning)}
+.input,.select,.textarea{width:100%;padding:.55rem .85rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:.9rem;transition:border-color var(--transition),box-shadow var(--transition)}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(88,166,255,.15)}
+.input::placeholder,.textarea::placeholder{color:var(--text-muted)}
+label{font-size:.875rem;color:var(--text-secondary);display:block;margin-bottom:.35rem}
+.divider{height:1px;background:var(--border);margin-block:1.5rem}
+.text-accent{color:var(--accent)}.text-muted{color:var(--text-muted)}.text-secondary{color:var(--text-secondary)}.text-success{color:var(--success)}.text-danger{color:var(--danger)}.text-center{text-align:center}
+.mt-sm{margin-top:.5rem}.mt-md{margin-top:1rem}.mt-lg{margin-top:2rem}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg-base)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+::selection{background:rgba(88,166,255,.3)}
+
+/* Tool styles */
+.tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.tool-header h1{font-size:1.5rem;flex:1}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-secondary);margin-bottom:.5rem}
+.rhel-bar{display:flex;align-items:center;gap:.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);padding:.6rem 1rem;margin-bottom:1rem;flex-wrap:wrap}
+.rhel-bar span{font-size:.8rem;color:var(--text-secondary)}
+.rhel-btn{padding:.3rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.rhel-btn.active{background:#cc0000;border-color:#cc0000;color:#fff}
+.mode-bar{display:flex;gap:.5rem;margin-bottom:.75rem}
+.mode-btn{padding:.35rem .9rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.mode-btn.active-mod{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}
+.mode-btn.active-cons{background:#1a3a2a;border-color:var(--success);color:var(--success)}
+.recipe-cats{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+.cat-btn{padding:.25rem .65rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.75rem;cursor:pointer;transition:all var(--transition)}
+.cat-btn.active{background:var(--accent-dim);border-color:var(--accent);color:#fff}
+.cat-btn.cons-active{background:#1a3a2a;border-color:var(--success);color:var(--success)}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem;margin-bottom:1.5rem;max-height:260px;overflow-y:auto}
+.recipe-card{padding:.5rem .75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition)}
+.recipe-card:hover{border-color:var(--accent);background:var(--bg-card-hover)}
+.recipe-card.ro{border-left:3px solid var(--success)}
+.recipe-card.ro:hover{border-color:var(--success)}
+.recipe-card strong{display:block;font-size:.78rem;color:var(--text-primary);margin-bottom:.12rem}
+.recipe-card span{font-size:.7rem;color:var(--text-muted)}
+.task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:.75rem;margin-bottom:.5rem}
+.task-card.ro-task{border-left:3px solid var(--success)}
+.task-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
+.task-num{font-size:.68rem;font-weight:700;background:var(--accent-dim);color:#fff;border-radius:999px;padding:.1rem .4rem;flex-shrink:0}
+.task-num.ro{background:#1a4a2a}
+.task-title-input{flex:1}
+.task-params{display:flex;flex-direction:column;gap:.3rem;margin-top:.4rem}
+.kv-row{display:flex;gap:.4rem;align-items:center}
+.kv-row input{flex:1}
+.output-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.output-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-input)}
+.output-header span{font-size:.75rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.output-pre{font-family:var(--font-mono);font-size:.76rem;padding:1rem;white-space:pre;overflow-x:auto;min-height:350px;color:var(--text-primary)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.check-label{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;color:var(--text-secondary)}
+.check-label input{width:15px;height:15px;accent-color:var(--accent)}
+.extras-row{display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap;align-items:center}
+.extras-row input{flex:1;min-width:90px}
+.ro-badge{font-size:.65rem;padding:.05rem .35rem;border-radius:999px;background:#1a3a2a;color:var(--success);border:1px solid var(--success);flex-shrink:0}
   </style>
 </head>
 <body>
 <div class="container">
   <header class="tool-header">
     <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
-    <h1>Ansible Playbook Builder</h1>
-    <span class="badge badge--version">v1.1.0</span>
+    <h1>Ansible Playbook Builder RHEL</h1>
+    <span class="badge badge--version">v1.2.0</span>
   </header>
 
-  <!-- RHEL version bar -->
   <div class="rhel-bar">
     <span>Cible :</span>
+    <button class="rhel-btn" data-v="6" onclick="setRhel(6,this)">RHEL 6</button>
     <button class="rhel-btn" data-v="7" onclick="setRhel(7,this)">RHEL 7</button>
     <button class="rhel-btn active" data-v="8" onclick="setRhel(8,this)">RHEL 8</button>
     <button class="rhel-btn" data-v="9" onclick="setRhel(9,this)">RHEL 9</button>
-    <span id="rhel-hint" style="margin-left:.5rem;font-size:.75rem;color:var(--accent)">dnf · systemd · Python 3.6+</span>
+    <span id="rhel-hint" style="margin-left:.5rem;font-size:.75rem;color:var(--accent)">dnf · Python 3.6 · EL8 · systemd</span>
   </div>
 
-  <!-- Recipe library -->
-  <p class="section-title">Bibliothèque de tâches (clic pour ajouter)</p>
+  <div class="mode-bar">
+    <button class="mode-btn active-mod" id="btn-mod" onclick="setMode('modification',this)">⚙ Modification</button>
+    <button class="mode-btn" id="btn-cons" onclick="setMode('consultation',this)">👁 Consultation (lecture seule)</button>
+  </div>
+
+  <p class="section-title">Bibliothèque de tâches — clic pour ajouter</p>
   <div class="recipe-cats" id="recipe-cats"></div>
   <div class="recipe-grid" id="recipe-grid"></div>
 
   <div class="layout">
-    <!-- Gauche : builder -->
-    <div style="display:flex;flex-direction:column;gap:1rem;">
+    <div style="display:flex;flex-direction:column;gap:.85rem">
 
       <div class="card">
         <p class="section-title">Play</p>
-        <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <div style="display:flex;flex-direction:column;gap:.5rem">
           <div><label>Nom</label><input class="input" id="play-name" value="Playbook RHEL" oninput="build()"></div>
-          <div><label>Hôtes</label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
-          <label class="check-label"><input type="checkbox" id="play-become" onchange="build()"> become: true</label>
+          <div><label>Hôtes / groupe</label><input class="input" id="play-hosts" value="all" oninput="build()"></div>
           <div class="two-col">
+            <label class="check-label"><input type="checkbox" id="play-become" onchange="build()"> become: true</label>
             <div><label>gather_facts</label>
               <select class="select" id="play-facts" onchange="build()"><option value="true">true</option><option value="false">false</option></select>
             </div>
+          </div>
+          <div class="two-col">
             <div><label>strategy</label>
               <select class="select" id="play-strategy" onchange="build()"><option value="">linear (défaut)</option><option value="free">free</option><option value="host_pinned">host_pinned</option></select>
+            </div>
+            <div><label>serial</label>
+              <input class="input" id="play-serial" placeholder="ex: 1 ou 25%" oninput="build()">
             </div>
           </div>
         </div>
@@ -86,23 +138,29 @@
       <div class="card">
         <p class="section-title">Variables (vars)</p>
         <div class="task-params" id="vars-list"></div>
-        <button class="btn btn--secondary btn--sm" onclick="addVar()">+ Variable</button>
+        <button class="btn btn--secondary btn--sm mt-sm" onclick="addVar()">+ Variable</button>
       </div>
 
       <div class="card">
-        <p class="section-title">Tâches</p>
+        <p class="section-title">Tâches <span style="font-size:.7rem;color:var(--text-muted);font-weight:400;text-transform:none">(vert = lecture seule)</span></p>
         <div id="tasks-list"></div>
-        <button class="btn btn--secondary btn--sm mt-md" onclick="addTask()">+ Tâche vide</button>
+        <div style="display:flex;gap:.5rem;margin-top:.75rem">
+          <button class="btn btn--secondary btn--sm" onclick="addTask()">+ Tâche modification</button>
+          <button class="btn btn--sm" style="border:1px solid var(--success);color:var(--success);background:transparent" onclick="addTask('','command',[],'' ,'','',true)">+ Tâche consultation</button>
+        </div>
       </div>
+
     </div>
 
-    <!-- Droite : output -->
     <div>
-      <p class="section-title">Playbook YAML</p>
+      <p class="section-title">Playbook YAML généré</p>
       <div class="output-box">
         <div class="output-header">
           <span>playbook.yml</span>
-          <button class="btn btn--sm btn--secondary" onclick="copyPlaybook()">Copier</button>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn--sm btn--secondary" onclick="copyPlaybook()">Copier</button>
+            <button class="btn btn--sm btn--ghost" onclick="clearTasks()">Vider</button>
+          </div>
         </div>
         <pre class="output-pre" id="output"></pre>
       </div>
@@ -112,187 +170,403 @@
 
 <script>
 let rhelVersion = 8;
+let recipeMode = 'modification';
 let taskCount = 0;
 
-const RHEL_HINTS = {7:'yum · Python 2.7 · EL7 · systemd', 8:'dnf · Python 3.6 · EL8 · systemd', 9:'dnf · Python 3.9 · EL9 · systemd'};
+const RHEL_HINTS = {
+  6:'yum · Python 2.6 · EL6 · SysV init',
+  7:'yum · Python 2.7 · EL7 · systemd',
+  8:'dnf · Python 3.6 · EL8 · systemd',
+  9:'dnf · Python 3.9 · EL9 · systemd'
+};
 function pkgMod(v){ return v<=7?'yum':'dnf'; }
-function setRhel(v,btn){ rhelVersion=v; document.querySelectorAll('.rhel-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('rhel-hint').textContent=RHEL_HINTS[v]; build(); }
+function setRhel(v,btn){
+  rhelVersion=v;
+  document.querySelectorAll('.rhel-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rhel-hint').textContent=RHEL_HINTS[v];
+  build();
+}
 
-// Recipe library
-const RECIPES = {
-  'Paquets': [
-    {n:'Installer un paquet',          d:'dnf install',      t:(v)=>`Installer paquet`,      m:()=>pkgMod(rhelVersion), args:{name:'paquet', state:'present'}},
-    {n:'Installer groupe de paquets',  d:'@Development Tools',t:(v)=>`Installer groupe`,      m:()=>pkgMod(rhelVersion), args:{name:'"@Development Tools"', state:'present'}},
-    {n:'Mettre à jour tous les paquets',d:'dnf update',      t:()=>`Mise à jour système`,     m:()=>pkgMod(rhelVersion), args:{name:'*', state:'latest'}},
-    {n:'Supprimer un paquet',          d:'dnf remove',       t:()=>`Supprimer paquet`,        m:()=>pkgMod(rhelVersion), args:{name:'paquet', state:'absent'}},
-    {n:'Activer dépôt EPEL',           d:'RHEL 8/9',         t:()=>`Activer EPEL`,            m:()=>pkgMod(rhelVersion), args:{name:'epel-release', state:'present'}},
-    {n:'Nettoyer cache DNF/YUM',       d:'clean all',        t:()=>`Nettoyer cache paquets`,  m:()=>pkgMod(rhelVersion)+' clean', args:{command:'all'}},
+function setMode(mode, btn){
+  recipeMode=mode;
+  document.getElementById('btn-mod').className='mode-btn'+(mode==='modification'?' active-mod':'');
+  document.getElementById('btn-cons').className='mode-btn'+(mode==='consultation'?' active-cons':'');
+  activeRecipeCat=null;
+  renderCats();
+}
+
+// ── MODIFICATION recipes ──────────────────────────────
+const RECIPES_MOD = {
+  'Paquets':[
+    {n:'Installer un paquet',            d:'state: present',   m:()=>pkgMod(rhelVersion), a:{name:'paquet',state:'present'}},
+    {n:'Installer groupe de paquets',    d:'@Development Tools',m:()=>pkgMod(rhelVersion),a:{name:'"@Development Tools"',state:'present'}},
+    {n:'Mettre à jour tous les paquets', d:'state: latest',    m:()=>pkgMod(rhelVersion), a:{name:'*',state:'latest'}},
+    {n:'Supprimer un paquet',            d:'state: absent',    m:()=>pkgMod(rhelVersion), a:{name:'paquet',state:'absent'}},
+    {n:'Activer EPEL',                   d:'epel-release',     m:()=>pkgMod(rhelVersion), a:{name:'epel-release',state:'present'}},
+    {n:'Installer plusieurs paquets',    d:'avec loop',        m:()=>pkgMod(rhelVersion), a:{name:'"{{ item }}"',state:'present'}, loop:'[httpd, curl, wget]'},
+    {n:'Nettoyer cache DNF/YUM',         d:'clean all',        m:()=>pkgMod(rhelVersion)+'_clean',a:{command:'all'}},
   ],
-  'Services': [
-    {n:'Démarrer et activer service',  d:'started+enabled',  t:()=>`Démarrer service`,    m:()=>'service', args:{name:'httpd', state:'started', enabled:'yes'}},
-    {n:'Arrêter et désactiver',        d:'stopped+disabled', t:()=>`Arrêter service`,     m:()=>'service', args:{name:'httpd', state:'stopped', enabled:'no'}},
-    {n:'Redémarrer service',           d:'restart',          t:()=>`Redémarrer service`,  m:()=>'service', args:{name:'httpd', state:'restarted'}},
-    {n:'Recharger config (reload)',    d:'reload',           t:()=>`Recharger service`,   m:()=>'service', args:{name:'httpd', state:'reloaded'}},
-    {n:'daemon_reload systemd',        d:'après unit install',t:()=>`Reload daemon systemd`,m:()=>'systemd',args:{daemon_reload:'yes'}},
-    {n:'Statut service (debug)',       d:'assert state',     t:()=>`Vérifier état service`,m:()=>'service_facts',args:{}},
+  'Services':[
+    {n:'Démarrer + activer service',     d:'started+enabled',  m:'service', a:{name:'httpd',state:'started',enabled:'yes'}},
+    {n:'Arrêter + désactiver',           d:'stopped+disabled', m:'service', a:{name:'httpd',state:'stopped',enabled:'no'}},
+    {n:'Redémarrer service',             d:'state: restarted', m:'service', a:{name:'httpd',state:'restarted'}},
+    {n:'Recharger config (reload)',      d:'state: reloaded',  m:'service', a:{name:'httpd',state:'reloaded'}},
+    {n:'daemon_reload systemd',          d:'après unit install',m:'systemd',a:{daemon_reload:'yes'}},
+    {n:'Service systemd (EL7+)',         d:'systemd module',   m:'systemd', a:{name:'httpd',state:'started',enabled:'yes',daemon_reload:'yes'}},
   ],
-  'Utilisateurs': [
-    {n:'Créer utilisateur système',    d:'useradd',          t:()=>`Créer utilisateur`,   m:()=>'user',  args:{name:'appuser', state:'present', system:'yes', shell:'/sbin/nologin'}},
-    {n:'Créer utilisateur applicatif', d:'avec home',        t:()=>`Créer user applicatif`,m:()=>'user', args:{name:'appuser', state:'present', home:'/home/appuser', shell:'/bin/bash', groups:'wheel'}},
-    {n:'Ajouter au groupe sudo',       d:'groupe wheel',     t:()=>`Ajouter groupe wheel`, m:()=>'user', args:{name:'appuser', groups:'wheel', append:'yes'}},
-    {n:'Clé SSH authorized_keys',      d:'déployer clé pub', t:()=>`Déployer clé SSH`,    m:()=>'authorized_key', args:{user:'appuser', state:'present', key:'"{{ lookup(\'file\', \'~/.ssh/id_rsa.pub\') }}"'}},
-    {n:'Supprimer utilisateur',        d:'userdel',          t:()=>`Supprimer utilisateur`,m:()=>'user', args:{name:'olduser', state:'absent', remove:'yes'}},
-    {n:'Configurer sudoers',           d:'fichier sudoers.d',t:()=>`Configurer sudo`,     m:()=>'copy',  args:{dest:'/etc/sudoers.d/appuser', content:'"appuser ALL=(ALL) NOPASSWD: ALL\\n"', mode:'0440', validate:'/usr/sbin/visudo -cf %s'}},
+  'Utilisateurs':[
+    {n:'Créer utilisateur système',      d:'system + nologin', m:'user',  a:{name:'appuser',state:'present',system:'yes',shell:'/sbin/nologin'}},
+    {n:'Créer utilisateur applicatif',   d:'avec home + groupe',m:'user', a:{name:'appuser',state:'present',home:'/home/appuser',shell:'/bin/bash',groups:'wheel',append:'yes'}},
+    {n:'Ajouter au groupe wheel',        d:'sudo access',      m:'user',  a:{name:'appuser',groups:'wheel',append:'yes'}},
+    {n:'Déployer clé SSH',               d:'authorized_keys',  m:'authorized_key',a:{user:'appuser',state:'present',key:'"{{ lookup(\'file\',\'~/.ssh/id_rsa.pub\') }}"'}},
+    {n:'Supprimer utilisateur',          d:'userdel -r',       m:'user',  a:{name:'olduser',state:'absent',remove:'yes'}},
+    {n:'Configurer sudoers',             d:'sudoers.d',        m:'copy',  a:{dest:'/etc/sudoers.d/appuser',content:'"appuser ALL=(ALL) NOPASSWD: ALL\\n"',mode:'0440',validate:'/usr/sbin/visudo -cf %s'}},
+    {n:'Verrouiller compte',             d:'password_lock',    m:'user',  a:{name:'appuser',password_lock:'yes'}},
   ],
-  'SELinux': [
-    {n:'SELinux enforcing',            d:'getenforce',       t:()=>`SELinux enforcing`,   m:()=>'selinux', args:{state:'enforcing', policy:'targeted'}},
-    {n:'SELinux permissive',           d:'pour debug',       t:()=>`SELinux permissif`,   m:()=>'selinux', args:{state:'permissive', policy:'targeted'}},
-    {n:'Restaurer contexte (restorecon)',d:'fichier ou dossier',t:()=>`Restaurer contexte SEL`,m:()=>'command', args:{cmd:'/usr/sbin/restorecon -Rv /var/www/html'}},
-    {n:'Activer booléen SELinux',      d:'setsebool',        t:()=>`Activer bool SELinux`,m:()=>'seboolean', args:{name:'httpd_can_network_connect', state:'yes', persistent:'yes'}},
-    {n:'Port SELinux (semanage)',       d:'http_port_t',      t:()=>`Ajouter port SELinux`,m:()=>'seport',    args:{ports:'8080', proto:'tcp', setype:'http_port_t', state:'present'}},
-    {n:'Contexte fichier (fcontext)',  d:'semanage fcontext',t:()=>`Contexte fichier SEL`,m:()=>'sefcontext', args:{target:'/opt/app(/.*)?', setype:'httpd_sys_content_t', state:'present'}},
+  'SELinux':[
+    {n:'SELinux enforcing',              d:'mode enforcing',   m:'selinux',   a:{state:'enforcing',policy:'targeted'}},
+    {n:'SELinux permissive (debug)',     d:'mode permissif',   m:'selinux',   a:{state:'permissive',policy:'targeted'}},
+    {n:'Activer booléen SELinux',        d:'setsebool -P',     m:'seboolean', a:{name:'httpd_can_network_connect',state:'yes',persistent:'yes'}},
+    {n:'Port SELinux (semanage)',        d:'http_port_t',      m:'seport',    a:{ports:'8080',proto:'tcp',setype:'http_port_t',state:'present'}},
+    {n:'Contexte fichier fcontext',      d:'semanage fcontext',m:'sefcontext',a:{target:'/opt/app(/.*)?',setype:'httpd_sys_content_t',state:'present'}},
+    {n:'Restorecon',                     d:'-Rv /chemin',      m:'command',   a:{cmd:'/usr/sbin/restorecon -Rv /var/www/html'}},
   ],
-  'Firewall': [
-    {n:'Ouvrir service (permanent)',   d:'firewall-cmd',     t:()=>`Ouvrir service firewalld`,m:()=>'firewalld', args:{service:'http', state:'enabled', permanent:'yes', immediate:'yes'}},
-    {n:'Ouvrir port TCP',             d:'port/tcp',         t:()=>`Ouvrir port TCP`,        m:()=>'firewalld', args:{port:'8080/tcp', state:'enabled', permanent:'yes', immediate:'yes'}},
-    {n:'Ajouter source IP',           d:'--add-source',     t:()=>`Autoriser IP source`,    m:()=>'firewalld', args:{source:'192.168.1.0/24', zone:'internal', state:'enabled', permanent:'yes'}},
-    {n:'Supprimer règle',             d:'remove',           t:()=>`Retirer règle firewall`, m:()=>'firewalld', args:{service:'http', state:'disabled', permanent:'yes'}},
+  'Firewall':[
+    {n:'Ouvrir service firewalld',       d:'permanent + now',  m:'firewalld', a:{service:'http',state:'enabled',permanent:'yes',immediate:'yes'}},
+    {n:'Ouvrir port TCP',               d:'port/tcp',         m:'firewalld', a:{port:'8080/tcp',state:'enabled',permanent:'yes',immediate:'yes'}},
+    {n:'Autoriser IP source',           d:'--add-source',     m:'firewalld', a:{source:'192.168.1.0/24',zone:'internal',state:'enabled',permanent:'yes'}},
+    {n:'Retirer règle firewall',        d:'state: disabled',  m:'firewalld', a:{service:'http',state:'disabled',permanent:'yes'}},
+    {n:'Reload firewalld',              d:'complet reload',   m:'command',   a:{cmd:'firewall-cmd --reload'}},
   ],
-  'Fichiers': [
-    {n:'Créer répertoire',            d:'mkdir -p',         t:()=>`Créer répertoire`,        m:()=>'file',       args:{path:'/opt/app', state:'directory', mode:'0755', owner:'appuser', group:'appuser'}},
-    {n:'Copier fichier',              d:'copy',             t:()=>`Copier fichier`,           m:()=>'copy',       args:{src:'files/app.conf', dest:'/etc/app/app.conf', mode:'0644', owner:'root', group:'root'}},
-    {n:'Déployer template Jinja2',    d:'template',         t:()=>`Déployer template`,        m:()=>'template',   args:{src:'templates/app.conf.j2', dest:'/etc/app/app.conf', mode:'0644'}},
-    {n:'Modifier une ligne',          d:'lineinfile',       t:()=>`Modifier ligne fichier`,   m:()=>'lineinfile', args:{path:'/etc/ssh/sshd_config', regexp:'^#?PermitRootLogin', line:'PermitRootLogin no', state:'present'}},
-    {n:'Bloc de config',              d:'blockinfile',      t:()=>`Ajouter bloc config`,      m:()=>'blockinfile',args:{path:'/etc/hosts', block:'"192.168.1.10 srv-app\\n192.168.1.11 srv-db"', state:'present'}},
-    {n:'Symlink',                     d:'state: link',      t:()=>`Créer lien symbolique`,    m:()=>'file',       args:{src:'/opt/app/current', dest:'/opt/app/latest', state:'link'}},
-    {n:'Supprimer fichier/dossier',   d:'absent',           t:()=>`Supprimer fichier`,        m:()=>'file',       args:{path:'/tmp/install', state:'absent'}},
+  'Fichiers':[
+    {n:'Créer répertoire',              d:'mkdir -p + droits', m:'file',       a:{path:'/opt/app',state:'directory',mode:'0755',owner:'appuser',group:'appuser'}},
+    {n:'Copier fichier',               d:'copy local→remote', m:'copy',       a:{src:'files/app.conf',dest:'/etc/app/app.conf',mode:'0644',owner:'root',group:'root'}},
+    {n:'Déployer template Jinja2',     d:'.j2 → remote',     m:'template',   a:{src:'templates/app.conf.j2',dest:'/etc/app/app.conf',mode:'0644'}},
+    {n:'Modifier une ligne',           d:'lineinfile',        m:'lineinfile', a:{path:'/etc/ssh/sshd_config',regexp:'^#?PermitRootLogin',line:'PermitRootLogin no',state:'present'}},
+    {n:'Ajouter bloc de config',       d:'blockinfile',       m:'blockinfile',a:{path:'/etc/hosts',block:'"192.168.1.10 srv-app"',state:'present'}},
+    {n:'Symlink',                      d:'state: link',       m:'file',       a:{src:'/opt/app/current',dest:'/opt/app/latest',state:'link'}},
+    {n:'Supprimer fichier/dossier',    d:'state: absent',     m:'file',       a:{path:'/tmp/install',state:'absent'}},
+    {n:'Télécharger fichier (get_url)',d:'HTTP download',     m:'get_url',    a:{url:'https://example.com/file.tar.gz',dest:'/tmp/file.tar.gz',mode:'0644'}},
+    {n:'Décompresser archive',         d:'unarchive',         m:'unarchive',  a:{src:'/tmp/file.tar.gz',dest:'/opt/app',remote_src:'yes'}},
   ],
-  'Réseau': [
-    {n:'Configurer hostname',         d:'hostname',         t:()=>`Définir hostname`,         m:()=>'hostname',  args:{name:'srv-prod-01.domaine.local'}},
-    {n:'Ajouter entrée /etc/hosts',   d:'lineinfile',       t:()=>`Ajouter entrée hosts`,     m:()=>'lineinfile',args:{path:'/etc/hosts', line:'"192.168.1.10 srv-app srv-app.domaine.local"', state:'present'}},
-    {n:'Configurer DNS (resolv.conf)', d:'template',        t:()=>`Configurer DNS`,           m:()=>'copy',      args:{dest:'/etc/resolv.conf', content:'"nameserver 8.8.8.8\\nnameserver 8.8.4.4\\n"'}},
-    {n:'Interface réseau (nmcli)',    d:'NetworkManager',   t:()=>`Configurer interface réseau`,m:()=>'nmcli',  args:{conn_name:'eth0', type:'ethernet', ip4:'192.168.1.100/24', gw4:'192.168.1.1', state:'present'}},
+  'Réseau':[
+    {n:'Configurer hostname',          d:'hostnamectl',       m:'hostname',  a:{name:'srv-prod-01.domaine.local'}},
+    {n:'Entrée /etc/hosts',            d:'lineinfile',        m:'lineinfile',a:{path:'/etc/hosts',line:'"192.168.1.10 srv-app srv-app.domaine.local"',state:'present'}},
+    {n:'Interface réseau (nmcli)',     d:'NetworkManager',    m:'nmcli',     a:{conn_name:'eth0',type:'ethernet',ip4:'192.168.1.100/24',gw4:'192.168.1.1',state:'present'}},
+    {n:'DNS (resolv.conf)',            d:'via copy',          m:'copy',      a:{dest:'/etc/resolv.conf',content:'"nameserver 8.8.8.8\\nnameserver 1.1.1.1\\n"'}},
   ],
-  'Subscription RHEL': [
-    {n:'S\'enregistrer sur RHSM',     d:'subscription-manager', t:()=>`Enregistrer RHSM`,   m:()=>'redhat_subscription', args:{state:'present', username:'"{{ rhsm_user }}"', password:'"{{ rhsm_password }}"', auto_attach:'yes'}},
-    {n:'Activer dépôt RHSM',          d:'--enable-repo',    t:()=>`Activer dépôt RHSM`,     m:()=>'rhsm_repository', args:{name:'rhel-8-for-x86_64-appstream-rpms', state:'enabled'}},
-    {n:'Se désabonner',               d:'unregister',       t:()=>`Désabonner système`,       m:()=>'redhat_subscription', args:{state:'absent'}},
-    {n:'Enregistrer sur Satellite',   d:'via activation key',t:()=>`Enregistrer Satellite`,  m:()=>'redhat_subscription', args:{state:'present', activationkey:'"{{ activation_key }}"', org_id:'"{{ org_id }}"', server_hostname:'"satellite.domaine.local"'}},
+  'Subscription RHEL':[
+    {n:'Enregistrer sur RHSM',         d:'auto_attach',       m:'redhat_subscription',a:{state:'present',username:'"{{ rhsm_user }}"',password:'"{{ rhsm_password }}"',auto_attach:'yes'}},
+    {n:'Activer dépôt RHSM',           d:'--enable',          m:'rhsm_repository',   a:{name:'rhel-8-for-x86_64-appstream-rpms',state:'enabled'}},
+    {n:'Enregistrer sur Satellite',    d:'activation key',    m:'redhat_subscription',a:{state:'present',activationkey:'"{{ activation_key }}"',org_id:'"{{ org_id }}"',server_hostname:'"satellite.domaine.local"'}},
+    {n:'Désabonner système',           d:'unregister',        m:'redhat_subscription',a:{state:'absent'}},
   ],
-  'Sécurité': [
-    {n:'Désactiver SSH root login',   d:'sshd_config',      t:()=>`Désactiver root SSH`,      m:()=>'lineinfile',args:{path:'/etc/ssh/sshd_config', regexp:'^#?PermitRootLogin', line:'PermitRootLogin no', state:'present'}, notify:'restart sshd'},
-    {n:'Timeout inactivité SSH',      d:'ClientAliveInterval',t:()=>`Timeout SSH`,            m:()=>'lineinfile',args:{path:'/etc/ssh/sshd_config', regexp:'^#?ClientAliveInterval', line:'ClientAliveInterval 300', state:'present'}, notify:'restart sshd'},
-    {n:'Configurer auditd',           d:'audit.rules',      t:()=>`Configurer auditd`,        m:()=>'template',  args:{src:'templates/audit.rules.j2', dest:'/etc/audit/rules.d/audit.rules'}, notify:'restart auditd'},
-    {n:'Désactiver services inutiles',d:'bluetooth, cups…', t:()=>`Désactiver services inutiles`,m:()=>'service', args:{name:'bluetooth', state:'stopped', enabled:'no'}},
-    {n:'Configurer limits',          d:'/etc/security/limits.conf',t:()=>`Configurer ulimits`,m:()=>'pam_limits',args:{domain:'*', limit_type:'soft', limit_item:'nofile', value:'65536'}},
+  'Sécurité':[
+    {n:'Désactiver SSH root login',    d:'PermitRootLogin no', m:'lineinfile',a:{path:'/etc/ssh/sshd_config',regexp:'^#?PermitRootLogin',line:'PermitRootLogin no',state:'present'},notify:'restart sshd'},
+    {n:'Timeout SSH inactif',          d:'ClientAliveInterval',m:'lineinfile',a:{path:'/etc/ssh/sshd_config',regexp:'^#?ClientAliveInterval',line:'ClientAliveInterval 300',state:'present'},notify:'restart sshd'},
+    {n:'Limites système (ulimits)',    d:'pam_limits',         m:'pam_limits',a:{domain:'*',limit_type:'soft',limit_item:'nofile',value:'65536'}},
+    {n:'Désactiver service inutile',   d:'bluetooth/cups…',    m:'service',   a:{name:'bluetooth',state:'stopped',enabled:'no'}},
+    {n:'Sysctl — param noyau',         d:'sysctl.conf',        m:'sysctl',    a:{name:'net.ipv4.ip_forward',value:'1',state:'present',reload:'yes'}},
   ],
 };
 
-// Render categories + recipes
-let activeRecipeCat = Object.keys(RECIPES)[0];
+// ── CONSULTATION (read-only) recipes ─────────────────
+const RECIPES_CONS = {
+  'Diagnostic OS':[
+    {n:'Infos système (setup)',             d:'gather_facts',      m:'setup',   a:{},ro:true},
+    {n:'Version OS (os-release)',           d:'cat /etc/os-release',m:'command',a:{cmd:'cat /etc/os-release'},ro:true},
+    {n:'Version kernel',                   d:'uname -r',          m:'command', a:{cmd:'uname -r'},ro:true},
+    {n:'Uptime et charge',                 d:'uptime',            m:'command', a:{cmd:'uptime'},ro:true},
+    {n:'Espace disque (df -h)',            d:'df -h',             m:'command', a:{cmd:'df -h'},ro:true},
+    {n:'Utilisation inodes (df -i)',       d:'df -i',             m:'command', a:{cmd:'df -i'},ro:true},
+    {n:'Mémoire (free -h)',               d:'free -h',           m:'command', a:{cmd:'free -h'},ro:true},
+    {n:'Mémoire détaillée',               d:'/proc/meminfo',     m:'command', a:{cmd:'cat /proc/meminfo'},ro:true},
+    {n:'Infos CPU (lscpu)',               d:'lscpu',             m:'command', a:{cmd:'lscpu'},ro:true},
+    {n:'Périphériques blocs (lsblk)',     d:'lsblk',             m:'command', a:{cmd:'lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT,LABEL'},ro:true},
+    {n:'Date et fuseau horaire',          d:'timedatectl',       m:'command', a:{cmd:'timedatectl status'},ro:true},
+    {n:'Hostname et domaine',             d:'hostnamectl',       m:'command', a:{cmd:'hostnamectl status'},ro:true},
+    {n:'Partitions montées',              d:'mount | column',    m:'command', a:{cmd:'mount | column -t'},ro:true},
+    {n:'Variables environnement',         d:'env | sort',        m:'shell',   a:{cmd:'env | sort'},ro:true},
+  ],
+  'Services & Processus':[
+    {n:'Tous les services (service_facts)',d:'ansible_facts',    m:'service_facts',a:{},ro:true},
+    {n:'Services actifs (systemctl)',      d:'--state=active',   m:'command',a:{cmd:'systemctl list-units --type=service --state=active --no-pager'},ro:true},
+    {n:'Services en échec',               d:'--state=failed',   m:'command',a:{cmd:'systemctl list-units --type=service --state=failed --no-pager'},ro:true},
+    {n:'Status d\'un service',            d:'systemctl status', m:'command',a:{cmd:'systemctl status httpd --no-pager'},ro:true},
+    {n:'Démarrages automatiques',         d:'list-unit-files',  m:'command',a:{cmd:'systemctl list-unit-files --type=service --state=enabled --no-pager'},ro:true},
+    {n:'Processus actifs (ps)',           d:'ps aux top20 CPU', m:'shell',  a:{cmd:'ps aux --sort=-%cpu | head -20'},ro:true},
+    {n:'Top 10 processus mémoire',        d:'ps --sort=-%mem',  m:'shell',  a:{cmd:'ps aux --sort=-%mem | head -11'},ro:true},
+    {n:'Processus d\'un utilisateur',     d:'ps -u user',       m:'shell',  a:{cmd:'ps -u appuser -f'},ro:true},
+    {n:'Fichiers ouverts (lsof)',         d:'lsof -n',          m:'command',a:{cmd:'lsof -n | head -50'},ro:true},
+  ],
+  'Réseau (lecture)':[
+    {n:'Interfaces réseau (ip addr)',     d:'ip addr show',     m:'command',a:{cmd:'ip addr show'},ro:true},
+    {n:'Table de routage',               d:'ip route show',    m:'command',a:{cmd:'ip route show'},ro:true},
+    {n:'Ports en écoute (ss -tlnp)',     d:'ss -tlnp',         m:'command',a:{cmd:'ss -tlnp'},ro:true},
+    {n:'Connexions établies',            d:'ss state estab',   m:'command',a:{cmd:'ss -tnp state established'},ro:true},
+    {n:'Statistiques sockets',           d:'ss -s',            m:'command',a:{cmd:'ss -s'},ro:true},
+    {n:'Config réseau (nmcli)',          d:'nmcli device status',m:'command',a:{cmd:'nmcli device status'},ro:true},
+    {n:'Détail interface nmcli',         d:'nmcli con show',   m:'command',a:{cmd:'nmcli con show'},ro:true},
+    {n:'Test connectivité (ping module)',d:'module ping',      m:'ping',   a:{},ro:true},
+    {n:'Test endpoint HTTP (uri)',       d:'GET + status_code',m:'uri',    a:{url:'http://localhost/',method:'GET'},ro:true},
+    {n:'Résolution DNS (dig)',           d:'dig +short',       m:'command',a:{cmd:'dig +short hostname'},ro:true},
+    {n:'Config firewalld',              d:'list-all-zones',    m:'command',a:{cmd:'firewall-cmd --list-all-zones 2>/dev/null || iptables -L -n'},ro:true},
+    {n:'Règles iptables',               d:'iptables -L -n -v', m:'command',a:{cmd:'iptables -L -n -v'},ro:true},
+  ],
+  'Stockage & Fichiers':[
+    {n:'Existence fichier (stat)',       d:'stat module',      m:'stat',   a:{path:'/etc/httpd/conf/httpd.conf'},ro:true},
+    {n:'Lire fichier (slurp)',           d:'base64 decode',    m:'slurp',  a:{src:'/etc/hostname'},ro:true},
+    {n:'Trouver fichiers récents',      d:'find module 7j',   m:'find',   a:{paths:'/var/log',age:'7d',age_stamp:'mtime',recurse:'yes'},ro:true},
+    {n:'Espace dossier (du)',           d:'du -sh',            m:'command',a:{cmd:'du -sh /var/log/ /var/www/ /opt/'},ro:true},
+    {n:'Fichiers volumineux >100 Mo',   d:'find -size +100M', m:'shell',  a:{cmd:'find / -xdev -type f -size +100M 2>/dev/null | sort -rh | head -20'},ro:true},
+    {n:'Contexte SELinux fichier',      d:'ls -lZ',           m:'command',a:{cmd:'ls -lZ /var/www/html/'},ro:true},
+    {n:'Permissions récursives',        d:'ls -lR',           m:'shell',  a:{cmd:'ls -lR /etc/app/ 2>/dev/null | head -50'},ro:true},
+  ],
+  'Paquets (lecture)':[
+    {n:'Paquets installés (pkg_facts)', d:'package_facts',    m:'package_facts',a:{},ro:true},
+    {n:'Version d\'un paquet (rpm -q)', d:'rpm -q paquet',    m:'command', a:{cmd:'rpm -q httpd'},ro:true},
+    {n:'Infos complètes (rpm -qi)',     d:'rpm -qi paquet',   m:'command', a:{cmd:'rpm -qi httpd'},ro:true},
+    {n:'Fichiers d\'un paquet',         d:'rpm -ql paquet',   m:'command', a:{cmd:'rpm -ql httpd'},ro:true},
+    {n:'Paquet propriétaire fichier',   d:'rpm -qf /path',    m:'command', a:{cmd:'rpm -qf /usr/sbin/httpd'},ro:true},
+    {n:'Recherche paquet installé',     d:'rpm -qa | grep',   m:'shell',   a:{cmd:'rpm -qa | grep -i httpd'},ro:true},
+    {n:'Mises à jour disponibles',      d:'dnf check-update', m:'command', a:{cmd:()=>`${pkgMod(rhelVersion)} check-update`},ro:true},
+    {n:'Historique DNF/YUM',           d:'history',           m:'command', a:{cmd:()=>`${pkgMod(rhelVersion)} history`},ro:true},
+    {n:'Groupes installés',            d:'group list',        m:'command', a:{cmd:()=>`${pkgMod(rhelVersion)} group list --installed`},ro:true},
+    {n:'Dépôts activés',              d:'repolist enabled',   m:'command', a:{cmd:()=>`${pkgMod(rhelVersion)} repolist enabled`},ro:true},
+    {n:'Vérifier intégrité RPM',      d:'rpm -Va',            m:'command', a:{cmd:'rpm -Va 2>/dev/null | head -30'},ro:true},
+  ],
+  'SELinux (lecture)':[
+    {n:'Statut SELinux (sestatus)',     d:'sestatus',          m:'command', a:{cmd:'sestatus'},ro:true},
+    {n:'Mode SELinux (getenforce)',     d:'getenforce',        m:'command', a:{cmd:'getenforce'},ro:true},
+    {n:'Alertes AVC du jour',          d:'ausearch -m avc',   m:'shell',   a:{cmd:'ausearch -m avc -ts today 2>/dev/null | tail -50'},ro:true},
+    {n:'Booléens SELinux actifs',      d:'getsebool -a | on', m:'shell',   a:{cmd:'getsebool -a | grep " on$"'},ro:true},
+    {n:'Ports SELinux déclarés',       d:'semanage port -l',  m:'command', a:{cmd:'semanage port -l'},ro:true},
+    {n:'Politique en place',           d:'semodule -l',       m:'command', a:{cmd:'semodule -l | head -30'},ro:true},
+  ],
+  'Utilisateurs (lecture)':[
+    {n:'Infos utilisateur (id)',        d:'id username',       m:'command', a:{cmd:'id appuser'},ro:true},
+    {n:'Groupes d\'un utilisateur',    d:'groups username',   m:'command', a:{cmd:'groups appuser'},ro:true},
+    {n:'NSS passwd (getent)',          d:'getent passwd',     m:'getent',  a:{database:'passwd',key:'appuser'},ro:true},
+    {n:'NSS groupe (getent)',          d:'getent group',      m:'getent',  a:{database:'group',key:'wheel'},ro:true},
+    {n:'Sessions actives (who)',        d:'who',               m:'command', a:{cmd:'who'},ro:true},
+    {n:'Historique connexions (last)', d:'last -n 20',        m:'command', a:{cmd:'last -n 20'},ro:true},
+    {n:'Comptes sudo (wheel)',         d:'sudoers wheel',     m:'shell',   a:{cmd:'grep -rE "^wheel|^%wheel" /etc/sudoers /etc/sudoers.d/ 2>/dev/null'},ro:true},
+    {n:'Comptes verrouillés',          d:'passwd -S -a',      m:'shell',   a:{cmd:'passwd -S -a 2>/dev/null | grep -E " L | LK "'},ro:true},
+    {n:'Utilisateurs /etc/passwd',     d:'cat /etc/passwd',   m:'command', a:{cmd:'getent passwd | sort -t: -k3 -n'},ro:true},
+    {n:'Connexions SSH récentes',      d:'/var/log/secure',   m:'shell',   a:{cmd:'grep "Accepted" /var/log/secure 2>/dev/null | tail -20'},ro:true},
+  ],
+  'Logs & Audit':[
+    {n:'Journaux récents',             d:'journalctl -n 50',  m:'command', a:{cmd:'journalctl -n 50 --no-pager'},ro:true},
+    {n:'Logs depuis dernier boot',     d:'journalctl -b',     m:'command', a:{cmd:'journalctl -b --no-pager -n 100'},ro:true},
+    {n:'Logs d\'un service',          d:'journalctl -u',      m:'command', a:{cmd:'journalctl -u httpd --no-pager -n 50'},ro:true},
+    {n:'Erreurs critiques',           d:'journalctl -p err',  m:'command', a:{cmd:'journalctl -p err -n 50 --no-pager'},ro:true},
+    {n:'Logs auth (var/log/secure)',  d:'tail /var/log/secure',m:'shell',  a:{cmd:'tail -n 50 /var/log/secure'},ro:true},
+    {n:'Messages système',            d:'/var/log/messages',  m:'shell',   a:{cmd:'tail -n 50 /var/log/messages'},ro:true},
+    {n:'Alertes audit (ausearch)',    d:'ausearch -m LOGIN',  m:'shell',   a:{cmd:'ausearch -m LOGIN -ts today 2>/dev/null | tail -30'},ro:true},
+    {n:'Résumé audit (aureport)',     d:'aureport --summary', m:'command', a:{cmd:'aureport --summary 2>/dev/null'},ro:true},
+    {n:'Crons actifs (system)',       d:'/etc/cron*',         m:'shell',   a:{cmd:'ls -la /etc/cron* /var/spool/cron/ 2>/dev/null'},ro:true},
+  ],
+  'Subscription RHSM':[
+    {n:'Statut abonnement RHSM',      d:'subscription-manager',m:'command',a:{cmd:'subscription-manager status'},ro:true},
+    {n:'Produits installés',          d:'list --installed',   m:'command', a:{cmd:'subscription-manager list --installed'},ro:true},
+    {n:'Identité système',            d:'identity',           m:'command', a:{cmd:'subscription-manager identity'},ro:true},
+    {n:'Dépôts RHSM activés',        d:'repos --list-enabled',m:'command',a:{cmd:'subscription-manager repos --list-enabled'},ro:true},
+    {n:'Abonnements disponibles',    d:'list --available',    m:'command', a:{cmd:'subscription-manager list --available --all'},ro:true},
+  ],
+};
+
+// ── Category rendering ────────────────────────────────
+let activeRecipeCat = null;
 const catContainer = document.getElementById('recipe-cats');
 const recipeContainer = document.getElementById('recipe-grid');
 
-Object.keys(RECIPES).forEach(cat => {
-  const b = document.createElement('button'); b.className = 'cat-btn' + (cat === activeRecipeCat ? ' active' : ''); b.textContent = cat;
-  b.onclick = () => { activeRecipeCat = cat; document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); renderRecipes(); };
-  catContainer.appendChild(b);
-});
+function renderCats(){
+  const data = recipeMode==='modification' ? RECIPES_MOD : RECIPES_CONS;
+  const cats = Object.keys(data);
+  catContainer.innerHTML = '';
+  if(!activeRecipeCat || !data[activeRecipeCat]) activeRecipeCat = cats[0];
+  cats.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'cat-btn' + (cat===activeRecipeCat ? (recipeMode==='consultation'?' cons-active':' active') : '');
+    b.textContent = cat;
+    b.onclick = () => { activeRecipeCat=cat; renderCats(); };
+    catContainer.appendChild(b);
+  });
+  renderRecipes();
+}
 
 function renderRecipes(){
-  recipeContainer.innerHTML = '';
-  (RECIPES[activeRecipeCat]||[]).forEach(r => {
-    const card = document.createElement('div'); card.className = 'recipe-card';
-    card.innerHTML = `<strong>${r.n}</strong><span>${r.d}</span>`;
-    card.onclick = () => addRecipeTask(r);
+  recipeContainer.innerHTML='';
+  const data = recipeMode==='modification' ? RECIPES_MOD : RECIPES_CONS;
+  (data[activeRecipeCat]||[]).forEach(r=>{
+    const card=document.createElement('div');
+    card.className='recipe-card'+(r.ro?' ro':'');
+    const modDisplay = typeof r.m==='function'?r.m():r.m;
+    card.innerHTML=`<strong>${r.n}</strong><span>${r.d} · <code>${modDisplay}</code></span>`;
+    card.onclick=()=>addRecipeTask(r);
     recipeContainer.appendChild(card);
   });
 }
 
-function addRecipeTask(recipe){
-  const mod = recipe.m();
-  const params = Object.entries(recipe.args).map(([k,v]) => ({k,p:v}));
-  const notify = recipe.notify || '';
-  addTask(recipe.n, mod, params, notify);
-}
-
 function addVar(k='',v=''){
-  const list = document.getElementById('vars-list');
-  const row = document.createElement('div'); row.className = 'kv-row';
-  row.innerHTML = `<input class="input" placeholder="nom_variable" value="${k}" oninput="build()"><input class="input" placeholder="valeur" value="${v}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  const list=document.getElementById('vars-list');
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="nom_variable" value="${k}" style="flex:0 0 130px" oninput="build()">
+    <input class="input" placeholder="valeur" value="${v}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
   list.appendChild(row); build();
 }
 
-function addTask(name='', module='dnf', params=[], notify='', when=''){
-  taskCount++;
-  const list = document.getElementById('tasks-list');
-  const card = document.createElement('div'); card.className = 'task-card'; card.id = `task-${taskCount}`;
-  const modOpts = ['dnf','yum','service','systemd','copy','template','file','lineinfile','blockinfile','user','authorized_key','firewalld','selinux','seboolean','seport','sefcontext','command','shell','hostname','nmcli','rhsm_repository','redhat_subscription','pam_limits','debug'].map(m => `<option value="${m}" ${m===module?'selected':''}>${m}</option>`).join('');
-  const paramsHtml = (params.length ? params : [{k:'',p:''}]).map(p => `<div class="kv-row"><input class="input" value="${p.k}" style="flex:0 0 140px" oninput="build()"><input class="input" placeholder="${p.p}" value="${p.p}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
-  card.innerHTML = `<div class="task-header">
-    <span class="task-num">${taskCount}</span>
-    <input class="input task-title-input" placeholder="Nom de la tâche" value="${name||'Tâche '+taskCount}" oninput="build()">
-    <button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();build()">✕</button>
-  </div>
-  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;">
-    <label style="margin:0;font-size:.78rem;color:var(--text-muted)">Module :</label>
-    <select class="select" style="width:auto" onchange="build()"><optgroup label="Modules">${modOpts}</optgroup></select>
-    <button class="btn btn--ghost btn--sm" onclick="addTaskParam(this)">+ param</button>
-  </div>
-  <div class="task-params">${paramsHtml}</div>
-  <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;">
-    <input class="input" placeholder="notify: nom_handler" value="${notify}" style="flex:1" oninput="build()">
-    <input class="input" placeholder="when: condition" value="${when}" style="flex:1" oninput="build()">
-    <input class="input" placeholder="loop: [...]" value="" style="flex:1" oninput="build()">
-  </div>`;
-  list.appendChild(card); build();
+function addRecipeTask(recipe){
+  const mod = typeof recipe.m==='function' ? recipe.m() : recipe.m;
+  const args = recipe.a || {};
+  const params = Object.entries(args)
+    .map(([k,v])=>({k,p:typeof v==='function'?v():v}))
+    .filter(p=>p.k!=='cmd');
+  const cmdVal = typeof args.cmd==='function' ? args.cmd() : (args.cmd||'');
+
+  const roFlag = !!recipe.ro;
+  const varName = recipe.n.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/_{2,}/g,'_').replace(/^_|_$/g,'').slice(0,25)+'_r';
+  const needsRegister = roFlag && ['command','shell','stat','slurp','find','getent','uri'].includes(mod);
+
+  addTask(recipe.n, mod, params, recipe.notify||'', recipe.loop||'', cmdVal, needsRegister?varName:'', roFlag, recipe.when||'');
+
+  if(roFlag && needsRegister){
+    let debugVar;
+    if(mod==='stat') debugVar=`${varName}.stat`;
+    else if(mod==='slurp') debugVar=`${varName}.content | b64decode`;
+    else debugVar=`${varName}.stdout_lines`;
+    addTask(`  Debug › ${recipe.n}`, 'debug', [{k:'var',p:debugVar}],'','','','',false,'');
+  } else if(roFlag){
+    if(mod==='setup') addTask('  Debug › Infos OS','debug',[{k:'var',p:'ansible_distribution+" "+ansible_distribution_version'}],'','','','',false,'');
+    else if(mod==='service_facts') addTask('  Debug › Services','debug',[{k:'var',p:'ansible_facts.services.keys()|list|sort'}],'','','','',false,'');
+    else if(mod==='package_facts') addTask('  Debug › Paquets','debug',[{k:'var',p:'ansible_facts.packages.keys()|list|sort'}],'','','','',false,'');
+    else if(mod==='ping') addTask('  Debug › Ping','debug',[{k:'msg',p:'"Hôte {{ inventory_hostname }} accessible"'}],'','','','',false,'');
+  }
 }
 
-function addTaskParam(btn){ const pp=btn.closest('.task-card').querySelector('.task-params'); const row=document.createElement('div'); row.className='kv-row'; row.innerHTML=`<input class="input" placeholder="paramètre" style="flex:0 0 140px" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`; pp.appendChild(row); build(); }
+function addTask(name='', module='dnf', params=[], notify='', loop='', cmd='', register='', ro=false, when=''){
+  taskCount++;
+  const list=document.getElementById('tasks-list');
+  const card=document.createElement('div');
+  card.className='task-card'+(ro?' ro-task':'');
+  card.id=`task-${taskCount}`;
+
+  const MODS=['debug','setup','service_facts','package_facts','ping','dnf','yum','service','systemd','copy','template','file','lineinfile','blockinfile','user','authorized_key','firewalld','selinux','seboolean','seport','sefcontext','command','shell','hostname','nmcli','rhsm_repository','redhat_subscription','pam_limits','sysctl','get_url','unarchive','uri','stat','slurp','find','getent'];
+  const modOpts=MODS.map(m=>`<option value="${m}"${m===module?' selected':''}>${m}</option>`).join('');
+  const paramsHtml=(params.length?params:[{k:'',p:''}]).map(p=>`<div class="kv-row"><input class="input" value="${escH(p.k)}" style="flex:0 0 130px" oninput="build()"><input class="input" value="${escH(p.p)}" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button></div>`).join('');
+
+  card.innerHTML=`<div class="task-header">
+    <span class="task-num${ro?' ro':''}">${taskCount}${ro?' 👁':''}</span>
+    <input class="input task-title-input" placeholder="Nom de la tâche" value="${escH(name||'Tâche '+taskCount)}" oninput="build()">
+    <button class="btn btn--ghost btn--sm" onclick="this.closest('.task-card').remove();renum();build()">✕</button>
+  </div>
+  <div style="display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap;">
+    <label style="margin:0;font-size:.78rem;color:var(--text-muted)">Module:</label>
+    <select class="select" style="width:auto;min-width:120px" onchange="build()">${modOpts}</select>
+    ${cmd?`<input class="input cmd-input" placeholder="commande" value="${escH(cmd)}" style="flex:1;min-width:140px" oninput="build()">`:'<button class="btn btn--ghost btn--sm" onclick="addTaskParam(this)">+ param</button>'}
+  </div>
+  ${!cmd?`<div class="task-params">${paramsHtml}</div>`:''}
+  <div class="extras-row">
+    <input class="input" placeholder="notify: handler" value="${escH(notify)}" oninput="build()">
+    <input class="input" placeholder="when: condition" value="${escH(when)}" oninput="build()">
+    <input class="input" placeholder="register: var" value="${escH(register)}" oninput="build()">
+    <input class="input" placeholder="loop: [...]" value="${escH(loop)}" oninput="build()">
+    <label class="check-label" title="changed_when: false"><input type="checkbox" class="cwf" ${ro?'checked':''} onchange="build()"> cwf</label>
+  </div>`;
+  list.appendChild(card);
+  if(cmd && !params.length) {} // cmd-input handles it
+  build();
+}
+
+function addTaskParam(btn){
+  const pp=btn.closest('.task-card').querySelector('.task-params');
+  if(!pp) return;
+  const row=document.createElement('div'); row.className='kv-row';
+  row.innerHTML=`<input class="input" placeholder="paramètre" style="flex:0 0 130px" oninput="build()"><input class="input" placeholder="valeur" oninput="build()"><button class="btn btn--ghost btn--sm" onclick="this.closest('.kv-row').remove();build()">✕</button>`;
+  pp.appendChild(row); build();
+}
+
+function renum(){
+  document.querySelectorAll('.task-num').forEach((el,i)=>{
+    el.textContent=(i+1)+(el.classList.contains('ro')?' 👁':'');
+  });
+}
+
+function escH(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function build(){
-  const name = document.getElementById('play-name').value||'Playbook';
-  const hosts = document.getElementById('play-hosts').value||'all';
-  const become = document.getElementById('play-become').checked;
-  const facts = document.getElementById('play-facts').value;
-  const strategy = document.getElementById('play-strategy').value;
+  const name=document.getElementById('play-name').value||'Playbook';
+  const hosts=document.getElementById('play-hosts').value||'all';
+  const become=document.getElementById('play-become').checked;
+  const facts=document.getElementById('play-facts').value;
+  const strategy=document.getElementById('play-strategy').value;
+  const serial=document.getElementById('play-serial').value;
 
-  const lines = ['---',`# Généré pour RHEL ${rhelVersion}`,`- name: ${name}`, `  hosts: ${hosts}`];
+  const lines=['---',`# Playbook généré — RHEL ${rhelVersion}`,`- name: "${name}"`,`  hosts: ${hosts}`];
   if(become) lines.push('  become: true');
   lines.push(`  gather_facts: ${facts}`);
   if(strategy) lines.push(`  strategy: ${strategy}`);
+  if(serial) lines.push(`  serial: ${serial}`);
 
-  const varRows = [...document.querySelectorAll('#vars-list .kv-row')];
-  if(varRows.length){ lines.push('  vars:'); varRows.forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k) lines.push(`    ${k}: ${v}`); }); }
+  const varRows=[...document.querySelectorAll('#vars-list .kv-row')];
+  if(varRows.length){ lines.push('  vars:'); varRows.forEach(r=>{ const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value); if(k) lines.push(`    ${k}: ${v||'""'}`); }); }
 
-  const taskCards = [...document.querySelectorAll('.task-card')];
+  const taskCards=[...document.querySelectorAll('.task-card')];
   if(taskCards.length){
     lines.push('  tasks:');
-    taskCards.forEach(card => {
-      const taskName = card.querySelector('.task-title-input').value||'Task';
-      const mod = card.querySelector('select')?.value||'shell';
-      lines.push(`    - name: ${taskName}`);
-      lines.push(`      ${mod}:`);
-      card.querySelectorAll('.task-params .kv-row').forEach(r=>{
-        const[k,v]=[...r.querySelectorAll('input')].map(i=>i.value);
-        if(k&&v) lines.push(`        ${k}: ${v}`);
-      });
-      const extras = [...card.querySelectorAll('div:last-child input')];
-      const notify = extras[0]?.value; const when = extras[1]?.value; const loop = extras[2]?.value;
+    taskCards.forEach(card=>{
+      const taskName=(card.querySelector('.task-title-input')?.value||'Task').trim();
+      const mod=card.querySelector('select')?.value||'shell';
+      const cmdInput=card.querySelector('.cmd-input');
+      const cmd=cmdInput?.value||'';
+      const extras=[...card.querySelectorAll('.extras-row input[type="text"],.extras-row input:not([type="checkbox"])')];
+      const notify=extras[0]?.value||'';
+      const when=extras[1]?.value||'';
+      const reg=extras[2]?.value||'';
+      const loop=extras[3]?.value||'';
+      const cwf=card.querySelector('.cwf')?.checked;
+
+      lines.push(`    - name: "${taskName}"`);
+      if(cmd){
+        lines.push(`      ${mod}: ${cmd}`);
+      } else {
+        const kvs=[...card.querySelectorAll('.task-params .kv-row')];
+        const pairs=kvs.map(r=>[...r.querySelectorAll('input')].map(i=>i.value)).filter(([k])=>k);
+        if(!pairs.length){ lines.push(`      ${mod}:`); }
+        else if(pairs.length===1 && ['ping','setup','service_facts','package_facts'].includes(mod)){
+          lines.push(`      ${mod}:`);
+        } else {
+          lines.push(`      ${mod}:`);
+          pairs.forEach(([k,v])=>lines.push(`        ${k}: ${v}`));
+        }
+      }
+      if(reg)    lines.push(`      register: ${reg}`);
+      if(cwf)    lines.push(`      changed_when: false`);
       if(notify) lines.push(`      notify: ${notify}`);
       if(when)   lines.push(`      when: ${when}`);
       if(loop)   lines.push(`      loop: ${loop}`);
     });
   }
 
-  document.getElementById('output').textContent = lines.join('\n');
+  document.getElementById('output').textContent=lines.join('\n');
 }
 
-function copyPlaybook(){ navigator.clipboard.writeText(document.getElementById('output').textContent); const b=event.target; b.textContent='Copié !'; b.classList.add('btn--primary'); setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500); }
+function copyPlaybook(){
+  navigator.clipboard.writeText(document.getElementById('output').textContent);
+  const b=event.target; b.textContent='Copié!'; b.classList.add('btn--primary');
+  setTimeout(()=>{b.textContent='Copier';b.classList.remove('btn--primary');},1500);
+}
 
-renderRecipes();
-addTask('Installer httpd', 'dnf', [{k:'name',p:'httpd'},{k:'state',p:'present'}],'restart httpd');
-addTask('Démarrer et activer httpd', 'service', [{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}]);
+function clearTasks(){ document.getElementById('tasks-list').innerHTML=''; taskCount=0; build(); }
+
+// Init
+renderCats();
+addTask('Vérifier connectivité','ping',[]);
+addTask('Installer httpd',pkgMod(rhelVersion),[{k:'name',p:'httpd'},{k:'state',p:'present'}],'restart httpd');
+addTask('Démarrer et activer httpd','service',[{k:'name',p:'httpd'},{k:'state',p:'started'},{k:'enabled',p:'yes'}]);
+build();
 </script>
 </body>
 </html>

@@ -1,29 +1,74 @@
 <!DOCTYPE html>
-<!-- Bash Reference — aucune donnée personnelle stockée -->
+<!-- Bash Reference & Constructeur Linux — aucune donnée personnelle stockée -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bash Reference — Portail</title>
-  <link rel="stylesheet" href="../style.css" />
   <style>
-    .tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2rem;}
-    .tool-header h1{font-size:1.5rem;flex:1;}
-    .search-bar{position:sticky;top:0;background:var(--bg-base);padding:.75rem 0;z-index:10;border-bottom:1px solid var(--border);margin-bottom:1.5rem;}
-    .search-bar input{width:100%;}
-    .cmd-section{margin-bottom:2.5rem;}
-    .cmd-section-title{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
-    .cmd-section-title span{font-family:var(--font-mono);background:var(--bg-input);border:1px solid var(--border);padding:.1rem .5rem;border-radius:var(--radius-sm);font-size:.9rem;}
-    .examples-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:.75rem;}
-    .example-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:border-color var(--transition);}
-    .example-card:hover{border-color:var(--border-focus);}
-    .example-card .cmd{font-family:var(--font-mono);font-size:.82rem;padding:.65rem 1rem;background:var(--bg-input);color:var(--accent2);word-break:break-all;cursor:pointer;position:relative;}
-    .example-card .cmd:hover::after{content:'copier';position:absolute;right:.75rem;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--text-muted);font-family:var(--font);}
-    .example-card .desc{padding:.5rem 1rem;font-size:.82rem;color:var(--text-secondary);border-top:1px solid var(--border);}
-    .hidden{display:none!important;}
-    .tag{display:inline-block;padding:.1rem .45rem;border-radius:999px;font-size:.7rem;background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted);margin-right:.3rem;}
-    .copied-toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--success);color:#fff;padding:.5rem 1.1rem;border-radius:var(--radius-sm);font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none;}
-    .copied-toast.show{opacity:1;}
+/* Portail Personnel — Charte graphique — aucune donnée personnelle */
+:root{--bg-base:#0d1117;--bg-card:#161b22;--bg-card-hover:#1c2330;--bg-input:#21262d;--border:#30363d;--border-focus:#58a6ff;--accent:#58a6ff;--accent-dim:#1f6feb;--accent2:#39d0d8;--text-primary:#e6edf3;--text-secondary:#8b949e;--text-muted:#484f58;--success:#3fb950;--warning:#d29922;--danger:#f85149;--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--shadow-card:0 4px 24px rgba(0,0,0,.4);--shadow-btn:0 2px 8px rgba(88,166,255,.15);--font:'Segoe UI',system-ui,-apple-system,sans-serif;--font-mono:'Cascadia Code','Consolas',monospace;--transition:160ms ease}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);font-size:15px;line-height:1.6;color:var(--text-primary);background:var(--bg-base);min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.5px}h2{font-size:1.35rem;font-weight:600}
+p{color:var(--text-secondary)}
+code,pre{font-family:var(--font-mono);font-size:.875em;background:var(--bg-input);border-radius:var(--radius-sm)}code{padding:.15em .4em}pre{padding:1rem;overflow-x:auto;border:1px solid var(--border)}
+.container{width:100%;max-width:1100px;margin-inline:auto;padding-inline:1.5rem}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1.1rem;border:1px solid transparent;border-radius:var(--radius-sm);font-family:var(--font);font-size:.875rem;font-weight:500;cursor:pointer;transition:background var(--transition),border-color var(--transition);white-space:nowrap;text-decoration:none!important}
+.btn--primary{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}.btn--primary:hover{background:var(--accent);border-color:var(--accent)}
+.btn--secondary{background:transparent;border-color:var(--border);color:var(--text-primary)}.btn--secondary:hover{background:var(--bg-input);border-color:var(--accent)}
+.btn--ghost{background:transparent;border-color:transparent;color:var(--text-secondary)}.btn--ghost:hover{color:var(--text-primary);background:var(--bg-input)}
+.btn--sm{padding:.35rem .75rem;font-size:.8rem}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.5rem;box-shadow:var(--shadow-card);transition:border-color var(--transition),background var(--transition)}
+.card:hover{border-color:var(--accent);background:var(--bg-card-hover)}
+.badge{display:inline-block;padding:.15em .55em;border-radius:999px;font-size:.72rem;font-weight:600}
+.badge--version{background:var(--bg-input);color:var(--accent);border:1px solid var(--border)}
+.input,.select,.textarea{width:100%;padding:.55rem .85rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:.9rem;transition:border-color var(--transition),box-shadow var(--transition)}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(88,166,255,.15)}
+.input::placeholder,.textarea::placeholder{color:var(--text-muted)}
+label{font-size:.875rem;color:var(--text-secondary);display:block;margin-bottom:.35rem}
+.mt-sm{margin-top:.5rem}.mt-md{margin-top:1rem}.mt-lg{margin-top:2rem}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg-base)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+::selection{background:rgba(88,166,255,.3)}
+
+/* Tool styles */
+.tool-header{display:flex;align-items:center;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.tool-header h1{font-size:1.5rem;flex:1}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.tab{padding:.55rem 1.2rem;font-size:.875rem;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;border-top:none;border-left:none;border-right:none;transition:color var(--transition)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.search-bar{position:sticky;top:0;background:var(--bg-base);padding:.75rem 0;z-index:10;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.cmd-section{margin-bottom:2.5rem}
+.cmd-section-title{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.cmd-section-title span{font-family:var(--font-mono);background:var(--bg-input);border:1px solid var(--border);padding:.1rem .5rem;border-radius:var(--radius-sm);font-size:.9rem}
+.examples-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:.75rem}
+.example-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:border-color var(--transition)}
+.example-card:hover{border-color:var(--border-focus)}
+.example-card .cmd{font-family:var(--font-mono);font-size:.82rem;padding:.65rem 1rem;background:var(--bg-input);color:var(--accent2);word-break:break-all;cursor:pointer;position:relative}
+.example-card .cmd:hover::after{content:'copier';position:absolute;right:.75rem;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--text-muted);font-family:var(--font)}
+.example-card .desc{padding:.5rem 1rem;font-size:.82rem;color:var(--text-secondary);border-top:1px solid var(--border)}
+.hidden{display:none!important}
+.copied-toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--success);color:#fff;padding:.5rem 1.1rem;border-radius:var(--radius-sm);font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.copied-toast.show{opacity:1}
+
+/* Builder */
+.bricks{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.brick{padding:.45rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:.875rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.brick:hover{border-color:var(--accent);color:var(--accent)}
+.brick.active{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}
+.brick-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1.5rem;display:none}
+.brick-panel.active{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.85rem;margin-bottom:1rem}
+.form-row{display:flex;flex-direction:column;gap:.3rem}
+.output-cmd{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;margin-top:1rem;font-family:var(--font-mono);font-size:.9rem;color:var(--accent2);word-break:break-all;min-height:3rem;white-space:pre-wrap}
+.section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:.75rem}
+.check-row{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text-secondary);cursor:pointer}
+.check-row input{width:15px;height:15px;accent-color:var(--accent)}
+.pipe-chain{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+.pipe-badge{font-family:var(--font-mono);font-size:.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:999px;padding:.1rem .5rem;color:var(--accent2)}
   </style>
 </head>
 <body>
@@ -31,93 +76,257 @@
   <header class="tool-header">
     <a href="../" class="btn btn--ghost btn--sm">← Retour</a>
     <h1>Bash Reference</h1>
-    <span class="badge badge--version">v1.0.0</span>
+    <span class="badge badge--version">v1.1.0</span>
   </header>
 
-  <div class="search-bar">
-    <input class="input" id="search" type="text" placeholder="Rechercher une commande, option, ou description…" oninput="filterCards()">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('ref',this)">📖 Référence</button>
+    <button class="tab" onclick="switchTab('build',this)">🔧 Constructeur</button>
   </div>
 
-  <div id="content"></div>
+  <!-- ── TAB: Référence ── -->
+  <div class="tab-pane active" id="tab-ref">
+    <div class="search-bar">
+      <input class="input" id="search" type="text" placeholder="Rechercher — find, grep, awk, sed, tar, rsync, systemctl…" oninput="filterCards()">
+    </div>
+    <div id="content"></div>
+  </div>
+
+  <!-- ── TAB: Constructeur ── -->
+  <div class="tab-pane" id="tab-build">
+    <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:.9rem">Sélectionne une brique pour construire ta commande. Les options sont adaptées à chaque outil.</p>
+    <div class="bricks" id="bricks"></div>
+    <div id="panels"></div>
+    <div id="build-output" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+        <span class="section-label">Commande générée</span>
+        <button class="btn btn--sm btn--secondary" onclick="copyBuild()">Copier</button>
+      </div>
+      <div class="output-cmd" id="cmd-out"></div>
+      <div class="pipe-chain" id="pipe-chain"></div>
+    </div>
+  </div>
 </div>
 <div class="copied-toast" id="toast">Copié !</div>
 
 <script>
+// ── Tab switching ──────────────────────────────────────
+function switchTab(id, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+// ── Reference data ─────────────────────────────────────
 const DATA = [
   { cmd:'find', entries:[
-    {c:'find . -name "*.log"',               d:'Trouver tous les fichiers .log récursivement'},
-    {c:'find /var -name "*.log" -mtime +7',  d:'Fichiers .log de plus de 7 jours dans /var'},
-    {c:'find . -type f -size +100M',         d:'Fichiers de plus de 100 Mo'},
-    {c:'find . -type d -name node_modules',  d:'Trouver les dossiers node_modules'},
+    {c:'find . -name "*.log"',                 d:'Fichiers .log récursivement'},
+    {c:'find /var -name "*.log" -mtime +7',    d:'Fichiers .log de plus de 7 jours'},
+    {c:'find . -type f -size +100M',           d:'Fichiers de plus de 100 Mo'},
+    {c:'find . -type d -empty',                d:'Répertoires vides'},
     {c:'find . -name "*.conf" -exec grep -l "listen" {} \\;', d:'Fichiers .conf contenant "listen"'},
-    {c:'find /home -user alice -type f',     d:'Fichiers appartenant à alice'},
-    {c:'find . -newer reference.txt',        d:'Fichiers plus récents que reference.txt'},
-    {c:'find . -perm 777',                   d:'Fichiers avec permissions 777'},
-    {c:'find . -maxdepth 2 -name "*.sh"',    d:'Fichiers .sh sur 2 niveaux max'},
-    {c:'find . -empty',                      d:'Fichiers et dossiers vides'},
-    {c:'find . -name "*.bak" -delete',       d:'Supprimer tous les fichiers .bak'},
-    {c:'find . -type f -exec chmod 644 {} \\;', d:'Appliquer chmod 644 à tous les fichiers'},
+    {c:'find /home -user alice -type f',       d:'Fichiers appartenant à alice'},
+    {c:'find . -newer reference.txt',          d:'Fichiers plus récents que reference.txt'},
+    {c:'find . -perm /4000',                   d:'Fichiers SUID'},
+    {c:'find . -perm /2000',                   d:'Fichiers SGID'},
+    {c:'find . -maxdepth 2 -name "*.sh"',      d:'Fichiers .sh sur 2 niveaux max'},
+    {c:'find . -name "*.bak" -delete',         d:'Supprimer tous les .bak'},
+    {c:'find / -xdev -type f -size +100M 2>/dev/null', d:'Gros fichiers (ignore autres FS)'},
+    {c:'find . -type f -exec chmod 644 {} \\;',d:'Appliquer chmod 644 à tous les fichiers'},
+    {c:'find . -type d -exec chmod 755 {} \\;',d:'Appliquer chmod 755 à tous les dossiers'},
+    {c:'find /var/log -name "*.log" -mtime +30 -delete', d:'Supprimer logs > 30 jours'},
   ]},
   { cmd:'grep', entries:[
-    {c:'grep "pattern" fichier.txt',          d:'Chercher un pattern dans un fichier'},
-    {c:'grep -r "pattern" /var/log/',         d:'Chercher récursivement dans un dossier'},
-    {c:'grep -i "error" syslog',              d:'Insensible à la casse'},
-    {c:'grep -n "TODO" *.py',                 d:'Afficher les numéros de ligne'},
-    {c:'grep -v "debug" app.log',             d:'Exclure les lignes contenant "debug"'},
-    {c:'grep -c "ERROR" *.log',               d:'Compter les occurrences par fichier'},
-    {c:'grep -l "FATAL" /var/log/*.log',      d:'Lister uniquement les fichiers matchants'},
-    {c:'grep -A 3 -B 3 "exception" app.log', d:'3 lignes avant et après le match'},
-    {c:'grep -E "^[0-9]{4}-[0-9]{2}" log',   d:'Regex étendue (ERE)'},
-    {c:'grep -P "\\d{3}-\\d{4}" contacts',   d:'Regex Perl (PCRE)'},
-    {c:'grep -w "root" /etc/passwd',          d:'Mot entier uniquement'},
-    {c:'grep --include="*.py" -r "import" .', d:'Filtrer par extension lors du grep récursif'},
+    {c:'grep "pattern" fichier.txt',           d:'Chercher un pattern dans un fichier'},
+    {c:'grep -r "pattern" /var/log/',          d:'Chercher récursivement dans un dossier'},
+    {c:'grep -i "error" syslog',               d:'Insensible à la casse'},
+    {c:'grep -n "TODO" *.py',                  d:'Afficher les numéros de ligne'},
+    {c:'grep -v "debug" app.log',              d:'Exclure les lignes contenant "debug"'},
+    {c:'grep -c "ERROR" *.log',                d:'Compter les occurrences par fichier'},
+    {c:'grep -l "FATAL" /var/log/*.log',       d:'Lister uniquement les fichiers matchants'},
+    {c:'grep -A 3 -B 3 "exception" app.log',  d:'3 lignes de contexte avant et après'},
+    {c:'grep -E "^[0-9]{4}-[0-9]{2}" log',    d:'Regex étendue ERE'},
+    {c:'grep -P "\\d{3}-\\d{4}" contacts',    d:'Regex Perl PCRE'},
+    {c:'grep -w "root" /etc/passwd',           d:'Mot entier uniquement'},
+    {c:'grep --include="*.py" -r "import" .',  d:'Filtrer par extension'},
+    {c:'grep -o "[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+" file', d:'Extraire les IPs uniquement'},
+    {c:'zgrep "ERROR" /var/log/messages.gz',   d:'Chercher dans un fichier compressé'},
   ]},
   { cmd:'awk', entries:[
-    {c:"awk '{print $1}' fichier",            d:'Afficher le 1er champ (séparateur espace)'},
-    {c:"awk -F: '{print $1,$3}' /etc/passwd", d:'Séparateur ":" — afficher champs 1 et 3'},
-    {c:"awk '/ERROR/ {print}' app.log",       d:'Imprimer les lignes contenant ERROR'},
-    {c:"awk '{sum+=$5} END {print sum}' f",  d:'Sommer la colonne 5'},
-    {c:"awk 'NR==5,NR==10' fichier",          d:'Afficher les lignes 5 à 10'},
-    {c:"awk 'NR>1' fichier",                  d:'Ignorer la première ligne (header CSV)'},
-    {c:"awk '{print NF, $0}' fichier",        d:'Afficher le nombre de champs par ligne'},
-    {c:"awk '!seen[$0]++' fichier",           d:'Dédupliquer les lignes'},
-    {c:"awk 'length($0)>80' fichier",         d:'Lignes de plus de 80 caractères'},
+    {c:"awk '{print $1}' fichier",             d:'Afficher le 1er champ (séparateur espace)'},
+    {c:"awk -F: '{print $1,$3}' /etc/passwd",  d:'Séparateur ":" — champs 1 et 3'},
+    {c:"awk '/ERROR/ {print}' app.log",        d:'Imprimer les lignes contenant ERROR'},
+    {c:"awk '{sum+=$5} END {print sum}' f",    d:'Sommer la colonne 5'},
+    {c:"awk 'NR==5,NR==10' fichier",           d:'Afficher les lignes 5 à 10'},
+    {c:"awk 'NR>1' fichier",                   d:'Ignorer la première ligne (header)'},
+    {c:"awk '{print NF, $0}' fichier",         d:'Afficher le nombre de champs par ligne'},
+    {c:"awk '!seen[$0]++' fichier",            d:'Dédupliquer les lignes'},
+    {c:"awk 'length($0)>80' fichier",          d:'Lignes de plus de 80 caractères'},
     {c:"awk 'BEGIN{FS=\",\";OFS=\"\\t\"} {print $1,$3}' f", d:'CSV vers TSV'},
+    {c:"awk '{count[$1]++} END{for(k in count) print count[k],k}' f", d:'Compter par valeur unique col1'},
+    {c:"awk -v OFS=',' '{print $2,$1,$3}' f",  d:'Réorganiser colonnes'},
   ]},
   { cmd:'sed', entries:[
-    {c:"sed 's/ancien/nouveau/' fichier",    d:'Remplacer la 1ère occurrence par ligne'},
-    {c:"sed 's/ancien/nouveau/g' fichier",   d:'Remplacer toutes les occurrences'},
-    {c:"sed -i 's/foo/bar/g' fichier.txt",   d:'Remplacement en place (modifier le fichier)'},
-    {c:"sed -n '10,20p' fichier",            d:'Afficher les lignes 10 à 20'},
-    {c:"sed '/^#/d' fichier.conf",           d:'Supprimer les lignes de commentaires'},
-    {c:"sed '/^$/d' fichier",                d:'Supprimer les lignes vides'},
-    {c:"sed -n '/START/,/END/p' fichier",    d:'Extraire entre deux patterns'},
-    {c:"sed '1s/^/Première ligne\\n/' f",    d:'Insérer une ligne au début'},
-    {c:"sed '$a Dernière ligne' fichier",     d:'Ajouter une ligne à la fin'},
-    {c:"sed 's/\\s\\+/ /g' fichier",         d:'Compresser les espaces multiples'},
+    {c:"sed 's/ancien/nouveau/' fichier",      d:'Remplacer la 1ère occurrence par ligne'},
+    {c:"sed 's/ancien/nouveau/g' fichier",     d:'Remplacer toutes les occurrences'},
+    {c:"sed -i 's/foo/bar/g' fichier.txt",     d:'Remplacement en place'},
+    {c:"sed -i.bak 's/foo/bar/g' fichier",     d:'Remplacement en place + backup .bak'},
+    {c:"sed -n '10,20p' fichier",              d:'Afficher les lignes 10 à 20'},
+    {c:"sed '/^#/d' fichier.conf",             d:'Supprimer les lignes de commentaires'},
+    {c:"sed '/^$/d' fichier",                  d:'Supprimer les lignes vides'},
+    {c:"sed -n '/START/,/END/p' fichier",      d:'Extraire entre deux patterns'},
+    {c:"sed '1s/^/Première ligne\\n/' f",      d:'Insérer une ligne au début'},
+    {c:"sed '$a\\Dernière ligne' fichier",      d:'Ajouter une ligne à la fin'},
+    {c:"sed 's/\\s\\+/ /g' fichier",           d:'Compresser les espaces multiples'},
+    {c:"sed -e 's/foo/bar/g' -e 's/baz/qux/g' f", d:'Plusieurs substitutions'},
   ]},
   { cmd:'tar', entries:[
-    {c:'tar -czf archive.tar.gz dossier/',   d:'Créer une archive gzip'},
-    {c:'tar -cjf archive.tar.bz2 dossier/',  d:'Créer une archive bzip2'},
-    {c:'tar -xzf archive.tar.gz',            d:'Extraire une archive gzip'},
-    {c:'tar -xzf archive.tar.gz -C /dest/',  d:'Extraire vers un dossier spécifique'},
-    {c:'tar -tzf archive.tar.gz',            d:'Lister le contenu sans extraire'},
-    {c:'tar -xzf archive.tar.gz fichier.txt',d:'Extraire un seul fichier'},
+    {c:'tar -czf archive.tar.gz dossier/',     d:'Créer une archive gzip'},
+    {c:'tar -cjf archive.tar.bz2 dossier/',   d:'Créer une archive bzip2'},
+    {c:'tar -cJf archive.tar.xz dossier/',    d:'Créer une archive xz (meilleur ratio)'},
+    {c:'tar -xzf archive.tar.gz',             d:'Extraire une archive gzip'},
+    {c:'tar -xzf archive.tar.gz -C /dest/',   d:'Extraire vers un dossier spécifique'},
+    {c:'tar -tzf archive.tar.gz',             d:'Lister le contenu sans extraire'},
+    {c:'tar -xzf archive.tar.gz fichier.txt', d:'Extraire un seul fichier'},
     {c:'tar -czf backup-$(date +%F).tar.gz .', d:'Archive avec date dans le nom'},
-    {c:'tar -czf - dossier/ | ssh user@host "cat > /backup/arch.tar.gz"', d:'Archive et transfert SSH en pipe'},
     {c:'tar --exclude="*.log" -czf arch.tar.gz dossier/', d:'Exclure des fichiers'},
+    {c:'tar -czf - dossier/ | ssh user@host "cat > /backup/arch.tar.gz"', d:'Archive et transfert SSH'},
   ]},
   { cmd:'rsync', entries:[
-    {c:'rsync -av source/ dest/',             d:'Sync locale avec verbose'},
+    {c:'rsync -av source/ dest/',              d:'Sync locale avec verbose'},
     {c:'rsync -avz source/ user@host:/dest/', d:'Sync distante avec compression'},
-    {c:'rsync -avz --delete source/ dest/',   d:'Sync miroir (supprime en destination)'},
-    {c:'rsync -avzn source/ dest/',           d:'Dry-run : simuler sans modifier'},
+    {c:'rsync -avz --delete source/ dest/',    d:'Sync miroir (supprime en destination)'},
+    {c:'rsync -avzn source/ dest/',            d:'Dry-run : simuler sans modifier'},
     {c:'rsync -avz --exclude="*.log" src/ dst/', d:'Exclure des fichiers'},
-    {c:'rsync -avz --exclude-from=".rsyncignore" src/ dst/', d:'Exclusions depuis un fichier'},
-    {c:'rsync -avz --progress src/ dst/',     d:'Afficher la progression'},
+    {c:'rsync -avz --progress src/ dst/',      d:'Afficher la progression'},
     {c:'rsync -avz -e "ssh -p 2222" src/ user@host:/dst/', d:'SSH sur un port non standard'},
     {c:'rsync -avz --bwlimit=1000 src/ dst/', d:'Limiter la bande passante à 1 Mo/s'},
-    {c:'rsync -a --backup --backup-dir=/backup/$(date +%F) src/ dst/', d:'Backup incrémental avec dossier daté'},
+    {c:'rsync -a --backup --backup-dir=/backup/$(date +%F) src/ dst/', d:'Backup incrémental daté'},
+    {c:'rsync -avz --checksum src/ dst/',      d:'Forcer comparaison par checksum (pas date)'},
+  ]},
+  { cmd:'systemctl', entries:[
+    {c:'systemctl start|stop|restart httpd',   d:'Démarrer / arrêter / redémarrer un service'},
+    {c:'systemctl enable --now httpd',         d:'Activer et démarrer immédiatement'},
+    {c:'systemctl disable --now httpd',        d:'Désactiver et arrêter immédiatement'},
+    {c:'systemctl status httpd',               d:'Statut d\'un service'},
+    {c:'systemctl daemon-reload',              d:'Recharger les fichiers unit systemd'},
+    {c:'systemctl list-units --type=service',  d:'Lister tous les services'},
+    {c:'systemctl list-units --state=failed',  d:'Lister les services en échec'},
+    {c:'systemctl list-unit-files --type=service', d:'Voir l\'état d\'activation des services'},
+    {c:'systemctl is-active httpd',            d:'Vérifier si un service tourne'},
+    {c:'systemctl is-enabled httpd',           d:'Vérifier si un service est activé au boot'},
+    {c:'systemctl mask httpd',                 d:'Empêcher le démarrage d\'un service'},
+    {c:'systemctl isolate multi-user.target',  d:'Changer de target (runlevel)'},
+  ]},
+  { cmd:'journalctl', entries:[
+    {c:'journalctl -n 50',                     d:'50 dernières lignes de log'},
+    {c:'journalctl -f',                        d:'Suivre les logs en temps réel (tail -f)'},
+    {c:'journalctl -u httpd',                  d:'Logs d\'un service spécifique'},
+    {c:'journalctl -u httpd -f',               d:'Suivre les logs d\'un service'},
+    {c:'journalctl -p err',                    d:'Uniquement les erreurs (et plus grave)'},
+    {c:'journalctl --since "2024-01-01" --until "2024-01-02"', d:'Logs sur une plage de dates'},
+    {c:'journalctl -b',                        d:'Logs depuis le dernier démarrage'},
+    {c:'journalctl -b -1',                     d:'Logs depuis l\'avant-dernier démarrage'},
+    {c:'journalctl --disk-usage',              d:'Espace disque utilisé par les journaux'},
+    {c:'journalctl --vacuum-time=7d',          d:'Supprimer les journaux > 7 jours'},
+    {c:'journalctl -k',                        d:'Messages du kernel uniquement (dmesg)'},
+  ]},
+  { cmd:'dnf / yum', entries:[
+    {c:'dnf install paquet',                   d:'Installer un paquet'},
+    {c:'dnf remove paquet',                    d:'Supprimer un paquet'},
+    {c:'dnf update',                           d:'Mettre à jour tous les paquets'},
+    {c:'dnf check-update',                     d:'Lister les mises à jour disponibles'},
+    {c:'dnf info paquet',                      d:'Infos détaillées sur un paquet'},
+    {c:'dnf search terme',                     d:'Rechercher un paquet'},
+    {c:'dnf list installed | grep paquet',     d:'Chercher parmi les paquets installés'},
+    {c:'dnf history',                          d:'Historique des transactions'},
+    {c:'dnf history undo N',                   d:'Annuler la transaction N'},
+    {c:'dnf repolist enabled',                 d:'Lister les dépôts activés'},
+    {c:'dnf group install "Development Tools"',d:'Installer un groupe de paquets'},
+    {c:'dnf provides /usr/sbin/httpd',         d:'Quel paquet fournit ce fichier'},
+    {c:'dnf clean all',                        d:'Nettoyer le cache DNF'},
+  ]},
+  { cmd:'rpm', entries:[
+    {c:'rpm -q paquet',                        d:'Vérifier si un paquet est installé'},
+    {c:'rpm -qi paquet',                       d:'Informations détaillées sur le paquet'},
+    {c:'rpm -ql paquet',                       d:'Lister les fichiers du paquet'},
+    {c:'rpm -qf /chemin/vers/fichier',         d:'Quel paquet possède ce fichier'},
+    {c:'rpm -qa',                              d:'Lister tous les paquets installés'},
+    {c:'rpm -qa --queryformat "%{NAME}-%{VERSION}\\n"', d:'Format personnalisé de liste'},
+    {c:'rpm -qa | grep -i nom',                d:'Rechercher un paquet installé'},
+    {c:'rpm -V paquet',                        d:'Vérifier l\'intégrité d\'un paquet'},
+    {c:'rpm -Va 2>/dev/null',                  d:'Vérifier tous les paquets installés'},
+    {c:'rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release', d:'Importer une clé GPG'},
+  ]},
+  { cmd:'ss / ip', entries:[
+    {c:'ss -tlnp',                             d:'Ports TCP en écoute + processus'},
+    {c:'ss -ulnp',                             d:'Ports UDP en écoute + processus'},
+    {c:'ss -tnp state established',            d:'Connexions TCP établies'},
+    {c:'ss -s',                                d:'Statistiques réseau résumé'},
+    {c:'ss -tnp sport = :80',                  d:'Connexions sur le port 80'},
+    {c:'ip addr show',                         d:'Afficher toutes les interfaces'},
+    {c:'ip addr show eth0',                    d:'Afficher une interface spécifique'},
+    {c:'ip route show',                        d:'Table de routage'},
+    {c:'ip route add 10.0.0.0/8 via 192.168.1.1', d:'Ajouter une route'},
+    {c:'ip link set eth0 up/down',             d:'Activer/désactiver une interface'},
+    {c:'nmcli device status',                  d:'État des interfaces réseau (NetworkManager)'},
+    {c:'nmcli con show',                       d:'Lister les connexions NetworkManager'},
+  ]},
+  { cmd:'chmod / chown', entries:[
+    {c:'chmod 755 fichier',                    d:'rwxr-xr-x — exécutable pour tous'},
+    {c:'chmod 644 fichier',                    d:'rw-r--r-- — fichier config standard'},
+    {c:'chmod 600 fichier',                    d:'rw------- — privé (clés SSH)'},
+    {c:'chmod 400 fichier',                    d:'r-------- — lecture seule strict'},
+    {c:'chmod +x script.sh',                   d:'Rendre exécutable'},
+    {c:'chmod -R 755 dossier/',               d:'Récursif sur un dossier'},
+    {c:'chown user:group fichier',             d:'Changer propriétaire et groupe'},
+    {c:'chown -R user:group dossier/',        d:'Changer propriétaire récursivement'},
+    {c:'chown --reference=ref.txt target.txt', d:'Copier les droits d\'un autre fichier'},
+    {c:'chmod u+s fichier',                    d:'Bit SUID'},
+    {c:'chmod g+s dossier/',                  d:'Bit SGID sur un répertoire'},
+    {c:'chmod +t /tmp',                        d:'Sticky bit (seul le proprio peut supprimer)'},
+  ]},
+  { cmd:'useradd / usermod', entries:[
+    {c:'useradd -m -s /bin/bash username',     d:'Créer utilisateur avec home et bash'},
+    {c:'useradd -r -s /sbin/nologin username', d:'Compte système sans shell'},
+    {c:'usermod -aG wheel username',           d:'Ajouter au groupe wheel (sudo)'},
+    {c:'usermod -s /bin/bash username',        d:'Changer le shell'},
+    {c:'usermod -l newname oldname',           d:'Renommer un compte'},
+    {c:'passwd username',                      d:'Définir/changer le mot de passe'},
+    {c:'passwd -l username',                   d:'Verrouiller un compte'},
+    {c:'passwd -u username',                   d:'Déverrouiller un compte'},
+    {c:'userdel -r username',                  d:'Supprimer utilisateur et son home'},
+    {c:'id username',                          d:'Voir UID, GID et groupes'},
+    {c:'groups username',                      d:'Lister les groupes d\'un utilisateur'},
+    {c:'getent passwd username',               d:'Infos depuis NSS (LDAP inclus)'},
+  ]},
+  { cmd:'firewall-cmd', entries:[
+    {c:'firewall-cmd --state',                 d:'Vérifier si firewalld tourne'},
+    {c:'firewall-cmd --list-all',              d:'Lister toutes les règles actives'},
+    {c:'firewall-cmd --list-all-zones',        d:'Lister toutes les zones'},
+    {c:'firewall-cmd --add-service=http --permanent', d:'Ouvrir le service HTTP (permanent)'},
+    {c:'firewall-cmd --add-port=8080/tcp --permanent', d:'Ouvrir un port TCP (permanent)'},
+    {c:'firewall-cmd --remove-service=http --permanent', d:'Fermer un service'},
+    {c:'firewall-cmd --add-source=192.168.1.0/24 --zone=trusted --permanent', d:'Autoriser un réseau'},
+    {c:'firewall-cmd --reload',                d:'Appliquer les règles permanentes'},
+    {c:'firewall-cmd --runtime-to-permanent',  d:'Sauvegarder les règles runtime en permanent'},
+    {c:'firewall-cmd --zone=public --list-ports', d:'Lister les ports ouverts d\'une zone'},
+  ]},
+  { cmd:'SELinux', entries:[
+    {c:'getenforce',                           d:'Afficher le mode SELinux'},
+    {c:'setenforce 0',                         d:'Passer en permissive (temporaire)'},
+    {c:'setenforce 1',                         d:'Passer en enforcing (temporaire)'},
+    {c:'sestatus',                             d:'Statut complet SELinux'},
+    {c:'ls -lZ /var/www/html/',               d:'Afficher les contextes de sécurité'},
+    {c:'restorecon -Rv /var/www/html/',       d:'Restaurer les contextes par défaut'},
+    {c:'chcon -t httpd_sys_content_t fichier', d:'Changer le contexte d\'un fichier'},
+    {c:'setsebool -P httpd_can_network_connect on', d:'Activer un booléen SELinux (permanent)'},
+    {c:'getsebool -a | grep httpd',           d:'Lister les booléens liés à httpd'},
+    {c:'semanage port -l | grep http',        d:'Ports autorisés pour http'},
+    {c:'semanage port -a -t http_port_t -p tcp 8080', d:'Ajouter un port autorisé'},
+    {c:'ausearch -m avc -ts today',           d:'Alertes AVC du jour'},
+    {c:'audit2allow -a -M monmodule',         d:'Créer un module SELinux depuis les AVC'},
   ]},
 ];
 
@@ -147,11 +356,476 @@ DATA.forEach(section=>{
   section.entries.forEach(e=>{
     const card=document.createElement('div'); card.className='example-card';
     card.dataset.cmd=section.cmd; card.dataset.desc=e.d;
-    card.innerHTML=`<div class="cmd" onclick="copyCmd(\`${e.c.replace(/`/g,'\\`')}\`)">${e.c}</div><div class="desc">${e.d}</div>`;
+    card.innerHTML=`<div class="cmd" onclick="copyCmd(\`${e.c.replace(/`/g,'\\`').replace(/\\/g,'\\\\')}\`)">${e.c.replace(/</g,'&lt;')}</div><div class="desc">${e.d}</div>`;
     grid.appendChild(card);
   });
   content.appendChild(sec);
 });
+
+// ── BUILDER ──────────────────────────────────────────────
+const BRICKS = [
+  {id:'find',      label:'🔍 Chercher (find)'},
+  {id:'grep',      label:'📝 Filtrer (grep)'},
+  {id:'sed',       label:'✂️ Remplacer (sed)'},
+  {id:'awk',       label:'📊 Traiter (awk)'},
+  {id:'tar',       label:'📦 Archiver (tar)'},
+  {id:'rsync',     label:'🔄 Synchroniser (rsync)'},
+  {id:'systemctl', label:'⚙️ Services (systemctl)'},
+  {id:'journalctl',label:'📋 Logs (journalctl)'},
+  {id:'dnf',       label:'📥 Paquets (dnf/yum)'},
+  {id:'rpm',       label:'🔖 RPM (rpm)'},
+  {id:'ss',        label:'🌐 Réseau (ss/ip)'},
+  {id:'chmod',     label:'🔐 Permissions (chmod)'},
+  {id:'useradd',   label:'👤 Utilisateurs (useradd)'},
+  {id:'firewall',  label:'🛡 Firewall (firewall-cmd)'},
+];
+
+const PANELS = {
+  find:`<div class="section-label">Chercher avec find</div>
+<div class="form-grid">
+  <div class="form-row"><label>Répertoire de départ</label><input class="input" id="f-path" value="." oninput="bfind()"></div>
+  <div class="form-row"><label>Nom / pattern (-name)</label><input class="input" id="f-name" placeholder='*.log ou "app*"' oninput="bfind()"></div>
+  <div class="form-row"><label>Type</label><select class="select" id="f-type" onchange="bfind()"><option value="">tous</option><option value="f">fichiers (-type f)</option><option value="d">dossiers (-type d)</option><option value="l">liens symboliques (-type l)</option></select></div>
+  <div class="form-row"><label>Taille (-size)</label><input class="input" id="f-size" placeholder="+100M ou -1k" oninput="bfind()"></div>
+  <div class="form-row"><label>Modifié il y a (jours, -mtime)</label><input class="input" id="f-mtime" placeholder="+7 ou -1" oninput="bfind()"></div>
+  <div class="form-row"><label>Profondeur max (-maxdepth)</label><input class="input" id="f-depth" type="number" placeholder="vide = illimité" oninput="bfind()"></div>
+  <div class="form-row"><label>Propriétaire (-user)</label><input class="input" id="f-user" placeholder="username" oninput="bfind()"></div>
+  <div class="form-row"><label>Permissions (-perm)</label><input class="input" id="f-perm" placeholder="755 ou /4000" oninput="bfind()"></div>
+</div>
+<div class="form-row"><label>Action sur les résultats (-exec / -delete)</label><select class="select" id="f-action" onchange="bfind()"><option value="">aucune (afficher)</option><option value="print0">xargs (null-delimited)</option><option value="delete">-delete (supprimer)</option><option value="chmod644">-exec chmod 644</option><option value="ls">-exec ls -la</option><option value="grep">-exec grep -l "pattern"</option></select></div>`,
+
+  grep:`<div class="section-label">Filtrer avec grep</div>
+<div class="form-grid">
+  <div class="form-row"><label>Pattern recherché</label><input class="input" id="g-pat" placeholder="ERROR" oninput="bgrep()"></div>
+  <div class="form-row"><label>Fichier(s) ou chemin</label><input class="input" id="g-file" value="fichier.txt" oninput="bgrep()"></div>
+  <div class="form-row"><label>Lignes contexte avant (-B)</label><input class="input" id="g-B" type="number" placeholder="0" oninput="bgrep()"></div>
+  <div class="form-row"><label>Lignes contexte après (-A)</label><input class="input" id="g-A" type="number" placeholder="0" oninput="bgrep()"></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:.75rem">
+  <label class="check-row"><input type="checkbox" id="g-r" onchange="bgrep()"> -r récursif</label>
+  <label class="check-row"><input type="checkbox" id="g-i" onchange="bgrep()"> -i insensible casse</label>
+  <label class="check-row"><input type="checkbox" id="g-n" onchange="bgrep()"> -n numéros de ligne</label>
+  <label class="check-row"><input type="checkbox" id="g-v" onchange="bgrep()"> -v inverser (exclure)</label>
+  <label class="check-row"><input type="checkbox" id="g-l" onchange="bgrep()"> -l fichiers seulement</label>
+  <label class="check-row"><input type="checkbox" id="g-c" onchange="bgrep()"> -c compter occurrences</label>
+  <label class="check-row"><input type="checkbox" id="g-w" onchange="bgrep()"> -w mot entier</label>
+  <label class="check-row"><input type="checkbox" id="g-E" onchange="bgrep()"> -E regex étendue (ERE)</label>
+  <label class="check-row"><input type="checkbox" id="g-P" onchange="bgrep()"> -P regex Perl (PCRE)</label>
+</div>`,
+
+  sed:`<div class="section-label">Remplacer / éditer avec sed</div>
+<div class="form-grid">
+  <div class="form-row"><label>Fichier cible</label><input class="input" id="s-file" value="fichier.txt" oninput="bsed()"></div>
+  <div class="form-row"><label>Action</label><select class="select" id="s-action" onchange="bsed()"><option value="replace">Substitution s///</option><option value="delete">Supprimer lignes (/pattern/d)</option><option value="print">Afficher plage (sed -n 'N,Mp')</option><option value="insert">Insérer après pattern</option><option value="prepend">Insérer avant pattern</option><option value="deleteblank">Supprimer lignes vides</option><option value="deletecomment">Supprimer commentaires #</option></select></div>
+  <div class="form-row" id="s-from-row"><label>Rechercher</label><input class="input" id="s-from" placeholder="ancien_texte" oninput="bsed()"></div>
+  <div class="form-row" id="s-to-row"><label>Remplacer par</label><input class="input" id="s-to" placeholder="nouveau_texte" oninput="bsed()"></div>
+  <div class="form-row" id="s-line-row"><label>Plage lignes (N,M)</label><input class="input" id="s-lines" placeholder="10,20" oninput="bsed()"></div>
+  <div class="form-row" id="s-insert-row"><label>Texte à insérer</label><input class="input" id="s-insert" placeholder="nouvelle ligne" oninput="bsed()"></div>
+</div>
+<div style="display:flex;gap:1rem;flex-wrap:wrap">
+  <label class="check-row"><input type="checkbox" id="s-g" onchange="bsed()"> /g toutes occurrences</label>
+  <label class="check-row"><input type="checkbox" id="s-i" onchange="bsed()"> -i modifier en place</label>
+  <label class="check-row"><input type="checkbox" id="s-bak" onchange="bsed()"> .bak backup (-i.bak)</label>
+</div>`,
+
+  awk:`<div class="section-label">Traiter avec awk</div>
+<div class="form-grid">
+  <div class="form-row"><label>Fichier</label><input class="input" id="a-file" value="fichier" oninput="bawk()"></div>
+  <div class="form-row"><label>Séparateur de champ (-F)</label><input class="input" id="a-fs" placeholder="espace (défaut)" oninput="bawk()"></div>
+  <div class="form-row"><label>Filtre (pattern)</label><input class="input" id="a-pat" placeholder="/ERROR/ ou NR>1" oninput="bawk()"></div>
+  <div class="form-row"><label>Action principale</label><select class="select" id="a-action" onchange="bawk()">
+    <option value="print">Imprimer champs (print $1,$2…)</option>
+    <option value="sum">Sommer une colonne</option>
+    <option value="count">Compter (NR)</option>
+    <option value="countval">Compter par valeur (col)</option>
+    <option value="max">Valeur max d'une colonne</option>
+    <option value="custom">Personnalisé</option>
+  </select></div>
+  <div class="form-row"><label>Champs à afficher / N° colonne</label><input class="input" id="a-fields" value="$1" oninput="bawk()"></div>
+  <div class="form-row"><label>Action custom (si sélectionné)</label><input class="input" id="a-custom" placeholder="{print NF,$0}" oninput="bawk()"></div>
+</div>`,
+
+  tar:`<div class="section-label">Archiver avec tar</div>
+<div class="form-grid">
+  <div class="form-row"><label>Opération</label><select class="select" id="t-op" onchange="btar()"><option value="c">Créer</option><option value="x">Extraire</option><option value="t">Lister</option></select></div>
+  <div class="form-row"><label>Archive (nom)</label><input class="input" id="t-arch" value="archive.tar.gz" oninput="btar()"></div>
+  <div class="form-row"><label>Source / destination</label><input class="input" id="t-src" value="dossier/" oninput="btar()"></div>
+  <div class="form-row"><label>Compression</label><select class="select" id="t-comp" onchange="btar()"><option value="z">gzip (.tar.gz)</option><option value="j">bzip2 (.tar.bz2)</option><option value="J">xz (.tar.xz)</option><option value="">aucune (.tar)</option></select></div>
+  <div class="form-row"><label>Extraire vers (-C)</label><input class="input" id="t-dest" placeholder="(défaut: .)" oninput="btar()"></div>
+  <div class="form-row"><label>Exclure (--exclude)</label><input class="input" id="t-excl" placeholder="*.log" oninput="btar()"></div>
+</div>
+<label class="check-row" style="margin-bottom:.5rem"><input type="checkbox" id="t-v" onchange="btar()"> -v verbose</label>`,
+
+  rsync:`<div class="section-label">Synchroniser avec rsync</div>
+<div class="form-grid">
+  <div class="form-row"><label>Source</label><input class="input" id="r-src" value="source/" oninput="brsync()"></div>
+  <div class="form-row"><label>Destination</label><input class="input" id="r-dst" value="dest/" oninput="brsync()"></div>
+  <div class="form-row"><label>Utilisateur@hôte distant</label><input class="input" id="r-host" placeholder="user@host (vide si local)" oninput="brsync()"></div>
+  <div class="form-row"><label>Port SSH (-e ssh -p)</label><input class="input" id="r-port" placeholder="22 (défaut)" oninput="brsync()"></div>
+  <div class="form-row"><label>Exclure (--exclude)</label><input class="input" id="r-excl" placeholder="*.log" oninput="brsync()"></div>
+  <div class="form-row"><label>Limite bande passante (Ko/s)</label><input class="input" id="r-bw" placeholder="0 = illimité" oninput="brsync()"></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:.5rem">
+  <label class="check-row"><input type="checkbox" id="r-z" checked onchange="brsync()"> -z compression</label>
+  <label class="check-row"><input type="checkbox" id="r-del" onchange="brsync()"> --delete miroir</label>
+  <label class="check-row"><input type="checkbox" id="r-n" onchange="brsync()"> -n dry-run</label>
+  <label class="check-row"><input type="checkbox" id="r-prog" onchange="brsync()"> --progress</label>
+  <label class="check-row"><input type="checkbox" id="r-chk" onchange="brsync()"> --checksum</label>
+  <label class="check-row"><input type="checkbox" id="r-bkp" onchange="brsync()"> --backup</label>
+</div>`,
+
+  systemctl:`<div class="section-label">Gérer un service systemd</div>
+<div class="form-grid">
+  <div class="form-row"><label>Nom du service</label><input class="input" id="sc-svc" value="httpd" oninput="bsystemctl()"></div>
+  <div class="form-row"><label>Action</label><select class="select" id="sc-action" onchange="bsystemctl()">
+    <option value="start">start</option><option value="stop">stop</option><option value="restart">restart</option><option value="reload">reload</option>
+    <option value="enable">enable</option><option value="disable">disable</option><option value="enable --now">enable --now</option><option value="disable --now">disable --now</option>
+    <option value="status">status</option><option value="is-active">is-active</option><option value="is-enabled">is-enabled</option>
+    <option value="mask">mask (bloquer)</option><option value="unmask">unmask</option>
+    <option value="daemon-reload">daemon-reload</option>
+    <option value="list-units --type=service">list-units (tous)</option>
+    <option value="list-units --type=service --state=failed">list-units (échec)</option>
+    <option value="list-unit-files --type=service">list-unit-files</option>
+  </select></div>
+</div>`,
+
+  journalctl:`<div class="section-label">Consulter les journaux</div>
+<div class="form-grid">
+  <div class="form-row"><label>Service (-u)</label><input class="input" id="j-svc" placeholder="httpd (vide = tous)" oninput="bjournalctl()"></div>
+  <div class="form-row"><label>Nombre de lignes (-n)</label><input class="input" id="j-n" type="number" placeholder="50" oninput="bjournalctl()"></div>
+  <div class="form-row"><label>Priorité minimum (-p)</label><select class="select" id="j-p" onchange="bjournalctl()"><option value="">toutes</option><option value="emerg">emerg (0)</option><option value="alert">alert (1)</option><option value="crit">crit (2)</option><option value="err">err (3)</option><option value="warning">warning (4)</option><option value="notice">notice (5)</option><option value="info">info (6)</option><option value="debug">debug (7)</option></select></div>
+  <div class="form-row"><label>Depuis (--since)</label><input class="input" id="j-since" placeholder='2024-01-01 ou "1 hour ago"' oninput="bjournalctl()"></div>
+  <div class="form-row"><label>Jusqu'à (--until)</label><input class="input" id="j-until" placeholder='2024-01-02' oninput="bjournalctl()"></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:.5rem">
+  <label class="check-row"><input type="checkbox" id="j-f" onchange="bjournalctl()"> -f follow (temps réel)</label>
+  <label class="check-row"><input type="checkbox" id="j-b" onchange="bjournalctl()"> -b depuis ce boot</label>
+  <label class="check-row"><input type="checkbox" id="j-k" onchange="bjournalctl()"> -k kernel uniquement</label>
+  <label class="check-row"><input type="checkbox" id="j-np" checked onchange="bjournalctl()"> --no-pager</label>
+  <label class="check-row"><input type="checkbox" id="j-r" onchange="bjournalctl()"> -r ordre inverse</label>
+</div>`,
+
+  dnf:`<div class="section-label">Gérer les paquets avec dnf / yum</div>
+<div class="form-grid">
+  <div class="form-row"><label>Gestionnaire</label><select class="select" id="d-mgr" onchange="bdnf()"><option value="dnf">dnf (RHEL 8/9)</option><option value="yum">yum (RHEL 6/7)</option></select></div>
+  <div class="form-row"><label>Action</label><select class="select" id="d-action" onchange="bdnf()">
+    <option value="install">install</option><option value="remove">remove</option><option value="update">update (tous)</option>
+    <option value="upgrade">upgrade</option><option value="check-update">check-update (liste)</option>
+    <option value="info">info (infos)</option><option value="search">search (chercher)</option>
+    <option value="list installed">list installed</option><option value="provides">provides (quel paquet)</option>
+    <option value="history">history</option><option value="clean all">clean all</option>
+    <option value="repolist enabled">repolist enabled</option><option value="group install">group install</option>
+    <option value="group list">group list</option>
+  </select></div>
+  <div class="form-row"><label>Paquet / terme</label><input class="input" id="d-pkg" placeholder="httpd" oninput="bdnf()"></div>
+</div>
+<label class="check-row" style="margin-bottom:.5rem"><input type="checkbox" id="d-y" onchange="bdnf()"> -y (répondre oui automatiquement)</label>`,
+
+  rpm:`<div class="section-label">Interroger RPM</div>
+<div class="form-grid">
+  <div class="form-row"><label>Action</label><select class="select" id="rpm-action" onchange="brpm()">
+    <option value="-q">-q : installé ?</option><option value="-qi">-qi : infos détaillées</option>
+    <option value="-ql">-ql : fichiers du paquet</option><option value="-qf">-qf : paquet d'un fichier</option>
+    <option value="-qa">-qa : lister tous</option><option value="-qR">-qR : dépendances</option>
+    <option value="-V">-V : vérifier intégrité</option><option value="-Va">-Va : vérifier tous</option>
+    <option value="--import">--import : clé GPG</option>
+  </select></div>
+  <div class="form-row"><label>Paquet ou chemin</label><input class="input" id="rpm-pkg" placeholder="httpd ou /chemin/fichier" oninput="brpm()"></div>
+  <div class="form-row"><label>Filtre pipe | grep</label><input class="input" id="rpm-grep" placeholder="(optionnel)" oninput="brpm()"></div>
+</div>`,
+
+  ss:`<div class="section-label">Afficher l'état réseau</div>
+<div class="form-grid">
+  <div class="form-row"><label>Outil</label><select class="select" id="n-tool" onchange="bss()"><option value="ss">ss</option><option value="ip">ip</option><option value="nmcli">nmcli</option></select></div>
+  <div class="form-row" id="ss-opts"><label>ss — Options</label><select class="select" id="n-ssopt" onchange="bss()">
+    <option value="tlnp">TCP en écoute + process</option><option value="ulnp">UDP en écoute + process</option>
+    <option value="tnp state established">Connexions établies</option><option value="s">Statistiques</option>
+    <option value="anp">Toutes les sockets</option>
+  </select></div>
+  <div class="form-row" id="ip-opts" style="display:none"><label>ip — Sous-commande</label><select class="select" id="n-ipopt" onchange="bss()">
+    <option value="addr show">addr show (interfaces)</option><option value="route show">route show (routage)</option>
+    <option value="link show">link show (liens)</option><option value="neigh show">neigh show (ARP)</option>
+  </select></div>
+  <div class="form-row" id="nm-opts" style="display:none"><label>nmcli — Sous-commande</label><select class="select" id="n-nmopt" onchange="bss()">
+    <option value="device status">device status</option><option value="con show">con show</option>
+    <option value="con show --active">con show --active</option><option value="general status">general status</option>
+  </select></div>
+  <div class="form-row"><label>Filtre port (ss sport)</label><input class="input" id="n-port" placeholder="80 (optionnel)" oninput="bss()"></div>
+</div>`,
+
+  chmod:`<div class="section-label">Gérer les permissions</div>
+<div class="form-grid">
+  <div class="form-row"><label>Cible (fichier ou dossier)</label><input class="input" id="c-target" value="/opt/app" oninput="bchmod()"></div>
+  <div class="form-row"><label>Action</label><select class="select" id="c-action" onchange="bchmod()"><option value="chmod">chmod (permissions)</option><option value="chown">chown (propriétaire)</option><option value="both">chmod + chown</option></select></div>
+  <div class="form-row"><label>Permissions octal</label><input class="input" id="c-perms" placeholder="755" oninput="bchmod()"></div>
+  <div class="form-row"><label>Propriétaire:Groupe</label><input class="input" id="c-owner" placeholder="appuser:appuser" oninput="bchmod()"></div>
+</div>
+<label class="check-row" style="margin-bottom:.5rem"><input type="checkbox" id="c-r" onchange="bchmod()"> -R récursif</label>`,
+
+  useradd:`<div class="section-label">Gérer les utilisateurs</div>
+<div class="form-grid">
+  <div class="form-row"><label>Nom d'utilisateur</label><input class="input" id="u-name" value="appuser" oninput="buseradd()"></div>
+  <div class="form-row"><label>Action</label><select class="select" id="u-action" onchange="buseradd()">
+    <option value="add">useradd (créer)</option><option value="mod">usermod (modifier)</option>
+    <option value="del">userdel (supprimer)</option><option value="passwd">passwd (mot de passe)</option>
+    <option value="lock">passwd -l (verrouiller)</option><option value="unlock">passwd -u (déverrouiller)</option>
+    <option value="id">id (infos)</option><option value="groups">groups (groupes)</option>
+    <option value="getent">getent passwd (NSS)</option>
+  </select></div>
+  <div class="form-row"><label>Shell</label><select class="select" id="u-shell" onchange="buseradd()"><option value="/bin/bash">/bin/bash</option><option value="/sbin/nologin">/sbin/nologin</option><option value="/bin/sh">/bin/sh</option></select></div>
+  <div class="form-row"><label>Groupe(s) supplémentaire(s)</label><input class="input" id="u-groups" placeholder="wheel,docker" oninput="buseradd()"></div>
+  <div class="form-row"><label>Home (-d)</label><input class="input" id="u-home" placeholder="/home/appuser" oninput="buseradd()"></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:.5rem">
+  <label class="check-row"><input type="checkbox" id="u-m" onchange="buseradd()"> -m créer home</label>
+  <label class="check-row"><input type="checkbox" id="u-sys" onchange="buseradd()"> -r compte système</label>
+  <label class="check-row"><input type="checkbox" id="u-del-r" onchange="buseradd()"> -r supprimer home (userdel)</label>
+</div>`,
+
+  firewall:`<div class="section-label">Gérer le firewall (firewall-cmd)</div>
+<div class="form-grid">
+  <div class="form-row"><label>Action</label><select class="select" id="fw-action" onchange="bfw()">
+    <option value="add-service">Ouvrir service</option><option value="remove-service">Fermer service</option>
+    <option value="add-port">Ouvrir port</option><option value="remove-port">Fermer port</option>
+    <option value="add-source">Autoriser IP/réseau source</option><option value="remove-source">Retirer IP source</option>
+    <option value="list-all">Lister toutes les règles</option><option value="list-all-zones">Lister toutes les zones</option>
+    <option value="reload">Reload (appliquer permanent)</option><option value="runtime-to-permanent">Sauvegarder runtime → permanent</option>
+    <option value="state">Vérifier état firewalld</option>
+  </select></div>
+  <div class="form-row"><label>Service (ex: http, ssh, https)</label><input class="input" id="fw-svc" placeholder="http" oninput="bfw()"></div>
+  <div class="form-row"><label>Port/protocole (ex: 8080/tcp)</label><input class="input" id="fw-port" placeholder="8080/tcp" oninput="bfw()"></div>
+  <div class="form-row"><label>Source IP/réseau</label><input class="input" id="fw-src" placeholder="192.168.1.0/24" oninput="bfw()"></div>
+  <div class="form-row"><label>Zone</label><select class="select" id="fw-zone" onchange="bfw()"><option value="public">public</option><option value="trusted">trusted</option><option value="internal">internal</option><option value="dmz">dmz</option><option value="home">home</option><option value="work">work</option></select></div>
+</div>
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.5rem">
+  <label class="check-row"><input type="checkbox" id="fw-perm" checked onchange="bfw()"> --permanent</label>
+  <label class="check-row"><input type="checkbox" id="fw-now" checked onchange="bfw()"> --immediate (immédiat)</label>
+</div>`,
+};
+
+// Render bricks
+const bricksDiv=document.getElementById('bricks');
+const panelsDiv=document.getElementById('panels');
+let activeBrick=null;
+
+BRICKS.forEach(b=>{
+  const btn=document.createElement('button');
+  btn.className='brick'; btn.textContent=b.label; btn.id='brick-'+b.id;
+  btn.onclick=()=>activateBrick(b.id);
+  bricksDiv.appendChild(btn);
+  const panel=document.createElement('div');
+  panel.className='brick-panel'; panel.id='panel-'+b.id;
+  panel.innerHTML=PANELS[b.id]||'';
+  panelsDiv.appendChild(panel);
+});
+
+function activateBrick(id){
+  document.querySelectorAll('.brick').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.brick-panel').forEach(p=>p.classList.remove('active'));
+  if(activeBrick===id){ activeBrick=null; document.getElementById('build-output').style.display='none'; return; }
+  activeBrick=id;
+  document.getElementById('brick-'+id).classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('build-output').style.display='block';
+  const fn={'find':bfind,'grep':bgrep,'sed':bsed,'awk':bawk,'tar':btar,'rsync':brsync,'systemctl':bsystemctl,'journalctl':bjournalctl,'dnf':bdnf,'rpm':brpm,'ss':bss,'chmod':bchmod,'useradd':buseradd,'firewall':bfw};
+  (fn[id]||function(){})();
+}
+
+function setCmd(cmd){ document.getElementById('cmd-out').textContent=cmd; }
+function copyBuild(){ navigator.clipboard.writeText(document.getElementById('cmd-out').textContent); const t=document.getElementById('toast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1500); }
+function gv(id){ const e=document.getElementById(id); return e?e.value.trim():''; }
+function gc(id){ const e=document.getElementById(id); return e?e.checked:false; }
+
+function bfind(){
+  let c='find '+( gv('f-path')||'.' );
+  if(gv('f-type')) c+=` -type ${gv('f-type')}`;
+  if(gv('f-name')) c+=` -name "${gv('f-name')}"`;
+  if(gv('f-size')) c+=` -size ${gv('f-size')}`;
+  if(gv('f-mtime')) c+=` -mtime ${gv('f-mtime')}`;
+  if(gv('f-depth')) c+=` -maxdepth ${gv('f-depth')}`;
+  if(gv('f-user')) c+=` -user ${gv('f-user')}`;
+  if(gv('f-perm')) c+=` -perm ${gv('f-perm')}`;
+  const a=gv('f-action');
+  if(a==='delete') c+=' -delete';
+  else if(a==='print0') c+=' -print0 | xargs -0 ls -la';
+  else if(a==='chmod644') c+=' -exec chmod 644 {} \\;';
+  else if(a==='ls') c+=' -exec ls -la {} \\;';
+  else if(a==='grep') c+=' -exec grep -l "pattern" {} \\;';
+  setCmd(c);
+}
+
+function bgrep(){
+  const pat=gv('g-pat'); const file=gv('g-file')||'.';
+  let flags='';
+  if(gc('g-r')) flags+='r'; if(gc('g-i')) flags+='i'; if(gc('g-n')) flags+='n';
+  if(gc('g-v')) flags+='v'; if(gc('g-l')) flags+='l'; if(gc('g-c')) flags+='c';
+  if(gc('g-w')) flags+='w'; if(gc('g-E')) flags+='E'; if(gc('g-P')) flags+='P';
+  let c='grep'+(flags?' -'+flags:'')+` "${pat}" ${file}`;
+  const B=gv('g-B'); const A=gv('g-A');
+  if(B&&B!=='0') c=c.replace('grep','grep -B '+B);
+  if(A&&A!=='0') c+=` -A ${A}`;
+  setCmd(c);
+}
+
+function bsed(){
+  const action=gv('s-action'), file=gv('s-file')||'fichier.txt';
+  const inplace=gc('s-i'), bak=gc('s-bak'), g=gc('s-g');
+  const iopt=inplace?(bak?'-i.bak':'-i ')+' ':' ';
+  let c='sed ';
+  if(action==='replace'){ const f=gv('s-from'), t=gv('s-to'); c+=`${inplace?(bak?'-i.bak ':'-i '):''}\'s/${f}/${t}/${g?'g':''}\'`; }
+  else if(action==='delete'){ const pat=gv('s-from'); c+=`${inplace?(bak?'-i.bak ':'-i '):''}\'/${pat}/d\'`; }
+  else if(action==='deleteblank'){ c+=`${inplace?(bak?'-i.bak ':'-i '):''}'/^$/d'`; }
+  else if(action==='deletecomment'){ c+=`${inplace?(bak?'-i.bak ':'-i '):''}'/^#/d'`; }
+  else if(action==='print'){ const l=gv('s-lines')||'1,10'; c+=`-n '${l}p'`; }
+  else if(action==='insert'){ const pat=gv('s-from'), ins=gv('s-insert'); c+=`${inplace?(bak?'-i.bak ':'-i '):''}\'/${pat}/a ${ins}\'`; }
+  else if(action==='prepend'){ const pat=gv('s-from'), ins=gv('s-insert'); c+=`${inplace?(bak?'-i.bak ':'-i '):''}\'/${pat}/i ${ins}\'`; }
+  setCmd(c+' '+file);
+}
+
+function bawk(){
+  const file=gv('a-file')||'fichier', fs=gv('a-fs'), pat=gv('a-pat'), action=gv('a-action'), fields=gv('a-fields')||'$1';
+  let body;
+  if(action==='print') body=`{print ${fields}}`;
+  else if(action==='sum') body=`{sum+=${fields}} END{print sum}`;
+  else if(action==='count') body='END{print NR}';
+  else if(action==='countval') body=`{c[${fields}]++} END{for(k in c) print c[k],k}`;
+  else if(action==='max') body=`BEGIN{m=""} {if($${fields}>m) m=$${fields}} END{print m}`;
+  else body=gv('a-custom')||`{print ${fields}}`;
+  let c='awk';
+  if(fs) c+=` -F'${fs}'`;
+  c+=` '${pat?pat+' ':''}${body}' ${file}`;
+  setCmd(c);
+}
+
+function btar(){
+  const op=gv('t-op'), arch=gv('t-arch')||'archive.tar.gz', src=gv('t-src')||'dossier/', comp=gv('t-comp'), dest=gv('t-dest'), excl=gv('t-excl'), v=gc('t-v');
+  let flags='-'+op+(v?'v':'')+comp+'f';
+  let c=`tar ${flags} ${arch}`;
+  if(excl) c+=` --exclude="${excl}"`;
+  if(op==='x'&&dest) c+=` -C ${dest}`;
+  if(op!=='t') c+=` ${src}`;
+  setCmd(c);
+}
+
+function brsync(){
+  let src=gv('r-src')||'source/'; let dst=gv('r-dst')||'dest/';
+  const host=gv('r-host'), port=gv('r-port'), excl=gv('r-excl'), bw=gv('r-bw');
+  let c='rsync -av';
+  if(gc('r-z')) c+='z';
+  if(gc('r-n')) c+='n';
+  if(gc('r-del')) c+=' --delete';
+  if(gc('r-prog')) c+=' --progress';
+  if(gc('r-chk')) c+=' --checksum';
+  if(gc('r-bkp')) c+=` --backup --backup-dir=/backup/$(date +%F)`;
+  if(port&&port!=='22') c+=` -e "ssh -p ${port}"`;
+  else if(host) c+=' ';
+  if(excl) c+=` --exclude="${excl}"`;
+  if(bw&&bw!=='0') c+=` --bwlimit=${bw}`;
+  c+=` ${src} ${host?host+':':''}${dst}`;
+  setCmd(c);
+}
+
+function bsystemctl(){
+  const svc=gv('sc-svc')||'httpd', action=gv('sc-action')||'status';
+  if(action.startsWith('list')||action==='daemon-reload') setCmd(`systemctl ${action} --no-pager`);
+  else setCmd(`systemctl ${action} ${svc}`);
+}
+
+function bjournalctl(){
+  let c='journalctl';
+  const svc=gv('j-svc'); if(svc) c+=` -u ${svc}`;
+  if(gc('j-f')) c+=' -f';
+  if(gc('j-b')) c+=' -b';
+  if(gc('j-k')) c+=' -k';
+  if(gc('j-r')) c+=' -r';
+  const p=gv('j-p'); if(p) c+=` -p ${p}`;
+  const n=gv('j-n'); if(n) c+=` -n ${n}`;
+  const since=gv('j-since'); if(since) c+=` --since "${since}"`;
+  const until=gv('j-until'); if(until) c+=` --until "${until}"`;
+  if(gc('j-np')) c+=' --no-pager';
+  setCmd(c);
+}
+
+function bdnf(){
+  const mgr=gv('d-mgr')||'dnf', action=gv('d-action')||'install', pkg=gv('d-pkg'), y=gc('d-y');
+  const noarg=['update','upgrade','check-update','history','clean all','repolist enabled','group list'];
+  let c=`${mgr}${y?' -y':''} ${action}`;
+  if(!noarg.includes(action)&&pkg) c+=` ${pkg}`;
+  setCmd(c);
+}
+
+function brpm(){
+  const action=gv('rpm-action')||'-q', pkg=gv('rpm-pkg'), grep=gv('rpm-grep');
+  let c='rpm '+action;
+  if(action!=='-qa'&&action!=='-Va'&&pkg) c+=` ${pkg}`;
+  if(grep) c+=` | grep -i "${grep}"`;
+  setCmd(c);
+}
+
+function bss(){
+  const tool=gv('n-tool');
+  document.getElementById('ss-opts').style.display=tool==='ss'?'':'none';
+  document.getElementById('ip-opts').style.display=tool==='ip'?'':'none';
+  document.getElementById('nm-opts').style.display=tool==='nmcli'?'':'none';
+  if(tool==='ss'){
+    const opt=gv('n-ssopt')||'tlnp'; const port=gv('n-port');
+    let c=`ss -${opt}`;
+    if(port) c+=` sport = :${port}`;
+    setCmd(c);
+  } else if(tool==='ip'){
+    setCmd(`ip ${gv('n-ipopt')||'addr show'}`);
+  } else {
+    setCmd(`nmcli ${gv('n-nmopt')||'device status'}`);
+  }
+}
+
+function bchmod(){
+  const target=gv('c-target')||'/opt/app', action=gv('c-action'), perms=gv('c-perms'), owner=gv('c-owner'), r=gc('c-r');
+  const R=r?' -R':'';
+  if(action==='chmod') setCmd(`chmod${R} ${perms} ${target}`);
+  else if(action==='chown') setCmd(`chown${R} ${owner} ${target}`);
+  else setCmd(`chmod${R} ${perms} ${target}\nchown${R} ${owner} ${target}`);
+}
+
+function buseradd(){
+  const name=gv('u-name')||'appuser', action=gv('u-action'), shell=gv('u-shell'), grps=gv('u-groups'), home=gv('u-home');
+  if(action==='add'){
+    let c='useradd';
+    if(gc('u-m')) c+=' -m';
+    if(gc('u-sys')) c+=' -r';
+    if(shell) c+=` -s ${shell}`;
+    if(home) c+=` -d ${home}`;
+    if(grps) c+=` -G ${grps}`;
+    setCmd(c+' '+name);
+  } else if(action==='mod'){
+    let c='usermod';
+    if(shell) c+=` -s ${shell}`;
+    if(grps) c+=` -aG ${grps}`;
+    if(home) c+=` -d ${home}`;
+    setCmd(c+' '+name);
+  } else if(action==='del'){
+    setCmd('userdel'+(gc('u-del-r')?' -r':'')+' '+name);
+  } else if(action==='passwd') setCmd(`passwd ${name}`);
+  else if(action==='lock') setCmd(`passwd -l ${name}`);
+  else if(action==='unlock') setCmd(`passwd -u ${name}`);
+  else if(action==='id') setCmd(`id ${name}`);
+  else if(action==='groups') setCmd(`groups ${name}`);
+  else if(action==='getent') setCmd(`getent passwd ${name}`);
+}
+
+function bfw(){
+  const action=gv('fw-action'), svc=gv('fw-svc'), port=gv('fw-port'), src=gv('fw-src'), zone=gv('fw-zone')||'public';
+  const perm=gc('fw-perm'), now=gc('fw-now');
+  const noarg=['list-all','list-all-zones','reload','runtime-to-permanent','state'];
+  if(noarg.includes(action)){ setCmd('firewall-cmd --'+action); return; }
+  let c=`firewall-cmd --zone=${zone}`;
+  if(action==='add-service'||action==='remove-service') c+=` --${action}=${svc||'http'}`;
+  else if(action==='add-port'||action==='remove-port') c+=` --${action}=${port||'8080/tcp'}`;
+  else if(action==='add-source'||action==='remove-source') c+=` --${action}=${src||'192.168.1.0/24'}`;
+  if(perm) c+=' --permanent';
+  if(now&&perm) c+=' --immediate';
+  setCmd(c);
+}
 </script>
 </body>
 </html>

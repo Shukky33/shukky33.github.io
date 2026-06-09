@@ -38,7 +38,7 @@
   <header class="portal-header">
     <p class="portal-header__eyebrow">Portail d'outils</p>
     <h1>Boîte à outils</h1>
-    <p>15 outils — 100 % client, sans dépendance externe, utilisables hors-ligne.</p>
+    <p>16 outils — 100 % client, sans dépendance externe, utilisables hors-ligne.</p>
   </header>
 
   <div class="search-bar">
@@ -272,18 +272,34 @@
       </div>
     </div>
 
-    <div class="card tool-card" data-tags="docker dockerfile container image build run volumes ports env">
+    <div class="card tool-card" data-tags="podman container image build run ubi rhel rootless quadlet">
       <div class="tool-card__meta">
-        <span class="tool-card__icon">🐳</span>
+        <span class="tool-card__icon">🦭</span>
         <span class="badge badge--version">v1.0.0</span>
       </div>
       <div class="tool-card__body">
-        <h2>Dockerfile Builder</h2>
-        <p>Générateur de Dockerfile et commandes docker run — multi-stage, volumes, env</p>
+        <h2>Podman Builder</h2>
+        <p>Containerfile, podman run rootless, Quadlet systemd, images UBI/HTTP</p>
       </div>
       <div class="tool-card__actions">
-        <a href="dockerfile/" class="btn btn--primary">Ouvrir</a>
-        <a href="dockerfile/index.html" download="dockerfile-builder.html" class="btn btn--secondary">↓</a>
+        <a href="podman/" class="btn btn--primary">Ouvrir</a>
+        <a href="podman/index.html" download="podman-builder.html" class="btn btn--secondary">↓</a>
+      </div>
+    </div>
+
+    <div class="card tool-card" data-tags="ansible playbook ubuntu debian apt ufw apparmor snap automation">
+      <div class="tool-card__meta">
+        <span class="tool-card__icon">🐧</span>
+        <span class="badge badge--version">v1.0.0</span>
+        <span class="badge badge--new">Ubuntu</span>
+      </div>
+      <div class="tool-card__body">
+        <h2>Ansible Playbook Ubuntu</h2>
+        <p>Playbooks Ubuntu 20/22/24 LTS — apt, ufw, AppArmor, snap, consultation</p>
+      </div>
+      <div class="tool-card__actions">
+        <a href="ansible-ubuntu/" class="btn btn--primary">Ouvrir</a>
+        <a href="ansible-ubuntu/index.html" download="ansible-ubuntu.html" class="btn btn--secondary">↓</a>
       </div>
     </div>
 
